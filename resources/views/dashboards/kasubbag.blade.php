@@ -1,0 +1,525 @@
+@extends('layouts.app')
+
+@section('title', 'Dashboard Kasubbag - Portal Layanan TI BPK')
+
+@section('content')
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8.5rem)] animate-in fade-in duration-300" x-data="kasubbagPage()">
+    <!-- LEFT PANEL: Ticket List with Tab filters -->
+    <div class="lg:col-span-4 bg-white border border-[#e2e6ea] rounded-2xl shadow-xs overflow-hidden flex flex-col h-full">
+        <!-- Header with Subbag Name -->
+        <div class="p-4 border-b border-gray-100 bg-white shrink-0">
+            <span class="text-[9px] bg-[#fcf4ec] text-[#b26d27] font-bold px-2 py-0.5 rounded-md uppercase font-mono tracking-wider">
+                Kasubbag Dispatcher
+            </span>
+            <h3 class="text-xs font-bold text-gray-800 font-display mt-1.5 truncate">
+                Inbox Subbagian TI
+            </h3>
+
+            <!-- Tab Control -->
+            <div class="flex gap-2 mt-3 bg-slate-50 p-1 rounded-xl">
+                <button @click="activeTab = 'aktif'; selectedId = null"
+                        class="flex-1 py-2 text-center text-xs font-bold rounded-lg transition-all cursor-pointer"
+                        :class="activeTab === 'aktif' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'">
+                    Aktif (<span x-text="tickets.filter(t => t.status !== 'Selesai' && t.status !== 'Kembalikan tiket ke operator').length"></span>)
+                </button>
+                <button @click="activeTab = 'selesai'; selectedId = null"
+                        class="flex-1 py-2 text-center text-xs font-bold rounded-lg transition-all cursor-pointer"
+                        :class="activeTab === 'selesai' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'">
+                    Selesai / Kembali (<span x-text="tickets.filter(t => t.status === 'Selesai' || t.status === 'Kembalikan tiket ke operator').length"></span>)
+                </button>
+            </div>
+        </div>
+
+        <!-- Scrolling tickets -->
+        <div class="flex-1 overflow-y-auto divide-y divide-gray-100 bg-slate-50/30">
+            <template x-for="t in getDisplayedTickets()" :key="t.id">
+                <button @click="selectTicket(t.id)"
+                        class="w-full p-4 text-left transition-all block relative cursor-pointer"
+                        :class="selectedId === t.id ? 'bg-white border-l-4 border-l-[#b26d27] shadow-xs' : 'bg-transparent hover:bg-slate-50'">
+                    <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-mono font-bold text-xs text-gray-800" x-text="t.id"></span>
+                            <template x-if="t.status === 'Dieskalasi'">
+                                <span class="bg-orange-100 text-orange-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase font-mono animate-pulse">
+                                    Eskalasi
+                                </span>
+                            </template>
+                        </div>
+                        <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Ditolak' : t.status"></span>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-gray-900 truncate" x-text="t.layanan"></h4>
+                    <p class="text-[10px] text-gray-400 mt-1 truncate leading-relaxed" x-text="'Pelapor: ' + t.pengirimName"></p>
+
+                    <div class="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between text-[9px] text-gray-400 font-mono">
+                        <span x-text="t.solverId ? 'Solver: ' + t.solverName.split(' (')[0] : 'Solver: Belum Ditunjuk'"></span>
+                        <span x-text="t.tanggalUpdate"></span>
+                    </div>
+                </button>
+            </template>
+            <div x-show="getDisplayedTickets().length === 0" class="p-8 text-center text-gray-400 text-xs">
+                Tidak ada tiket dalam kategori ini.
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Ticket Detail View + Action controls -->
+    <div class="lg:col-span-8 bg-white border border-[#e2e6ea] rounded-2xl shadow-xs overflow-hidden flex flex-col h-full">
+        <template x-if="getSelectedTicket()">
+            <div class="flex flex-col h-full overflow-hidden">
+                <!-- Detail Header -->
+                <div class="p-5 border-b border-gray-100 bg-slate-50/40 shrink-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-base font-bold text-gray-800 font-display mt-0.5" x-text="getSelectedTicket().layanan"></h2>
+                            <p class="text-[11px] text-gray-400 mt-1" x-text="'ID: ' + getSelectedTicket().id + ' | Pelapor: ' + getSelectedTicket().pengirimName"></p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Ditolak' : getSelectedTicket().status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scrollable body content -->
+                <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                    <!-- Detail Section -->
+                    <div class="bg-[#fffbeb]/20 border border-[#e8ceab]/30 p-4 rounded-xl space-y-2">
+                        <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="info" class="w-4 h-4 text-[#b26d27]"></i>
+                            <span>Deskripsi Masalah / Permintaan</span>
+                        </h4>
+                        <p class="text-xs text-gray-700 leading-relaxed font-medium whitespace-pre-wrap" x-text="getSelectedTicket().detail"></p>
+                    </div>
+
+                    <!-- Flow Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-gray-600">
+                        <div class="border border-slate-100 p-3 rounded-xl">
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Kategori Layanan</div>
+                            <div class="text-gray-800 font-bold mt-1" x-text="getSelectedTicket().layananKategori + ' → ' + getSelectedTicket().layananSub"></div>
+                        </div>
+                        <div class="border border-slate-100 p-3 rounded-xl">
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Status Penugasan Solver</div>
+                            <div class="text-gray-800 font-bold mt-1" x-text="getSelectedTicket().solverName ? getSelectedTicket().solverName : 'Belum Ditugaskan'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="border-t border-gray-100 pt-5 space-y-3.5" x-show="getSelectedTicket().status !== 'Selesai' && getSelectedTicket().status !== 'Kembalikan tiket ke operator'">
+                        <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Aksi Penanganan Tiket</h4>
+                        
+                        <div class="flex flex-wrap gap-2.5">
+                            <!-- Accept Ticket -->
+                            <button @click="acceptTicket()" 
+                                    x-show="getSelectedTicket().status === 'Pending'"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                Terima Tiket
+                            </button>
+
+                            <!-- Assign Solver -->
+                            <button @click="openAssignModal()" 
+                                    x-show="getSelectedTicket().status === 'Diterima' || getSelectedTicket().status === 'Ditugaskan' || getSelectedTicket().status === 'Dikerjakan' || getSelectedTicket().status === 'Dieskalasi'"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
+                                <i data-lucide="user-check" class="w-4 h-4"></i>
+                                Tugaskan Solver
+                            </button>
+
+                            <!-- Return to Operator -->
+                            <button @click="openRejectModal()" 
+                                    x-show="getSelectedTicket().status === 'Pending' || getSelectedTicket().status === 'Diterima' || getSelectedTicket().status === 'Dieskalasi'"
+                                    class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
+                                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                Kembalikan ke Operator
+                            </button>
+
+                            <!-- Complete Ticket -->
+                            <button @click="openCompleteModal()" 
+                                    x-show="getSelectedTicket().status === 'Dikerjakan' || getSelectedTicket().status === 'Ditugaskan'"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                Selesaikan Tiket
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="border-t border-slate-100 pt-5 flex flex-col space-y-4">
+                        <h3 class="text-sm font-bold text-gray-800 font-display flex items-center gap-2">
+                            <i data-lucide="message-square" class="w-4.5 h-4.5 text-[#b26d27]"></i>
+                            <span>Riwayat Aktivitas & Komentar</span>
+                        </h3>
+
+                        <!-- Comments Thread -->
+                        <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="comments-box">
+                            <template x-for="c in getSelectedTicket().comments" :key="c.id">
+                                <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
+                                     :class="getCommentBubbleClass(c.type)">
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="font-bold text-gray-900 truncate" x-text="c.authorName"></span>
+                                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
+                                                  :class="getRoleBadgeClass(c.authorRole)"
+                                                  x-text="c.authorRole"></span>
+                                        </div>
+                                        <span class="text-[9px] text-gray-400 font-mono" x-text="c.timestamp"></span>
+                                    </div>
+                                    <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
+                                </div>
+                            </template>
+                            <div x-show="getSelectedTicket().comments.length === 0" class="text-center py-6 text-gray-400 text-xs">
+                                Belum ada riwayat aktivitas.
+                            </div>
+                        </div>
+
+                        <!-- Post Comment Form -->
+                        <form @submit.prevent="submitComment()" class="flex gap-2">
+                            <input type="text" x-model="commentText" placeholder="Ketik balasan atau komentar baru..." class="flex-1 bg-white border border-[#e2e6ea] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27] transition-all text-gray-800 placeholder-gray-400 font-medium">
+                            <button type="submit" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white w-9.5 h-9.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-all shadow-sm">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template x-if="!getSelectedTicket()">
+            <div class="m-auto text-center py-12 text-gray-400 space-y-2">
+                <i data-lucide="inbox" class="w-12 h-12 mx-auto text-gray-300"></i>
+                <p class="text-sm font-semibold">Pilih tiket dari inbox untuk mulai memproses.</p>
+            </div>
+        </template>
+    </div>
+
+    <!-- MODAL: Assign Solver -->
+    <div x-show="assignModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
+            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                <i data-lucide="user-check" class="text-blue-600 w-5 h-5"></i>
+                Tugaskan Solver TI
+            </h3>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Personel Solver</label>
+                <select x-model="selectedSolverId" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-sm outline-none transition-all font-medium">
+                    @foreach($solvers as $solver)
+                        <option value="{{ $solver->id }}">{{ $solver->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button @click="assignModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
+                <button @click="confirmAssign()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Reject to Operator -->
+    <div x-show="rejectModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
+            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                <i data-lucide="x-circle" class="text-rose-600 w-5 h-5"></i>
+                Kembalikan ke Operator
+            </h3>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Alasan Pengembalian</label>
+                <textarea x-model="rejectReason" rows="3" placeholder="Masukkan alasan kenapa tiket dikembalikan ke operator..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-medium"></textarea>
+            </div>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button @click="rejectModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
+                <button @click="confirmReject()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold">Kirim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Complete Ticket -->
+    <div x-show="completeModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
+            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                <i data-lucide="check-circle" class="text-emerald-600 w-5 h-5"></i>
+                Selesaikan Tiket
+            </h3>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Catatan Penyelesaian</label>
+                <textarea x-model="completeNotes" rows="3" placeholder="Masukkan detail langkah perbaikan atau catatan penutupan tiket..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-medium"></textarea>
+            </div>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button @click="completeModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
+                <button @click="confirmComplete()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Selesai</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    function kasubbagPage() {
+        return {
+            tickets: [],
+            selectedId: null,
+            activeTab: 'aktif',
+            commentText: '',
+            
+            // Modals
+            assignModalOpen: false,
+            rejectModalOpen: false,
+            completeModalOpen: false,
+            
+            selectedSolverId: '{{ $solvers->first()->id ?? "" }}',
+            rejectReason: '',
+            completeNotes: '',
+
+            init() {
+                this.fetchTickets();
+            },
+
+            async fetchTickets() {
+                try {
+                    const res = await fetch('/api/tickets');
+                    this.tickets = await res.json();
+                    
+                    const displayed = this.getDisplayedTickets();
+                    if (displayed.length > 0 && !this.selectedId) {
+                        this.selectedId = displayed[0].id;
+                    }
+                    
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        this.scrollComments();
+                    });
+                } catch (e) {
+                    console.error('Failed to load tickets', e);
+                }
+            },
+
+            getDisplayedTickets() {
+                return this.tickets.filter(t => {
+                    const isClosed = t.status === 'Selesai' || t.status === 'Kembalikan tiket ke operator';
+                    return this.activeTab === 'aktif' ? !isClosed : isClosed;
+                });
+            },
+
+            getSelectedTicket() {
+                return this.tickets.find(t => t.id === this.selectedId);
+            },
+
+            selectTicket(id) {
+                this.selectedId = id;
+                this.commentText = '';
+                this.$nextTick(() => {
+                    lucide.createIcons();
+                    this.scrollComments();
+                });
+            },
+
+            getStatusBadgeClass(status) {
+                const s = status === 'Kembalikan tiket ke operator' ? 'Pending' : status;
+                switch (s) {
+                    case 'Pending': return 'status-pending';
+                    case 'Diterima': return 'status-diterima';
+                    case 'Ditugaskan': return 'status-ditugaskan';
+                    case 'Dikerjakan': return 'status-dikerjakan';
+                    case 'Dieskalasi': return 'status-dieskalasi';
+                    case 'Selesai': return 'status-selesai';
+                    default: return 'status-pending';
+                }
+            },
+
+            getCommentBubbleClass(type) {
+                switch (type) {
+                    case 'sistem': return 'bg-slate-50 border-slate-200 text-slate-700';
+                    case 'terima': return 'bg-emerald-50 border-l-4 border-l-emerald-500 text-emerald-800';
+                    case 'penugasan': return 'bg-blue-50 border-l-4 border-l-blue-500 text-blue-800';
+                    case 'mulai_kerjakan': return 'bg-purple-50 border-l-4 border-l-purple-500 text-purple-800';
+                    case 'penyelesaian': return 'bg-green-50 border-l-4 border-l-green-600 text-green-800';
+                    case 'eskalasi': return 'bg-amber-50 border-l-4 border-l-amber-500 text-amber-800';
+                    default: return 'bg-white border-[#e2e6ea] shadow-xs text-gray-800';
+                }
+            },
+
+            getRoleBadgeClass(role) {
+                if (role === 'pengguna') return 'bg-[#fcf4ec] text-[#b26d27]';
+                if (role === 'kasubbag') return 'bg-blue-100 text-blue-800';
+                if (role === 'solver') return 'bg-purple-100 text-purple-800';
+                return 'bg-slate-100 text-slate-700';
+            },
+
+            async acceptTicket() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket) return;
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Diterima',
+                            comment: {
+                                text: 'Tiket diterima oleh Kasubbag TI.',
+                                type: 'terima'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.fetchTickets();
+                    }
+                } catch (e) {
+                    alert('Gagal memproses tiket.');
+                }
+            },
+
+            openAssignModal() {
+                this.assignModalOpen = true;
+            },
+
+            async confirmAssign() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket || !this.selectedSolverId) return;
+
+                // Find solver name
+                const solverMap = {
+                    @foreach($solvers as $solver)
+                        '{{ $solver->id }}': '{{ $solver->name }}',
+                    @endforeach
+                };
+                const solverName = solverMap[this.selectedSolverId];
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Ditugaskan',
+                            solverId: this.selectedSolverId,
+                            solverName: solverName,
+                            comment: {
+                                text: `Tiket ditugaskan kepada solver: ${solverName}.`,
+                                type: 'penugasan'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.assignModalOpen = false;
+                        this.fetchTickets();
+                    }
+                } catch (e) {
+                    alert('Gagal menugaskan solver.');
+                }
+            },
+
+            openRejectModal() {
+                this.rejectReason = '';
+                this.rejectModalOpen = true;
+            },
+
+            async confirmReject() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket || !this.rejectReason.trim()) return;
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Kembalikan tiket ke operator',
+                            alasanTolak: this.rejectReason.trim(),
+                            comment: {
+                                text: `Tiket dikembalikan ke operator. Alasan: ${this.rejectReason.trim()}`,
+                                type: 'eskalasi'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.rejectModalOpen = false;
+                        this.fetchTickets();
+                    }
+                } catch (e) {
+                    alert('Gagal mengembalikan tiket.');
+                }
+            },
+
+            openCompleteModal() {
+                this.completeNotes = '';
+                this.completeModalOpen = true;
+            },
+
+            async confirmComplete() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket || !this.completeNotes.trim()) return;
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Selesai',
+                            catatanKasubbag: this.completeNotes.trim(),
+                            tanggalSelesai: new Date().toISOString().slice(0, 10),
+                            comment: {
+                                text: `Tiket telah selesai dikerjakan. Catatan: ${this.completeNotes.trim()}`,
+                                type: 'penyelesaian'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.completeModalOpen = false;
+                        this.fetchTickets();
+                    }
+                } catch (e) {
+                    alert('Gagal menyelesaikan tiket.');
+                }
+            },
+
+            async submitComment() {
+                if (!this.commentText.trim()) return;
+                const text = this.commentText.trim();
+                this.commentText = '';
+
+                try {
+                    const response = await fetch(`/api/tickets/${this.selectedId}/comments`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            comment: {
+                                text: text,
+                                type: 'komentar'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.fetchTickets();
+                    }
+                } catch (err) {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            },
+
+            scrollComments() {
+                const box = document.getElementById('comments-box');
+                if (box) {
+                    box.scrollTop = box.scrollHeight;
+                }
+            }
+        };
+    }
+</script>
+@endpush

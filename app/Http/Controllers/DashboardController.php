@@ -1,0 +1,507 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Ticket;
+use App\Models\Comment;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class DashboardController extends Controller
+{
+    /**
+     * Helper to verify user role
+     */
+    protected function checkRole($role)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== $role) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Pengguna Dashboard (Home / Main)
+     */
+    public function pengguna()
+    {
+        if (!$this->checkRole('pengguna')) return redirect('/');
+
+        $tickets = Ticket::where('pengirimId', Auth::id())
+            ->orderBy('tanggalUpdate', 'desc')
+            ->get();
+
+        return view('dashboards.pengguna', compact('tickets'));
+    }
+
+    /**
+     * Pengguna Lapor Tiket Form
+     */
+    public function lapor()
+    {
+        if (!$this->checkRole('pengguna')) return redirect('/');
+
+        return view('dashboards.lapor');
+    }
+
+    /**
+     * Pengguna Tiket Saya List
+     */
+    public function tiketSaya()
+    {
+        if (!$this->checkRole('pengguna')) return redirect('/');
+
+        $tickets = Ticket::where('pengirimId', Auth::id())
+            ->orderBy('tanggalUpdate', 'desc')
+            ->get();
+
+        return view('dashboards.tiket', compact('tickets'));
+    }
+
+    /**
+     * Kasubbag Dashboard
+     */
+    public function kasubbag()
+    {
+        if (!$this->checkRole('kasubbag')) return redirect('/');
+
+        $user = Auth::user();
+        $tickets = Ticket::where('kasubbagId', $user->subbagId)
+            ->orderBy('tanggalUpdate', 'desc')
+            ->get();
+
+        $solvers = User::where('role', 'solver')
+            ->where('subbagId', $user->subbagId)
+            ->get();
+
+        return view('dashboards.kasubbag', compact('tickets', 'solvers'));
+    }
+
+    /**
+     * Solver Dashboard
+     */
+    public function solver()
+    {
+        if (!$this->checkRole('solver')) return redirect('/');
+
+        $tickets = Ticket::where('solverId', Auth::id())
+            ->orderBy('tanggalUpdate', 'desc')
+            ->get();
+
+        return view('dashboards.solver', compact('tickets'));
+    }
+
+    /**
+     * Operator Dashboard - Overview
+     */
+    public function operator()
+    {
+        if (!$this->checkRole('operator')) return redirect('/');
+
+        $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
+
+        return view('dashboards.operator', compact('tickets'));
+    }
+
+    /**
+     * Operator Dashboard - Semua Tiket
+     */
+    public function operatorTiket()
+    {
+        if (!$this->checkRole('operator')) return redirect('/');
+
+        $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
+
+        return view('dashboards.operator-tiket', compact('tickets'));
+    }
+
+    /**
+     * Operator Dashboard - Analitik
+     */
+    public function operatorAnalitik()
+    {
+        if (!$this->checkRole('operator')) return redirect('/');
+
+        $tickets = Ticket::all();
+
+        return view('dashboards.operator-analitik', compact('tickets'));
+    }
+
+    // ==========================================
+    // AJAX API ENDPOINTS
+    // ==========================================
+
+    /**
+     * Get all tickets with comments for current user / dashboard
+     */
+    public function getTicketsApi()
+    {
+        $user = Auth::user();
+        $query = Ticket::with('comments');
+
+        if ($user->role === 'pengguna') {
+            $query->where('pengirimId', $user->id);
+        } elseif ($user->role === 'kasubbag') {
+            $query->where('kasubbagId', $user->subbagId);
+        } elseif ($user->role === 'solver') {
+            $query->where('solverId', $user->id);
+        }
+
+        $tickets = $query->orderBy('tanggalUpdate', 'desc')->get();
+
+        return response()->json($tickets);
+    }
+
+    /**
+     * Create new ticket
+     */
+    public function createTicketApi(Request $request)
+    {
+        $request->validate([
+            'jenis' => 'nullable|string',
+            'layananKategori' => 'required|string',
+            'layananSub' => 'required|string',
+            'layanan' => 'nullable|string',
+            'detail' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $subbagMaster = [
+            'k1' => 'Subbagian Pengelolaan Infrastruktur dan Jaringan',
+            'k2' => 'Subbagian Pelayanan TIK',
+            'k3' => 'Subbagian Pengembangan Sistem Informasi Pemeriksaan',
+            'k4' => 'Subbagian Pengembangan Sistem Informasi Kelembagaan',
+            'k5' => 'Subbagian Sains Data',
+            'k6' => 'Subbagian Tata Kelola Data',
+            'k7' => 'Subbagian Keamanan Informasi',
+            'k8' => 'Subbagian MIOT',
+        ];
+
+        $subbagRouting = [
+            'Layanan Identitas' => 'k2',
+            'Layanan Data' => 'k6',
+            'Layanan Aplikasi' => 'k3',
+            'Layanan Teknologi' => 'k1',
+            'Layanan Perangkat' => 'k2',
+            'Layanan Dukungan TI Untuk Kegiatan Khusus' => 'k2',
+            'Layanan Informasi' => 'k8',
+            'Layanan TTE' => 'k7',
+            'Layanan Segel Elektronik' => 'k7',
+            'Layanan MFA' => 'k7',
+            'Layanan Sistem Layanan Data' => 'k5',
+            'Aplikasi Kelembagaan' => 'k4',
+            'Aplikasi Pendukung' => 'k4',
+            'Aplikasi Kolaborasi' => 'k2',
+            'Layanan Survei' => 'k2',
+        ];
+
+        $category = $request->layananKategori;
+        $sub = $request->layananSub;
+        $layanan = $request->layanan ?: $sub;
+
+        // Route dynamically
+        $subbagId = $subbagRouting[$sub] ?? $subbagRouting[$category] ?? 'k2';
+        $subbagName = $subbagMaster[$subbagId] ?? 'Subbagian Pelayanan TIK';
+
+        $kasubbagUser = User::where('role', 'kasubbag')->where('subbagId', $subbagId)->first();
+        $kasubbagName = $kasubbagUser ? $kasubbagUser->name : "Kasubbag $subbagName";
+
+        $year = date('Y');
+        $count = Ticket::count() + 1;
+        $ticketId = "TKT-$year-" . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+        $now = date('Y-m-d H:i');
+
+        $ticket = Ticket::create([
+            'id' => $ticketId,
+            'pengirimId' => $user->id,
+            'pengirimName' => $user->name,
+            'jenis' => $request->jenis ?? 'Layanan',
+            'layananKategori' => $category,
+            'layananSub' => $sub,
+            'layanan' => $layanan,
+            'detail' => $request->detail,
+            'tanggal' => date('Y-m-d'),
+            'tanggalUpdate' => $now,
+            'kasubbagId' => $subbagId,
+            'kasubbagName' => $kasubbagName,
+            'status' => 'Pending',
+        ]);
+
+        // Add system comment
+        Comment::create([
+            'id' => 'cmt-' . microtime(true),
+            'ticketId' => $ticketId,
+            'authorId' => $user->id,
+            'authorName' => $user->name,
+            'authorRole' => $user->role,
+            'text' => "Tiket baru berhasil diajukan dengan kategori \"$category\" → \"$sub\" → \"$layanan\". Otomatis diteruskan ke $subbagName.",
+            'timestamp' => $now,
+            'type' => 'sistem',
+        ]);
+
+        return response()->json(['success' => true, 'id' => $ticketId]);
+    }
+
+    /**
+     * Update ticket status and actions
+     */
+    public function updateTicketActionApi(Request $request, $id)
+    {
+        $ticket = Ticket::findOrFail($id);
+        $now = date('Y-m-d H:i');
+
+        $ticket->update([
+            'status' => $request->status ?? $ticket->status,
+            'kasubbagId' => $request->kasubbagId ?? $ticket->kasubbagId,
+            'kasubbagName' => $request->kasubbagName ?? $ticket->kasubbagName,
+            'solverId' => $request->solverId ?? $ticket->solverId,
+            'solverName' => $request->solverName ?? $ticket->solverName,
+            'alasanTolak' => $request->alasanTolak ?? $ticket->alasanTolak,
+            'catatanKasubbag' => $request->catatanKasubbag ?? $ticket->catatanKasubbag,
+            'tanggalSelesai' => $request->tanggalSelesai ?? $ticket->tanggalSelesai,
+            'tanggalUpdate' => $now,
+        ]);
+
+        if ($request->has('comment')) {
+            $commentData = $request->comment;
+            Comment::create([
+                'id' => $commentData['id'] ?? ('cmt-' . microtime(true)),
+                'ticketId' => $id,
+                'authorId' => $commentData['authorId'] ?? Auth::id(),
+                'authorName' => $commentData['authorName'] ?? Auth::user()->name,
+                'authorRole' => $commentData['authorRole'] ?? Auth::user()->role,
+                'text' => $commentData['text'],
+                'timestamp' => $now,
+                'type' => $commentData['type'] ?? 'komentar',
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Add comment to ticket
+     */
+    public function addCommentApi(Request $request, $id)
+    {
+        $request->validate([
+            'comment' => 'required|array',
+            'comment.text' => 'required|string',
+        ]);
+
+        $commentData = $request->comment;
+        $now = date('Y-m-d H:i');
+
+        Comment::create([
+            'id' => $commentData['id'] ?? ('cmt-' . microtime(true)),
+            'ticketId' => $id,
+            'authorId' => Auth::id(),
+            'authorName' => Auth::user()->name,
+            'authorRole' => Auth::user()->role,
+            'text' => $commentData['text'],
+            'timestamp' => $now,
+            'type' => $commentData['type'] ?? 'komentar',
+        ]);
+
+        Ticket::where('id', $id)->update(['tanggalUpdate' => $now]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Gemini AI Recommendation
+     */
+    public function chatRecommendApi(Request $request)
+    {
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) {
+            return response()->json([
+                'error' => 'API Key Gemini belum dikonfigurasi di server Laravel. Silakan tambahkan GEMINI_API_KEY ke file .env Anda.',
+            ], 500);
+        }
+
+        $messages = $request->messages;
+        if (!is_array($messages)) {
+            return response()->json(['error' => 'messages array is required'], 400);
+        }
+
+        // Format history for Gemini API
+        $contents = [];
+        foreach ($messages as $msg) {
+            $contents[] = [
+                'role' => $msg['sender'] === 'user' ? 'user' : 'model',
+                'parts' => [['text' => $msg['text']]],
+            ];
+        }
+
+        $catalogGuide = '
+1. Kategori: "Layanan Identitas"
+   - Sub-Layanan: "Layanan Akun"
+     * Items: "Pembuatan Akun Baru Portal BPK", "Reset Password / Masalah Login", "Perubahan Hak Akses Aplikasi", "Penghapusan / Penonaktifan Akun Pegawai"
+   - Sub-Layanan: "Layanan TTE"
+     * Items: "Registrasi Sertifikat TTE Baru", "Perpanjangan Masa Aktif TTE", "Pencabutan Sertifikat TTE", "Troubleshooting Tanda Tangan Elektronik Gagal"
+   - Sub-Layanan: "Layanan Segel Elektronik"
+     * Items: "Penerbitan Segel Baru Instansi", "Perpanjangan Masa Aktif Segel", "Masalah Verifikasi Segel Elektronik"
+   - Sub-Layanan: "Layanan Email"
+     * Items: "Pembuatan Email Baru @bpk.go.id", "Reset Password Email Dinas", "Masalah Kuota Email Penuh", "Konfigurasi Mail Client (Outlook/Thunderbird/HP)"
+   - Sub-Layanan: "Layanan MFA"
+     * Items: "Registrasi Multi-Factor Authentication Baru", "Reset Token MFA / Google Authenticator", "Masalah Sinkronisasi Waktu MFA"
+
+2. Kategori: "Layanan Data"
+   - Sub-Layanan: "Pengelolaan Data"
+     * Items: "Perencanaan Data", "Pengumpulan Data", "Pengolahan Data", "Penyimpanan Data", "Penyebarluasan Data", "Analisis Data", "Pengamanan Data", "Pemusnahan Data"
+   - Sub-Layanan: "Layanan Sistem Layanan Data"
+     * Items: "BIDICS Dashboard", "BIDICS-SSA"
+
+3. Kategori: "Layanan Aplikasi"
+   - Sub-Layanan: "Pengembangan Aplikasi"
+     * Items: "Permintaan Fitur Baru Aplikasi", "Pelaporan Bug / Error Aplikasi", "Uji Coba / Testing Aplikasi Baru", "Integrasi API Antar Aplikasi BPK"
+   - Sub-Layanan: "Aplikasi Pemeriksaan"
+     * Items: "SiAP-BPK (Sistem Informasi Pemeriksaan)", "Aplikasi E-Audit Pemeriksaan Pusat", "Aplikasi Kertas Kerja Pemeriksaan (KKP)", "Masalah Sinkronisasi Offline SiAP-BPK"
+   - Sub-Layanan: "Aplikasi Kelembagaan"
+     * Items: "Aplikasi Kepegawaian (SISDM BPK)", "Aplikasi Keuangan (SIKAD BPK)", "Aplikasi Persuratan Dinas (E-Office)", "Aplikasi Perjalanan Dinas Pegawai"
+   - Sub-Layanan: "Aplikasi Pendukung"
+     * Items: "Aplikasi Manajemen Risiko Biro TI", "Aplikasi Helpdesk Biro TI", "Aplikasi Presensi Pegawai BPK"
+   - Sub-Layanan: "Aplikasi Kolaborasi"
+     * Items: "Microsoft Teams BPK", "BPK Cloud Storage (Nextcloud)", "Aplikasi Survei Internal BPK"
+   - Sub-Layanan: "Layanan Survei"
+     * Items: "Pembuatan Kuesioner Baru", "Analisis Hasil Survei Internal", "Export Data Survei Pegawai"
+
+4. Kategori: "Layanan Teknologi"
+   - Sub-Layanan: "Layanan Intranet"
+     * Items: "Pembuatan Local Area Network (LAN)", "Pengaturan konfigurasi LAN", "Penonaktifan LAN", "Penyediaan kabel LAN", "Pemasangan perangkat Wireless Fidelity (Wifi)", "Pengaturan konfigurasi Wifi", "Penonaktifan Wifi"
+   - Sub-Layanan: "Layanan Internet"
+     * Items: "Pemasangan perangkat koneksi internet", "Pengaturan konfigurasi perangkat koneksi internet", "Penonaktifan perangkat koneksi internet"
+   - Sub-Layanan: "Layanan Virtual Private Network"
+     * Items: "Pemasangan VPN", "Pengaturan konfigurasi VPN", "Penonaktifan VPN"
+   - Sub-Layanan: "Layanan Hosting"
+     * Items: "Pendaftaran hosting subdomain", "Pengaturan konfigurasi hosting subdomain", "Penonaktifan hosting subdomain"
+
+5. Kategori: "Layanan Perangkat"
+   - Sub-Layanan: "Standarisasi Perangkat Komputer"
+     * Items: "Konsultasi Spesifikasi PC/Laptop", "Verifikasi Kelayakan Perangkat Lama", "Instalasi OS Standar BPK RI"
+   - Sub-Layanan: "Pemeliharaan Perangkat"
+     * Items: "Pembersihan Hardware PC/Laptop", "Perbaikan Kerusakan Fisik Laptop Dinas", "Instalasi Antivirus / Scan Malware Perangkat"
+   - Sub-Layanan: "Peminjaman Perangkat"
+     * Items: "Peminjaman Laptop Rapat Paripurna", "Peminjaman Projector / Proyektor", "Peminjaman Sound System", "Pengembalian Perangkat Pinjaman"
+   - Sub-Layanan: "Penyediaan Barang Persediaan"
+     * Items: "Penyediaan Toner / Tinta Printer Biro", "Penyediaan Mouse / Keyboard Baru", "Penyediaan Kabel Konektor Display / HDMI"
+
+6. Kategori: "Layanan Dukungan TI Untuk Kegiatan Khusus"
+   - Sub-Layanan: "Pendampingan Personel TI"
+     * Items: "Pendampingan Sidang / Rapat Pleno", "Pendampingan Pemeriksaan Lapangan (On-Site Audit)", "Pendampingan Diklat / Pelatihan TIK", "Dukungan TI Acara Nasional BPK"
+
+7. Kategori: "Layanan Informasi"
+   - Sub-Layanan: "Knowledge Base Produk TI"
+     * Items: "Permintaan User Manual SiAP", "Permintaan Video Panduan Aplikasi", "FAQ Portal Layanan TI BPK"
+   - Sub-Layanan: "Informasi Produk TI"
+     * Items: "Katalog Layanan Biro TI Terbaru", "Spesifikasi Hardware Terbaru Standard BPK", "Status Rilis Aplikasi Baru Biro TI"
+   - Sub-Layanan: "Tugas dan Fungsi Biro TI"
+     * Items: "Struktur Organisasi Biro TI Pusat", "SOP Pelayanan Layanan TI BPK", "Uraian Tugas Subbagian TI"
+';
+
+        $systemInstruction = "Anda adalah Asisten Virtual Layanan TI BPK RI (Badan Pemeriksa Keuangan Republik Indonesia).
+Tugas utama Anda adalah membantu pengguna (pegawai BPK) mengidentifikasi dan mencocokkan masalah TI mereka dengan Katalog Layanan TI BPK RI secara akurat menggunakan kecerdasan buatan, sekaligus memberikan jawaban panduan yang ramah dan solutif.
+
+Berikut adalah Katalog Layanan TI BPK RI yang valid dan resmi:
+$catalogGuide
+
+Aturan Pencocokan:
+1. Jika kendala yang diceritakan pengguna dapat dipetakan secara logis ke salah satu Layanan Level 3 (items) di katalog di atas, Anda WAJIB memberikan rekomendasi tersebut.
+2. Nama 'category', 'sub', dan 'service' di dalam objek 'recommendation' harus SANGAT PERSIS (exact match) dengan teks yang ada di katalog di atas. Jangan disingkat atau diubah.
+3. Berikan penilaian tingkat keyakinan ('confidence'):
+   - 'Tinggi': Jika pengguna menyebutkan kata kunci atau konteks yang sangat jelas cocok dengan layanan spesifik.
+   - 'Sedang': Jika konteks merujuk secara tidak langsung namun kuat ke layanan tersebut.
+   - 'Rendah': Jika ada keraguan atau minim detail.
+4. Jika tidak ada kecocokan yang masuk akal, atau pengguna hanya mengobrol santai (greeting/sapaan), biarkan objek 'recommendation' bernilai null.
+
+Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur berikut:
+{
+  \"reply\": \"Jawaban sapaan atau penjelasan bantuan Anda dalam Bahasa Indonesia yang ramah dan profesional.\",
+  \"recommendation\": {
+    \"category\": \"Nama Kategori Level 1\",
+    \"sub\": \"Nama Sub-Layanan Level 2\",
+    \"service\": \"Nama Detail Layanan Level 3\",
+    \"confidence\": \"Tinggi\" | \"Sedang\" | \"Rendah\",
+    \"score\": 5
+  }
+}
+
+Atau jika tidak ada kecocokan:
+{
+  \"reply\": \"Jawaban sapaan atau penjelasan bantuan Anda.\",
+  \"recommendation\": null
+}";
+
+        $models = [
+            'gemini-2.5-flash',
+            'gemini-2.5-flash-lite'
+        ];
+        $maxRetries = 2;
+        $retryDelay = 1; // seconds
+        $response = null;
+        $lastError = null;
+
+        try {
+            foreach ($models as $model) {
+                $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
+
+                $payload = [
+                    'contents' => $contents,
+                    'systemInstruction' => [
+                        'parts' => [['text' => $systemInstruction]]
+                    ],
+                    'generationConfig' => [
+                        'responseMimeType' => 'application/json',
+                    ]
+                ];
+
+                for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                    try {
+                        $response = Http::post($apiUrl, $payload);
+
+                        if ($response->successful()) {
+                            $data = $response->json();
+                            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+                            return response()->json(json_decode($text, true));
+                        }
+
+                        $lastError = $response->body();
+                        $status = $response->status();
+
+                        // If it is 503 (Unavailable) or 429 (Resource Exhausted), wait and retry
+                        if ($status === 503 || $status === 429) {
+                            Log::warning("Gemini API ({$model}) returned status {$status}, retrying in {$retryDelay}s (attempt {$attempt}/{$maxRetries})...");
+                            sleep($retryDelay);
+                            continue;
+                        }
+
+                        break;
+                    } catch (\Exception $e) {
+                        $lastError = $e->getMessage();
+                        Log::warning("Gemini API ({$model}) request exception, retrying: " . $e->getMessage());
+                        sleep($retryDelay);
+                    }
+                }
+            }
+
+            Log::error("Gemini API Request Failed after fallback models", ['last_error' => $lastError]);
+            return response()->json([
+                'error' => 'Gagal memproses AI Chatbot setelah mencoba beberapa model.',
+                'details' => $lastError
+            ], 500);
+
+        } catch (\Exception $e) {
+            Log::error("Gemini API Exception", ['msg' => $e->getMessage()]);
+            return response()->json([
+                'error' => 'Terjadi kesalahan sistem saat memproses AI Chatbot.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+}
