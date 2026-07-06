@@ -38,7 +38,7 @@
             <div class="my-auto max-w-sm w-full mx-auto space-y-8">
                 <!-- Logo Header -->
                 <div class="flex items-center gap-2 mb-2">
-                    <img src="/logo-melati.png" alt="Logo Melati" class="w-8 h-8 object-contain" @click="clickFlower()" />
+                    <img src="/logo-melati.png" alt="Logo Melati" class="w-8 h-8 object-contain" />
                     <span class="text-xl font-extrabold text-[#b26d27] tracking-tight">
                         Melati V2
                     </span>
@@ -152,25 +152,25 @@
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 <div class="relative w-[800px] h-full">
                     <!-- Jasmine Left Group -->
-                    <div class="absolute" style="width: 800px; height: 100%; top: 0; left: -136px; transform: rotate(-12deg); transform-origin: bottom center;">
+                    <div class="absolute" style="width: 800px; height: 1000px; bottom: -10px; left: -136px; transform: rotate(-12deg); transform-origin: bottom center;">
                         <!-- tangkai-melati Left -->
-                        <div class="absolute z-10" style="width: 80px; height: 55%; bottom: -10px; left: calc(50% - 48px); transform-origin: bottom center; transform: rotate(5deg);">
+                        <div class="absolute z-10" style="width: 80px; height: 600px; bottom: 0; left: calc(50% - 48px); transform-origin: bottom center; transform: rotate(5deg);">
                             <img src="/tangkai-melati.png" alt="" class="w-full h-full object-fill" />
                         </div>
                         <!-- bunga-melati Left -->
-                        <div class="absolute z-20 cursor-pointer w-full h-full pointer-events-auto" style="top: 8%; left: 0; filter: drop-shadow(6px 10px 28px rgba(0,0,0,0.14));" @click="clickFlower()">
+                        <div class="absolute z-20 w-full h-full" style="top: 0; left: 0; filter: drop-shadow(6px 10px 28px rgba(0,0,0,0.14));">
                             <img src="/bunga-melati.png" alt="Bunga Melati Kiri" class="w-full h-full object-contain" />
                         </div>
                     </div>
 
                     <!-- Jasmine Right Group -->
-                    <div class="absolute" style="width: 800px; height: 100%; top: 0; left: 0px; transform: rotate(10deg); transform-origin: bottom center;">
+                    <div class="absolute" style="width: 800px; height: 1000px; bottom: -10px; left: 0px; transform: rotate(10deg); transform-origin: bottom center;">
                         <!-- tangkai-melati Right -->
-                        <div class="absolute z-10" style="width: 72px; height: 52%; bottom: -10px; left: calc(50% + 60px); transform-origin: bottom center; transform: rotate(-5deg);">
+                        <div class="absolute z-10" style="width: 72px; height: 580px; bottom: 0; left: calc(50% + 60px); transform-origin: bottom center; transform: rotate(-5deg);">
                             <img src="/tangkai-melati.png" alt="" class="w-full h-full object-fill" />
                         </div>
                         <!-- bunga-melati Right -->
-                        <div class="absolute z-30 cursor-pointer w-full h-full pointer-events-auto" style="top: 12%; right: 0; filter: drop-shadow(6px 10px 24px rgba(0,0,0,0.12));" @click="clickFlower()">
+                        <div class="absolute z-30 w-full h-full" style="top: 40px; right: 0; filter: drop-shadow(6px 10px 24px rgba(0,0,0,0.12));">
                             <img src="/bunga-melati.png" alt="Bunga Melati Kanan" class="w-full h-full object-contain" />
                         </div>
                     </div>
@@ -268,109 +268,7 @@
 
         <!-- RICKROLL MODAL REMOVED -->
 
-        <!-- MINIGAME MODAL -->
-        <div x-show="isMinigameOpen" class="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4 backdrop-blur-md" style="display: none;">
-            <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl flex flex-col relative text-white">
-                <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="trophy" class="w-5 h-5 text-yellow-500 animate-bounce"></i>
-                        <span class="font-bold text-xs uppercase tracking-wider text-slate-100">
-                            Adu Penalti BPK 🇮🇩
-                        </span>
-                    </div>
-                    <button @click="isMinigameOpen = false" class="text-slate-400 hover:text-white p-1.5 hover:bg-slate-800 rounded-lg cursor-pointer">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-
-                <!-- Select Player State -->
-                <div x-show="gameStage === 'select'" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                    <div class="text-center space-y-1">
-                        <h2 class="text-sm font-extrabold text-[#b26d27] uppercase tracking-wider">Pilih Eksekutor</h2>
-                        <p class="text-[11px] text-slate-400">Pilih salah satu pemain bintang Timnas Indonesia!</p>
-                    </div>
-                    <div class="grid grid-cols-1 gap-3">
-                        <template x-for="p in players">
-                            <button @click="startGame(p)" class="bg-slate-800 hover:bg-[#b26d27]/20 border border-slate-700 hover:border-[#b26d27] text-left p-3.5 rounded-2xl transition-all cursor-pointer flex gap-3.5 items-start group">
-                                <div class="w-10 h-10 rounded-full bg-[#fcf4ec] text-xl flex items-center justify-center shrink-0" x-text="p.flag"></div>
-                                <div>
-                                    <h3 class="text-xs font-bold text-white group-hover:text-[#b26d27] flex items-center gap-1.5">
-                                        <span x-text="p.name"></span>
-                                        <span class="text-[9px] bg-[#b26d27]/30 text-amber-200 px-2 py-0.5 rounded-full" x-text="p.specialty"></span>
-                                    </h3>
-                                    <p class="text-[10px] text-slate-400 mt-1" x-text="p.desc"></p>
-                                </div>
-                            </button>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Playing State -->
-                <div x-show="gameStage === 'playing' || gameStage === 'over'" class="flex flex-col">
-                    <div class="bg-slate-950/80 px-4 py-3 flex justify-between items-center border-b border-slate-800/60 font-mono text-center">
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[9px] text-[#b26d27] font-bold block truncate" x-text="selectedPlayer ? selectedPlayer.name : ''"></span>
-                            <span class="text-2xl font-black text-emerald-400" x-text="playerScore"></span>
-                        </div>
-                        <div class="px-3 py-1 bg-slate-800 rounded-lg text-[9px] font-bold text-slate-300">
-                            Tendangan: <span x-text="attempts"></span>/5
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[9px] text-rose-400 font-bold block truncate" x-text="selectedKeeper ? selectedKeeper.name + ' (' + selectedKeeper.flag + ')' : ''"></span>
-                            <span class="text-2xl font-black text-rose-400" x-text="keeperScore"></span>
-                        </div>
-                    </div>
-
-                    <div class="p-5 flex flex-col items-center justify-center min-h-[280px] bg-gradient-to-b from-slate-900 via-emerald-950/20 to-slate-950 relative overflow-hidden">
-                        <!-- Goal Post -->
-                        <div class="w-full h-36 border-4 border-t-4 border-white/80 rounded-t-lg relative bg-emerald-900/30 flex items-center justify-center shadow-inner mt-6">
-                            <!-- Goalkeeper (Simplified) -->
-                            <div class="absolute bottom-2 transition-all duration-500"
-                                 :style="getKeeperStyle()">
-                                <div class="w-12 h-16 bg-emerald-500 rounded-lg flex flex-col items-center justify-center border-2 border-white">
-                                    <div class="w-6 h-6 bg-pink-200 rounded-full border border-black -mt-4"></div>
-                                    <span class="text-[10px] font-black text-white">GK</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Penalty Spot & Ball -->
-                        <div class="mt-6 flex flex-col items-center">
-                            <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center border-2 border-black animate-bounce cursor-pointer shadow-md"
-                                 x-show="!isShooting && outcome === null"
-                                 @click="showDirectionSelector = true">
-                                ⚽
-                            </div>
-                        </div>
-
-                        <!-- Direction Selector Overlay -->
-                        <div x-show="showDirectionSelector && !isShooting" class="absolute inset-0 bg-black/60 flex items-center justify-center gap-3">
-                            <button @click="shoot('left')" class="px-4 py-2 bg-[#b26d27] rounded-xl font-bold hover:bg-[#9b5a1b]">Kiri</button>
-                            <button @click="shoot('center')" class="px-4 py-2 bg-[#b26d27] rounded-xl font-bold hover:bg-[#9b5a1b]">Tengah</button>
-                            <button @click="shoot('right')" class="px-4 py-2 bg-[#b26d27] rounded-xl font-bold hover:bg-[#9b5a1b]">Kanan</button>
-                        </div>
-
-                        <!-- Outcome Message -->
-                        <div x-show="outcome !== null" class="mt-4 text-center">
-                            <h3 class="text-lg font-black tracking-widest"
-                                :class="outcome === 'GOAL' ? 'text-emerald-400' : 'text-rose-500'"
-                                x-text="outcome"></h3>
-                            <p class="text-xs mt-1 text-slate-300" x-text="gameMessage"></p>
-                            <button @click="nextTurn()" class="mt-3 px-4 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold">
-                                Lanjut
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Reset button when over -->
-                    <div x-show="gameStage === 'over'" class="p-4 border-t border-slate-800 bg-slate-950 text-center">
-                        <button @click="resetGame()" class="px-6 py-2 bg-[#b26d27] hover:bg-[#9b5a1b] rounded-xl font-bold text-xs uppercase tracking-wider">
-                            Main Lagi
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- MINIGAME MODAL REMOVED -->
     </div>
 
     <script>
@@ -384,8 +282,7 @@
                 error: '',
                 isDemoOpen: false,
                 demoTab: 'all',
-                flowerClicks: 0,
-                isMinigameOpen: false,
+
 
                 
                 // Demo Users matching the PHP array
@@ -400,38 +297,7 @@
                     { name: 'Operator TI Utama BPK', username: 'admin', password: 'admin123', role: 'operator' }
                 ],
 
-                // Minigame Data
-                gameStage: 'select',
-                selectedPlayer: null,
-                selectedKeeper: null,
-                playerScore: 0,
-                keeperScore: 0,
-                attempts: 0,
-                isShooting: false,
-                showDirectionSelector: false,
-                keeperDir: 'center',
-                outcome: null,
-                gameMessage: '',
-                
-                players: [
-                    { id: 'arhan', name: 'Pratama Arhan', specialty: 'Curve Shot', desc: 'Spesialis pojok kanan. Mengurangi peluang penyelamatan kiper di arah Kanan.', flag: '🇮🇩' },
-                    { id: 'marselino', name: 'Marselino Ferdinan', specialty: 'Power Shot', desc: 'Tembakan super keras. Tingkat akurasi dasar yang stabil.', flag: '🇮🇩' },
-                    { id: 'ragnar', name: 'Ragnar Oratmangoen', specialty: 'Precision Placement', desc: 'Penempatan bola presisi. Mengurangi peluang penyelamatan kiper.', flag: '🇮🇩' }
-                ],
 
-                keepers: [
-                    { id: 'martinez', name: 'Emiliano Martínez', team: 'Argentina', flag: '🇦🇷' },
-                    { id: 'neuer', name: 'Manuel Neuer', team: 'Jerman', flag: '🇩🇪' }
-                ],
-
-                clickFlower() {
-                    this.flowerClicks++;
-                    if (this.flowerClicks >= 10) {
-                        this.isMinigameOpen = true;
-                        this.flowerClicks = 0;
-                        this.resetGame();
-                    }
-                },
 
                 autofill(user) {
                     this.username = user.username;
@@ -480,62 +346,7 @@
                     }
                 },
 
-                // Minigame Functions
-                resetGame() {
-                    this.gameStage = 'select';
-                    this.selectedPlayer = null;
-                    this.selectedKeeper = null;
-                    this.playerScore = 0;
-                    this.keeperScore = 0;
-                    this.attempts = 0;
-                    this.isShooting = false;
-                    this.showDirectionSelector = false;
-                    this.keeperDir = 'center';
-                    this.outcome = null;
-                    this.gameMessage = '';
-                },
 
-                startGame(player) {
-                    this.selectedPlayer = player;
-                    this.selectedKeeper = this.keepers[Math.floor(Math.random() * this.keepers.length)];
-                    this.gameStage = 'playing';
-                },
-
-                shoot(direction) {
-                    this.isShooting = true;
-                    this.showDirectionSelector = false;
-                    
-                    const dirs = ['left', 'center', 'right'];
-                    this.keeperDir = dirs[Math.floor(Math.random() * dirs.length)];
-                    
-                    setTimeout(() => {
-                        this.attempts++;
-                        if (direction === this.keeperDir) {
-                            this.keeperScore++;
-                            this.outcome = 'SAVED';
-                            this.gameMessage = `Diselamatkan! ${this.selectedKeeper.name} menebak arah dengan tepat.`;
-                        } else {
-                            this.playerScore++;
-                            this.outcome = 'GOAL';
-                            this.gameMessage = `Gol! Tembakan ke arah ${direction} bersarang di gawang!`;
-                        }
-                        this.isShooting = false;
-                    }, 800);
-                },
-
-                getKeeperStyle() {
-                    if (this.keeperDir === 'left') return 'transform: translateX(-70px) rotate(-15deg)';
-                    if (this.keeperDir === 'right') return 'transform: translateX(70px) rotate(15deg)';
-                    return 'transform: translateX(0px)';
-                },
-
-                nextTurn() {
-                    this.outcome = null;
-                    this.keeperDir = 'center';
-                    if (this.attempts >= 5) {
-                        this.gameStage = 'over';
-                    }
-                }
             }
         }
     </script>
