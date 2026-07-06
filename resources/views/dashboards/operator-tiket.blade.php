@@ -30,7 +30,7 @@
                     <option value="Dikerjakan">Dikerjakan</option>
                     <option value="Dieskalasi">Dieskalasi</option>
                     <option value="Selesai">Selesai</option>
-                    <option value="Kembalikan tiket ke operator">Kembalikan ke Operator</option>
+                    <option value="Kembalikan tiket ke operator">Dikembalikan</option>
                 </select>
             </div>
         </div>
@@ -49,7 +49,7 @@
                     <p class="text-[10px] text-gray-500 truncate" x-text="'Pelapor: ' + t.pengirimName"></p>
                     
                     <div class="flex items-center justify-between gap-2 mt-2.5">
-                        <span class="status-badge font-semibold" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Ditolak' : t.status"></span>
+                        <span class="status-badge font-semibold" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : t.status"></span>
                     </div>
                 </div>
             </template>
@@ -70,7 +70,7 @@
                             <h2 class="text-base font-bold text-gray-800 font-display mt-0.5" x-text="getSelectedTicket().layanan"></h2>
                             <p class="text-[11px] text-gray-400 mt-1" x-text="'ID: ' + getSelectedTicket().id + ' | Pelapor: ' + getSelectedTicket().pengirimName"></p>
                         </div>
-                        <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Ditolak' : getSelectedTicket().status"></span>
+                        <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : getSelectedTicket().status"></span>
                     </div>
                 </div>
 
@@ -246,8 +246,10 @@
             },
 
             getStatusBadgeClass(status) {
-                const s = status === 'Kembalikan tiket ke operator' ? 'Pending' : status;
-                switch (s) {
+                if (status === 'Kembalikan tiket ke operator') {
+                    return 'status-ditolak';
+                }
+                switch (status) {
                     case 'Pending': return 'status-pending';
                     case 'Diterima': return 'status-diterima';
                     case 'Ditugaskan': return 'status-ditugaskan';

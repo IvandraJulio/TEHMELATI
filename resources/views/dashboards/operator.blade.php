@@ -161,7 +161,7 @@
                                     <td class="p-3 truncate max-w-[150px]">{{ $t->layanan }}</td>
                                     <td class="p-3">
                                         <span class="status-badge {{ $t->status === 'Selesai' ? 'status-selesai' : 'status-ditolak' }}">
-                                            {{ $t->status === 'Kembalikan tiket ke operator' ? 'Ditolak' : $t->status }}
+                                            {{ $t->status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : $t->status }}
                                         </span>
                                     </td>
                                 </tr>

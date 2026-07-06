@@ -73,7 +73,7 @@
         <!-- Card 3: Rejection Rate -->
         <div class="bg-white border border-[#e2e6ea] p-5 rounded-2xl shadow-xs flex items-center justify-between">
             <div class="space-y-1">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono">Rasio Penolakan Operator</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono">Rasio Tiket Dikembalikan</span>
                 <h3 class="text-2xl font-extrabold text-gray-800 font-display">{{ $rejectionRate }}%</h3>
                 <p class="text-[10px] text-gray-400 font-medium">{{ $rejected }} tiket dikembalikan / tidak valid</p>
             </div>
@@ -89,7 +89,7 @@
         <div class="bg-white border border-[#e2e6ea] p-5 rounded-2xl shadow-xs lg:col-span-4 flex flex-col justify-between">
             <div>
                 <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Distribusi Status Tiket</h3>
-                <p class="text-[11px] text-gray-400 mt-0.5">Rasio Selesai vs Aktif vs Ditolak</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Rasio Selesai vs Aktif vs Dikembalikan</p>
             </div>
             
             <div class="my-6 flex items-center justify-center h-[200px]">
@@ -107,7 +107,7 @@
                 </div>
                 <div class="space-y-1">
                     <span class="text-xs font-extrabold text-rose-600" x-text="'{{ $rejected }}'"></span>
-                    <div class="text-gray-400">Ditolak</div>
+                    <div class="text-gray-400">Dikembalikan</div>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
         <div class="bg-white border border-[#e2e6ea] p-5 rounded-2xl shadow-xs lg:col-span-8 flex flex-col justify-between">
             <div>
                 <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Kinerja Per Subbagian Biro TI</h3>
-                <p class="text-[11px] text-gray-400 mt-0.5">Volume tiket aktif, selesai, dan ditolak per subbag</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Volume tiket aktif, selesai, dan dikembalikan per subbag</p>
             </div>
 
             <div class="mt-6 h-[250px] relative w-full">
@@ -137,7 +137,7 @@
         new Chart(ctxStatus, {
             type: 'doughnut',
             data: {
-                labels: ['Selesai', 'Aktif', 'Ditolak'],
+                labels: ['Selesai', 'Aktif', 'Dikembalikan'],
                 datasets: [{
                     data: [{{ $completed }}, {{ $open }}, {{ $rejected }}],
                     backgroundColor: ['#10b981', '#3b82f6', '#f43f5e'],
@@ -190,7 +190,7 @@
                         borderRadius: 4
                     },
                     {
-                        label: 'Kembalikan ke Operator',
+                        label: 'Dikembalikan',
                         data: ditolakData,
                         backgroundColor: '#ef4444',
                         borderRadius: 4
