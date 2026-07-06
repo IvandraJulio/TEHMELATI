@@ -8,17 +8,17 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #FAF4EE;
         }
         .font-mono {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Poppins', sans-serif;
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -148,7 +148,7 @@
                     <nav class="px-3 space-y-1">
                         @foreach($navItems as $item)
                             @php
-                                $isActive = Route::currentRouteName() === $item['route'] || str_starts_with(Route::currentRouteName(), $item['route'] . '.');
+                                $isActive = Route::currentRouteName() === $item['route'] || ($item['route'] === 'dashboard' && Route::currentRouteName() === 'dashboard.lapor');
                             @endphp
                             <a href="{{ route($item['route']) }}"
                                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all {{ $isActive ? 'bg-[#fcf4ec] text-[#b26d27]' : 'text-gray-500 hover:bg-slate-50 hover:text-gray-800' }}">
@@ -188,7 +188,7 @@
                         <nav class="space-y-1">
                             @foreach($navItems as $item)
                                 @php
-                                    $isActive = Route::currentRouteName() === $item['route'] || str_starts_with(Route::currentRouteName(), $item['route'] . '.');
+                                    $isActive = Route::currentRouteName() === $item['route'] || ($item['route'] === 'dashboard' && Route::currentRouteName() === 'dashboard.lapor');
                                 @endphp
                                 <a href="{{ route($item['route']) }}" @click="mobileMenuOpen = false"
                                    class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all {{ $isActive ? 'bg-[#fcf4ec] text-[#b26d27]' : 'text-gray-500 hover:bg-slate-50 hover:text-gray-800' }}">

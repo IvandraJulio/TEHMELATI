@@ -8,16 +8,16 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
         .font-mono {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Poppins', sans-serif;
         }
         .writing-mode-vertical {
             writing-mode: vertical-lr;
@@ -130,10 +130,7 @@
             </div>
 
             <!-- Footer -->
-            <div
-                @click="triggerRickroll()"
-                class="text-center text-[10px] text-gray-400 font-mono tracking-widest mt-8 cursor-pointer hover:text-[#b26d27] transition-all hover:scale-105 select-none"
-            >
+            <div class="text-center text-[10px] text-gray-400 font-mono tracking-widest mt-8 select-none">
                 © Biro TI 2026
             </div>
         </div>
@@ -150,25 +147,34 @@
             <svg class="absolute top-[14%] right-[14%] w-7 h-7 animate-pulse z-20" style="animation-duration: 4s; animation-delay: 1.2s" viewBox="0 0 32 32" fill="white">
                 <path d="M16 2 L17.2 14.8 L30 16 L17.2 17.2 L16 30 L14.8 17.2 L2 16 L14.8 14.8 Z" />
             </svg>
+            
+            <!-- Centered Wrapper for Jasmine Flowers -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div class="relative w-[800px] h-full">
+                    <!-- Jasmine Left Group -->
+                    <div class="absolute" style="width: 800px; height: 100%; top: 0; left: -136px; transform: rotate(-12deg); transform-origin: bottom center;">
+                        <!-- tangkai-melati Left -->
+                        <div class="absolute z-10" style="width: 80px; height: 55%; bottom: -10px; left: calc(50% - 48px); transform-origin: bottom center; transform: rotate(5deg);">
+                            <img src="/tangkai-melati.png" alt="" class="w-full h-full object-fill" />
+                        </div>
+                        <!-- bunga-melati Left -->
+                        <div class="absolute z-20 cursor-pointer w-full h-full pointer-events-auto" style="top: 8%; left: 0; filter: drop-shadow(6px 10px 28px rgba(0,0,0,0.14));" @click="clickFlower()">
+                            <img src="/bunga-melati.png" alt="Bunga Melati Kiri" class="w-full h-full object-contain" />
+                        </div>
+                    </div>
 
-            <!-- tangkai-melati Left -->
-            <div class="absolute z-10" style="width: 80px; height: 55%; bottom: -10px; left: calc(32% - 40px); transform-origin: bottom center; transform: rotate(-7deg);">
-                <img src="/tangkai-melati.png" alt="" class="w-full h-full object-fill" />
-            </div>
-
-            <!-- bunga-melati Left -->
-            <div class="absolute z-20 cursor-pointer" style="width: 800px; height: 800px; top: 8%; left: -17%; filter: drop-shadow(6px 10px 28px rgba(0,0,0,0.14)); transform: rotate(-12deg);" @click="clickFlower()">
-                <img src="/bunga-melati.png" alt="Bunga Melati Kiri" class="w-full h-full object-contain" />
-            </div>
-
-            <!-- tangkai-melati Right -->
-            <div class="absolute z-10" style="width: 72px; height: 52%; bottom: -10px; left: calc(62% - 36px); transform-origin: bottom center; transform: rotate(5deg);">
-                <img src="/tangkai-melati.png" alt="" class="w-full h-full object-fill" />
-            </div>
-
-            <!-- bunga-melati Right -->
-            <div class="absolute z-30 cursor-pointer" style="width: 800px; height: 800px; top: 12%; right: 0%; filter: drop-shadow(6px 10px 24px rgba(0,0,0,0.12)); transform: rotate(10deg);" @click="clickFlower()">
-                <img src="/bunga-melati.png" alt="Bunga Melati Kanan" class="w-full h-full object-contain" />
+                    <!-- Jasmine Right Group -->
+                    <div class="absolute" style="width: 800px; height: 100%; top: 0; left: 0px; transform: rotate(10deg); transform-origin: bottom center;">
+                        <!-- tangkai-melati Right -->
+                        <div class="absolute z-10" style="width: 72px; height: 52%; bottom: -10px; left: calc(50% + 60px); transform-origin: bottom center; transform: rotate(-5deg);">
+                            <img src="/tangkai-melati.png" alt="" class="w-full h-full object-fill" />
+                        </div>
+                        <!-- bunga-melati Right -->
+                        <div class="absolute z-30 cursor-pointer w-full h-full pointer-events-auto" style="top: 12%; right: 0; filter: drop-shadow(6px 10px 24px rgba(0,0,0,0.12));" @click="clickFlower()">
+                            <img src="/bunga-melati.png" alt="Bunga Melati Kanan" class="w-full h-full object-contain" />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -260,25 +266,7 @@
             </div>
         </div>
 
-        <!-- RICKROLL MODAL -->
-        <div x-show="isRickrolled" class="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-[100] p-4 backdrop-blur-lg" style="display: none;">
-            <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col relative text-white">
-                <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-                    <span class="font-bold text-xs uppercase tracking-wider text-slate-100">
-                        😎 YOU GOT RICKROLLED! 🎵
-                    </span>
-                    <button @click="isRickrolled = false" class="text-slate-400 hover:text-white p-1.5 hover:bg-slate-800 rounded-lg cursor-pointer">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div class="relative w-full aspect-video bg-black">
-                    <iframe x-if="isRickrolled" class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0" title="Rick Astley" frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen></iframe>
-                </div>
-                <div class="p-4 bg-slate-950 text-center text-xs text-slate-400 font-medium">
-                    Never gonna give you up, never gonna let you down... 😉
-                </div>
-            </div>
-        </div>
+        <!-- RICKROLL MODAL REMOVED -->
 
         <!-- MINIGAME MODAL -->
         <div x-show="isMinigameOpen" class="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4 backdrop-blur-md" style="display: none;">
@@ -398,7 +386,7 @@
                 demoTab: 'all',
                 flowerClicks: 0,
                 isMinigameOpen: false,
-                isRickrolled: false,
+
                 
                 // Demo Users matching the PHP array
                 demoUsers: [
@@ -458,9 +446,7 @@
                     return 'bg-slate-100 text-slate-700 border-slate-200';
                 },
 
-                triggerRickroll() {
-                    this.isRickrolled = true;
-                },
+
 
                 async submitLogin() {
                     this.loading = true;
