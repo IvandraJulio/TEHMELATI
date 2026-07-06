@@ -240,16 +240,25 @@
             <!-- Accounts List Grid -->
             <div class="flex-1 overflow-y-auto p-4.5 space-y-3.5 scroll-thin">
                 @php
-                    $rawDemoUsers = [
-                        ['id' => 'u1', 'name' => 'Budi Santoso', 'username' => 'budi', 'password' => 'budi123', 'role' => 'pengguna', 'subbagId' => null],
-                        ['id' => 'u2', 'name' => 'Siti Rahayu', 'username' => 'siti', 'password' => 'siti123', 'role' => 'pengguna', 'subbagId' => null],
-                        ['id' => 'u3', 'name' => 'Ahmad Fauzi', 'username' => 'ahmad', 'password' => 'ahmad123', 'role' => 'pengguna', 'subbagId' => null],
-                        ['id' => 'u4', 'name' => 'Dewi Kusuma', 'username' => 'dewi', 'password' => 'dewi123', 'role' => 'pengguna', 'subbagId' => null],
-                        ['id' => 'k1', 'name' => 'Ir. Hartono, M.T.', 'username' => 'kasubbag.infrastruktur', 'password' => 'pass123', 'role' => 'kasubbag', 'subbagId' => 'k1'],
-                        ['id' => 'k2', 'name' => 'Dra. Wulandari, M.Si.', 'username' => 'kasubbag.pelayanan', 'password' => 'pass123', 'role' => 'kasubbag', 'subbagId' => 'k2'],
-                        ['id' => 'k3', 'name' => 'Rizal Pratama, S.T.', 'username' => 'kasubbag.si.pemeriksaan', 'password' => 'pass123', 'role' => 'kasubbag', 'subbagId: k3'],
-                        ['id' => 'op1', 'name' => 'Operator TI Utama BPK', 'username' => 'admin', 'password' => 'admin123', 'role' => 'operator', 'subbagId' => null],
-                    ];
+                    $dbUsers = \App\Models\User::all();
+                    $demoUsersList = [];
+                    foreach ($dbUsers as $user) {
+                        $pwd = 'pass123';
+                        if ($user->role === 'pengguna') {
+                            $pwd = $user->username . '123';
+                        } elseif ($user->role === 'solver') {
+                            $pwd = 'solver123';
+                        } elseif ($user->role === 'operator') {
+                            $pwd = 'admin123';
+                        }
+                        
+                        $demoUsersList[] = [
+                            'name' => $user->name,
+                            'username' => $user->username,
+                            'password' => $pwd,
+                            'role' => $user->role,
+                        ];
+                    }
                 @endphp
                 <template x-for="user in demoUsers" :key="user.username">
                     <div x-show="demoTab === 'all' || user.role === demoTab">
@@ -274,10 +283,6 @@
                 </template>
             </div>
         </div>
-
-        <!-- RICKROLL MODAL REMOVED -->
-
-        <!-- MINIGAME MODAL REMOVED -->
     </div>
 
     <script>
@@ -294,17 +299,8 @@
 
 
                 
-                // Demo Users matching the PHP array
-                demoUsers: [
-                    { name: 'Budi Santoso (Pelapor)', username: 'budi', password: 'budi123', role: 'pengguna' },
-                    { name: 'Siti Rahayu (Pelapor)', username: 'siti', password: 'siti123', role: 'pengguna' },
-                    { name: 'Ahmad Fauzi (Pelapor)', username: 'ahmad', password: 'ahmad123', role: 'pengguna' },
-                    { name: 'Dewi Kusuma (Pelapor)', username: 'dewi', password: 'dewi123', role: 'pengguna' },
-                    { name: 'Ir. Hartono, M.T. (Kasubbag)', username: 'kasubbag.infrastruktur', password: 'pass123', role: 'kasubbag' },
-                    { name: 'Dra. Wulandari, M.Si. (Kasubbag)', username: 'kasubbag.pelayanan', password: 'pass123', role: 'kasubbag' },
-                    { name: 'Supriyadi (Solver)', username: 'solver.infra.1', password: 'solver123', role: 'solver' },
-                    { name: 'Operator TI Utama BPK', username: 'admin', password: 'admin123', role: 'operator' }
-                ],
+                // Demo Users loaded dynamically from database
+                demoUsers: @json($demoUsersList),
 
 
 

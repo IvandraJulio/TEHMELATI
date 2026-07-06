@@ -7,7 +7,7 @@
     <!-- LEFT COLUMN: Report Form -->
     <div class="lg:col-span-7 bg-white p-5 md:p-6 rounded-2xl border border-[#e2e6ea] shadow-xs space-y-6">
         <div>
-            <h2 class="text-lg font-bold text-gray-800 font-display">Form Lapor Insiden / Permintaan Layanan</h2>
+            <h2 class="text-lg font-bold text-gray-800 font-display">Form Permintaan Layanan</h2>
             <p class="text-xs text-gray-400 mt-1">Gunakan form di bawah ini atau minta bantuan asisten AI di sebelah kanan untuk mengisi otomatis.</p>
         </div>
 
@@ -44,7 +44,7 @@
             </div>
 
             <!-- Detail Layanan Select -->
-            <div>
+            <div x-show="getDetailLayananList().length > 0" style="display: none;">
                 <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Detail Layanan (Level 3)</label>
                 <select x-model="detailLayanan" :disabled="!subLayanan" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-sm outline-none transition-all font-medium disabled:opacity-50">
                     <option value="">-- Pilih Detail Layanan --</option>
@@ -189,11 +189,11 @@
                 {
                     category: "Layanan Identitas",
                     subs: [
-                        { name: "Layanan Akun", items: ["Pembuatan Akun Baru Portal BPK", "Reset Password / Masalah Login", "Perubahan Hak Akses Aplikasi", "Penghapusan / Penonaktifan Akun Pegawai"] },
-                        { name: "Layanan TTE", items: ["Registrasi Sertifikat TTE Baru", "Perpanjangan Masa Aktif TTE", "Pencabutan Sertifikat TTE", "Troubleshooting Tanda Tangan Elektronik Gagal"] },
-                        { name: "Layanan Segel Elektronik", items: ["Penerbitan Segel Baru Instansi", "Perpanjangan Masa Aktif Segel", "Masalah Verifikasi Segel Elektronik"] },
-                        { name: "Layanan Email", items: ["Pembuatan Email Baru @bpk.go.id", "Reset Password Email Dinas", "Masalah Kuota Email Penuh", "Konfigurasi Mail Client (Outlook/Thunderbird/HP)"] },
-                        { name: "Layanan MFA", items: ["Registrasi Multi-Factor Authentication Baru", "Reset Token MFA / Google Authenticator", "Masalah Sinkronisasi Waktu MFA"] }
+                        { name: "Layanan Akun", items: [] },
+                        { name: "Layanan TTE", items: [] },
+                        { name: "Layanan Segel Elektronik", items: [] },
+                        { name: "Layanan Email", items: [] },
+                        { name: "Layanan MFA", items: [] }
                     ]
                 },
                 {
@@ -206,12 +206,12 @@
                 {
                     category: "Layanan Aplikasi",
                     subs: [
-                        { name: "Pengembangan Aplikasi", items: ["Permintaan Fitur Baru Aplikasi", "Pelaporan Bug / Error Aplikasi", "Uji Coba / Testing Aplikasi Baru", "Integrasi API Antar Aplikasi BPK"] },
-                        { name: "Aplikasi Pemeriksaan", items: ["SiAP-BPK (Sistem Informasi Pemeriksaan)", "Aplikasi E-Audit Pemeriksaan Pusat", "Aplikasi Kertas Kerja Pemeriksaan (KKP)", "Masalah Sinkronisasi Offline SiAP-BPK"] },
-                        { name: "Aplikasi Kelembagaan", items: ["Aplikasi Kepegawaian (SISDM BPK)", "Aplikasi Keuangan (SIKAD BPK)", "Aplikasi Persuratan Dinas (E-Office)", "Aplikasi Perjalanan Dinas Pegawai"] },
-                        { name: "Aplikasi Pendukung", items: ["Aplikasi Manajemen Risiko Biro TI", "Aplikasi Helpdesk Biro TI", "Aplikasi Presensi Pegawai BPK"] },
-                        { name: "Aplikasi Kolaborasi", items: ["Microsoft Teams BPK", "BPK Cloud Storage (Nextcloud)", "Aplikasi Survei Internal BPK"] },
-                        { name: "Layanan Survei", items: ["Pembuatan Kuesioner Baru", "Analisis Hasil Survei Internal", "Export Data Survei Pegawai"] }
+                        { name: "Pengembangan Aplikasi", items: [] },
+                        { name: "Aplikasi Pemeriksaan", items: [] },
+                        { name: "Aplikasi Kelembagaan", items: [] },
+                        { name: "Aplikasi Pendukung", items: [] },
+                        { name: "Aplikasi Kolaborasi", items: [] },
+                        { name: "Layanan Survei", items: [] }
                     ]
                 },
                 {
@@ -226,10 +226,24 @@
                 {
                     category: "Layanan Perangkat",
                     subs: [
-                        { name: "Standarisasi Perangkat Komputer", items: ["Konsultasi Spesifikasi PC/Laptop", "Verifikasi Kelayakan Perangkat Lama", "Instalasi OS Standar BPK RI"] },
-                        { name: "Pemeliharaan Perangkat", items: ["Pembersihan Hardware PC/Laptop", "Perbaikan Kerusakan Fisik Laptop Dinas", "Instalasi Antivirus / Scan Malware Perangkat"] },
-                        { name: "Peminjaman Perangkat", items: ["Peminjaman Laptop Rapat Paripurna", "Peminjaman Projector / Proyektor", "Peminjaman Sound System", "Pengembalian Perangkat Pinjaman"] },
-                        { name: "Penyediaan Barang Persediaan", items: ["Penyediaan Toner / Tinta Printer Biro", "Penyediaan Mouse / Keyboard Baru", "Penyediaan Kabel Konektor Display / HDMI"] }
+                        { name: "Standarisasi Perangkat Komputer", items: [] },
+                        { name: "Pemeliharaan Perangkat", items: [] },
+                        { name: "Peminjaman Perangkat", items: [] },
+                        { name: "Penyediaan Barang Persediaan", items: [] }
+                    ]
+                },
+                {
+                    category: "Layanan Dukungan TI Untuk Kegiatan Khusus",
+                    subs: [
+                        { name: "Pendampingan Personel TI", items: [] }
+                    ]
+                },
+                {
+                    category: "Layanan Informasi",
+                    subs: [
+                        { name: "Knowledge Base Produk TI", items: [] },
+                        { name: "Informasi Produk TI", items: [] },
+                        { name: "Tugas dan Fungsi Biro TI", items: [] }
                     ]
                 }
             ],
