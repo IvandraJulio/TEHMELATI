@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use App\Models\Comment;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -244,6 +245,17 @@ class DashboardController extends Controller
             'type' => 'sistem',
         ]);
 
+        // Notify solvers of the subbag
+        $solvers = User::where('role', 'solver')->where('subbagId', $subbagId)->get();
+        foreach ($solvers as $solver) {
+            Notification::create([
+                'user_id' => $solver->id,
+                'ticket_id' => $ticketId,
+                'title' => 'Tiket Baru Tersedia',
+                'message' => "Tiket baru {$ticketId} ({$layanan}) tersedia untuk diambil di subbagian Anda.",
+            ]);
+        }
+
         return response()->json(['success' => true, 'id' => $ticketId]);
     }
 
@@ -254,6 +266,10 @@ class DashboardController extends Controller
     {
         $ticket = Ticket::findOrFail($id);
         $now = date('Y-m-d H:i');
+
+        $oldStatus = $ticket->status;
+        $oldSolverId = $ticket->solverId;
+        $oldKasubbagId = $ticket->kasubbagId;
 
         $ticket->update([
             'status' => $request->status ?? $ticket->status,
@@ -266,6 +282,55 @@ class DashboardController extends Controller
             'tanggalSelesai' => $request->tanggalSelesai ?? $ticket->tanggalSelesai,
             'tanggalUpdate' => $now,
         ]);
+
+        $newStatus = $ticket->status;
+        $newSolverId = $ticket->solverId;
+        $newKasubbagId = $ticket->kasubbagId;
+
+        // 1. Notify Pelapor on status changes
+        if ($newStatus !== $oldStatus) {
+            $isOldActive = in_array($oldStatus, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']);
+            $isNewActive = in_array($newStatus, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']);
+
+            if ($isNewActive && !$isOldActive) {
+                Notification::create([
+                    'user_id' => $ticket->pengirimId,
+                    'ticket_id' => $ticket->id,
+                    'title' => 'Tiket Diproses',
+                    'message' => "Tiket Anda dengan ID {$ticket->id} ({$ticket->layanan}) saat ini sedang diproses dengan status: {$newStatus}.",
+                ]);
+            } elseif ($newStatus === 'Selesai' && $oldStatus !== 'Selesai') {
+                Notification::create([
+                    'user_id' => $ticket->pengirimId,
+                    'ticket_id' => $ticket->id,
+                    'title' => 'Tiket Selesai',
+                    'message' => "Tiket Anda dengan ID {$ticket->id} ({$ticket->layanan}) telah selesai ditangani.",
+                ]);
+            }
+        }
+
+        // 2. Notify Solver on assignment
+        if (!empty($newSolverId) && ($oldSolverId !== $newSolverId || ($oldStatus !== $newStatus && in_array($newStatus, ['Ditugaskan', 'Dikerjakan'])))) {
+            Notification::create([
+                'user_id' => $newSolverId,
+                'ticket_id' => $ticket->id,
+                'title' => 'Tugas Baru Ditugaskan',
+                'message' => "Anda telah ditugaskan untuk menangani tiket {$ticket->id} ({$ticket->layanan}).",
+            ]);
+        }
+
+        // 3. Notify Solvers if ticket becomes "bisa diambil" again
+        if (empty($newSolverId) && !empty($newKasubbagId) && (!empty($oldSolverId) || $newStatus === 'Dieskalasi')) {
+            $solvers = User::where('role', 'solver')->where('subbagId', $newKasubbagId)->get();
+            foreach ($solvers as $solver) {
+                Notification::create([
+                    'user_id' => $solver->id,
+                    'ticket_id' => $ticket->id,
+                    'title' => 'Tiket Tersedia Kembali',
+                    'message' => "Tiket {$ticket->id} ({$ticket->layanan}) dikembalikan/dieskalasi dan kini tersedia untuk diambil.",
+                ]);
+            }
+        }
 
         if ($request->has('comment')) {
             $commentData = $request->comment;
@@ -503,5 +568,28 @@ Atau jika tidak ada kecocokan:
                 'details' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get user notifications
+     */
+    public function getNotificationsApi()
+    {
+        $notifications = Notification::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->limit(30)
+            ->get();
+        return response()->json($notifications);
+    }
+
+    /**
+     * Mark all user notifications as read
+     */
+    public function markNotificationsReadApi()
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+        return response()->json(['success' => true]);
     }
 }

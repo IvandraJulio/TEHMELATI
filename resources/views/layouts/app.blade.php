@@ -121,10 +121,80 @@
                 @endif
 
                 <!-- Notification Bell -->
-                <button class="text-gray-500 hover:text-gray-800 p-1.5 rounded-full hover:bg-slate-50 transition-all cursor-pointer relative">
-                    <i data-lucide="bell" class="w-4.5 h-4.5"></i>
-                    <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
-                </button>
+                <div class="relative" x-data="{ 
+                    open: false, 
+                    notifications: [], 
+                    async fetchNotifications() {
+                        try {
+                            const res = await fetch('/api/notifications');
+                            this.notifications = await res.json();
+                        } catch(e) {}
+                    },
+                    async markAsRead() {
+                        try {
+                            await fetch('/api/notifications/read', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=&quot;csrf-token&quot;]').getAttribute('content')
+                                }
+                            });
+                            // Fetch again to update read status
+                            this.fetchNotifications();
+                        } catch(e) {}
+                    },
+                    get unreadCount() {
+                        return this.notifications.filter(n => !n.is_read).length;
+                    },
+                    init() {
+                        this.fetchNotifications();
+                        // Poll every 30 seconds
+                        setInterval(() => this.fetchNotifications(), 30000);
+                    }
+                }" @click.away="open = false">
+                    <button @click="open = !open; if(open) markAsRead()" class="text-gray-500 hover:text-gray-800 p-1.5 rounded-full hover:bg-slate-50 transition-all cursor-pointer relative flex items-center justify-center">
+                        <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+                        <span x-show="unreadCount > 0" class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                    </button>
+
+                    <!-- Dropdown Panel -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 mt-2.5 w-80 bg-white border border-[#e2e6ea] rounded-2xl shadow-xl z-50 overflow-hidden" 
+                         style="display: none;">
+                        
+                        <!-- Header -->
+                        <div class="px-4 py-3 bg-slate-50 border-b border-[#e2e6ea] flex justify-between items-center">
+                            <span class="text-xs font-bold text-gray-800">Notifikasi</span>
+                            <span x-show="unreadCount > 0" class="text-[10px] font-bold bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full" x-text="unreadCount + ' Baru'"></span>
+                        </div>
+
+                        <!-- Scrollable list -->
+                        <div class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                            <!-- Template for notifications -->
+                            <template x-for="n in notifications" :key="n.id">
+                                <div class="p-3.5 text-left block hover:bg-slate-50/50 transition-colors"
+                                     :class="!n.is_read ? 'bg-[#fffbeb]/20' : 'bg-transparent'">
+                                    <div class="flex justify-between items-start gap-1.5 mb-1">
+                                        <span class="text-[11px] font-bold text-gray-900" x-text="n.title"></span>
+                                        <span class="text-[8px] text-gray-400 font-mono" x-text="new Date(n.created_at).toLocaleDateString('id-ID', {hour: '2-digit', minute:'2-digit'})"></span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 leading-relaxed font-medium" x-text="n.message"></p>
+                                </div>
+                            </template>
+
+                            <!-- Empty state -->
+                            <div x-show="notifications.length === 0" class="py-10 text-center text-gray-400 text-xs flex flex-col items-center justify-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13 A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8v7a3 3 0 0 1-3 3h15"/><path d="m2 2 20 20"/><path d="M18 8A6 6 0 0 0 8.13 4.13"/></svg>
+                                <span>Tidak ada notifikasi.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- User Profile Info -->
                 <div class="flex items-center gap-2.5 pl-3 border-l border-slate-100">

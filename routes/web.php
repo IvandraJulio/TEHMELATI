@@ -32,4 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/tickets/{id}/actions', [DashboardController::class, 'updateTicketActionApi']);
     Route::post('/api/tickets/{id}/comments', [DashboardController::class, 'addCommentApi']);
     Route::post('/api/chat-recommend', [DashboardController::class, 'chatRecommendApi']);
+
+    // Notifications API
+    Route::get('/api/notifications', [DashboardController::class, 'getNotificationsApi']);
+    Route::post('/api/notifications/read', [DashboardController::class, 'markNotificationsReadApi']);
 });
