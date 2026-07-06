@@ -121,7 +121,17 @@ class DashboardController extends Controller
         } elseif ($user->role === 'kasubbag') {
             $query->where('kasubbagId', $user->subbagId);
         } elseif ($user->role === 'solver') {
-            $query->where('solverId', $user->id);
+            $query->where(function ($q) use ($user) {
+                $q->where('solverId', $user->id)
+                  ->orWhere(function ($q2) use ($user) {
+                      $q2->where('kasubbagId', $user->subbagId)
+                         ->where(function ($q3) {
+                             $q3->whereNull('solverId')
+                                ->orWhere('solverId', '');
+                         })
+                         ->whereNotIn('status', ['Selesai', 'Kembalikan tiket ke operator']);
+                  });
+            });
         }
 
         $tickets = $query->orderBy('tanggalUpdate', 'desc')->get();
