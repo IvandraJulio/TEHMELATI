@@ -91,9 +91,17 @@
                                 <button
                                     type="button"
                                     @click="showPassword = !showPassword"
-                                    class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                                    class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#b26d27] transition-colors cursor-pointer flex items-center justify-center"
+                                    aria-label="Toggle password visibility"
                                 >
-                                    <i :data-lucide="showPassword ? 'eye-off' : 'eye'" class="w-4.5 h-4.5"></i>
+                                    <!-- Eye Icon (when password is hidden) -->
+                                    <template x-if="!showPassword">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4.5 h-4.5 transition-all"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </template>
+                                    <!-- Eye-Off Icon (when password is visible) -->
+                                    <template x-if="showPassword">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4.5 h-4.5 transition-all"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                    </template>
                                 </button>
                             </div>
                         </div>
@@ -315,6 +323,19 @@
 
 
                 async submitLogin() {
+                    if (!this.username.trim() && !this.password.trim()) {
+                        this.error = 'Email dan password harus diisi.';
+                        return;
+                    }
+                    if (!this.username.trim()) {
+                        this.error = 'Email harus diisi.';
+                        return;
+                    }
+                    if (!this.password.trim()) {
+                        this.error = 'Password harus diisi.';
+                        return;
+                    }
+
                     this.loading = true;
                     this.error = '';
 
@@ -323,6 +344,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                             },
                             body: JSON.stringify({
