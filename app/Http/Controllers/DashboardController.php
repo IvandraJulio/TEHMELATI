@@ -14,24 +14,10 @@ use Illuminate\Support\Facades\Log;
 class DashboardController extends Controller
 {
     /**
-     * Helper to verify user role
-     */
-    protected function checkRole($role)
-    {
-        $user = Auth::user();
-        if (!$user || $user->role !== $role) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Pengguna Dashboard (Home / Main)
      */
     public function pengguna()
     {
-        if (!$this->checkRole('pengguna')) return redirect('/');
-
         $tickets = Ticket::where('pengirimId', Auth::id())
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
@@ -44,8 +30,6 @@ class DashboardController extends Controller
      */
     public function lapor()
     {
-        if (!$this->checkRole('pengguna')) return redirect('/');
-
         return view('dashboards.lapor');
     }
 
@@ -54,8 +38,6 @@ class DashboardController extends Controller
      */
     public function tiketSaya()
     {
-        if (!$this->checkRole('pengguna')) return redirect('/');
-
         $tickets = Ticket::where('pengirimId', Auth::id())
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
@@ -68,8 +50,6 @@ class DashboardController extends Controller
      */
     public function kasubbag()
     {
-        if (!$this->checkRole('kasubbag')) return redirect('/');
-
         $user = Auth::user();
         $tickets = Ticket::where('kasubbagId', $user->subbagId)
             ->orderBy('tanggalUpdate', 'desc')
@@ -87,8 +67,6 @@ class DashboardController extends Controller
      */
     public function solver()
     {
-        if (!$this->checkRole('solver')) return redirect('/');
-
         $tickets = Ticket::where('solverId', Auth::id())
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
@@ -101,8 +79,6 @@ class DashboardController extends Controller
      */
     public function operator()
     {
-        if (!$this->checkRole('operator')) return redirect('/');
-
         $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
 
         return view('dashboards.operator', compact('tickets'));
@@ -113,8 +89,6 @@ class DashboardController extends Controller
      */
     public function operatorTiket()
     {
-        if (!$this->checkRole('operator')) return redirect('/');
-
         $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
 
         return view('dashboards.operator-tiket', compact('tickets'));
@@ -125,8 +99,6 @@ class DashboardController extends Controller
      */
     public function operatorAnalitik()
     {
-        if (!$this->checkRole('operator')) return redirect('/');
-
         $tickets = Ticket::all();
 
         return view('dashboards.operator-analitik', compact('tickets'));
@@ -233,7 +205,7 @@ class DashboardController extends Controller
             'status' => 'Pending',
         ]);
 
-        // Add system comment
+        // Tambahkan komentar sistem otomatis
         Comment::create([
             'id' => 'cmt-' . microtime(true),
             'ticketId' => $ticketId,
@@ -245,7 +217,7 @@ class DashboardController extends Controller
             'type' => 'sistem',
         ]);
 
-        // Notify solvers of the subbag
+        // Kirim notifikasi ke semua solver di subbagian terkait
         $solvers = User::where('role', 'solver')->where('subbagId', $subbagId)->get();
         foreach ($solvers as $solver) {
             Notification::create([
@@ -260,7 +232,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Update ticket status and actions
+     * Memperbarui status tiket dan memproses aksi (terima, tugaskan, selesaikan, eskalasi, tolak)
      */
     public function updateTicketActionApi(Request $request, $id)
     {
@@ -287,7 +259,7 @@ class DashboardController extends Controller
         $newSolverId = $ticket->solverId;
         $newKasubbagId = $ticket->kasubbagId;
 
-        // 1. Notify Pelapor on status changes
+        // 1. Kirim notifikasi ke Pelapor ketika status tiket berubah
         if ($newStatus !== $oldStatus) {
             $isOldActive = in_array($oldStatus, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']);
             $isNewActive = in_array($newStatus, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']);
@@ -309,7 +281,7 @@ class DashboardController extends Controller
             }
         }
 
-        // 2. Notify Solver on assignment
+        // 2. Kirim notifikasi ke Solver saat ditugaskan
         if (!empty($newSolverId) && ($oldSolverId !== $newSolverId || ($oldStatus !== $newStatus && in_array($newStatus, ['Ditugaskan', 'Dikerjakan'])))) {
             Notification::create([
                 'user_id' => $newSolverId,
@@ -319,7 +291,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        // 3. Notify Solvers if ticket becomes "bisa diambil" again
+        // 3. Kirim notifikasi ke semua Solver jika tiket didelegasikan kembali (bisa diambil kembali)
         if (empty($newSolverId) && !empty($newKasubbagId) && (!empty($oldSolverId) || $newStatus === 'Dieskalasi')) {
             $solvers = User::where('role', 'solver')->where('subbagId', $newKasubbagId)->get();
             foreach ($solvers as $solver) {
@@ -571,7 +543,7 @@ Atau jika tidak ada kecocokan:
     }
 
     /**
-     * Get user notifications
+     * Mengambil daftar notifikasi milik pengguna yang sedang login
      */
     public function getNotificationsApi()
     {
@@ -583,7 +555,7 @@ Atau jika tidak ada kecocokan:
     }
 
     /**
-     * Mark all user notifications as read
+     * Menandai semua notifikasi milik pengguna sebagai telah dibaca
      */
     public function markNotificationsReadApi()
     {

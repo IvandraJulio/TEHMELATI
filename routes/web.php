@@ -5,35 +5,47 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 
-Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+// Rute Otentikasi untuk Tamu (Belum Login)
+Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+});
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    // Pengguna (Pelapor)
-    Route::get('/dashboard', [DashboardController::class, 'pengguna'])->name('dashboard');
-    Route::get('/dashboard/lapor', [DashboardController::class, 'lapor'])->name('dashboard.lapor');
-    Route::get('/dashboard/tiket', [DashboardController::class, 'tiketSaya'])->name('dashboard.tiket');
+    // Rute khusus untuk peran Pengguna (Pelapor)
+    Route::middleware('role:pengguna')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'pengguna'])->name('dashboard');
+        Route::get('/dashboard/lapor', [DashboardController::class, 'lapor'])->name('dashboard.lapor');
+        Route::get('/dashboard/tiket', [DashboardController::class, 'tiketSaya'])->name('dashboard.tiket');
+    });
 
-    // Kasubbag
-    Route::get('/kasubbag', [DashboardController::class, 'kasubbag'])->name('kasubbag');
+    // Rute khusus untuk peran Kasubbag
+    Route::middleware('role:kasubbag')->group(function () {
+        Route::get('/kasubbag', [DashboardController::class, 'kasubbag'])->name('kasubbag');
+    });
 
-    // Solver
-    Route::get('/solver', [DashboardController::class, 'solver'])->name('solver');
+    // Rute khusus untuk peran Solver
+    Route::middleware('role:solver')->group(function () {
+        Route::get('/solver', [DashboardController::class, 'solver'])->name('solver');
+    });
 
-    // Operator
-    Route::get('/operator', [DashboardController::class, 'operator'])->name('operator');
-    Route::get('/operator/tiket', [DashboardController::class, 'operatorTiket'])->name('operator.tiket');
-    Route::get('/operator/analitik', [DashboardController::class, 'operatorAnalitik'])->name('operator.analitik');
+    // Rute khusus untuk peran Operator
+    Route::middleware('role:operator')->group(function () {
+        Route::get('/operator', [DashboardController::class, 'operator'])->name('operator');
+        Route::get('/operator/tiket', [DashboardController::class, 'operatorTiket'])->name('operator.tiket');
+        Route::get('/operator/analitik', [DashboardController::class, 'operatorAnalitik'])->name('operator.analitik');
+    });
 
-    // AJAX API routes
+    // Rute API AJAX umum (pengguna yang sudah terotentikasi)
     Route::get('/api/tickets', [DashboardController::class, 'getTicketsApi']);
     Route::post('/api/tickets', [DashboardController::class, 'createTicketApi']);
     Route::post('/api/tickets/{id}/actions', [DashboardController::class, 'updateTicketActionApi']);
     Route::post('/api/tickets/{id}/comments', [DashboardController::class, 'addCommentApi']);
     Route::post('/api/chat-recommend', [DashboardController::class, 'chatRecommendApi']);
 
-    // Notifications API
+    // Rute API Notifikasi
     Route::get('/api/notifications', [DashboardController::class, 'getNotificationsApi']);
     Route::post('/api/notifications/read', [DashboardController::class, 'markNotificationsReadApi']);
 });
