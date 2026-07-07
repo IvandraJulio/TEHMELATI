@@ -238,6 +238,17 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Kirim notifikasi ke semua kasubbag di subbagian terkait
+        $kasubbags = User::where('role', 'kasubbag')->where('subbagId', $subbagId)->get();
+        foreach ($kasubbags as $kb) {
+            Notification::create([
+                'user_id' => $kb->id,
+                'ticket_id' => $ticketId,
+                'title' => 'Tiket Baru Tersedia',
+                'message' => "Tiket baru {$ticketId} ({$layanan}) tersedia untuk diambil di subbagian Anda.",
+            ]);
+        }
+
         return response()->json(['success' => true, 'id' => $ticketId]);
     }
 
@@ -268,6 +279,13 @@ class DashboardController extends Controller
         $newStatus = $ticket->status;
         $newSolverId = $ticket->solverId;
         $newKasubbagId = $ticket->kasubbagId;
+
+        // Hapus notifikasi 'Tiket Belum Diambil' jika sudah ditugaskan, dialihkan, selesai, atau dikembalikan ke operator
+        if (!empty($newSolverId) || ($newKasubbagId !== $oldKasubbagId) || in_array($newStatus, ['Selesai', 'Kembalikan tiket ke operator'])) {
+            Notification::where('ticket_id', $ticket->id)
+                ->where('title', 'Tiket Belum Diambil')
+                ->delete();
+        }
 
         // 1. Kirim notifikasi ke Pelapor ketika status tiket berubah
         if ($newStatus !== $oldStatus) {
@@ -552,25 +570,50 @@ Atau jika tidak ada kecocokan:
         }
     }
 
-    /**
-     * Mengambil daftar notifikasi milik pengguna yang sedang login
-     */
     public function getNotificationsApi()
     {
-        $notifications = Notification::where('user_id', Auth::id())
+        $user = Auth::user();
+
+        // Jika user adalah kasubbag atau solver, cek apakah ada tiket di subbagian mereka yang belum diambil
+        if ($user && in_array($user->role, ['kasubbag', 'solver']) && !empty($user->subbagId)) {
+            $unassignedTickets = Ticket::where('kasubbagId', $user->subbagId)
+                ->where(function ($q) {
+                    $q->whereNull('solverId')->orWhere('solverId', '');
+                })
+                ->whereNotIn('status', ['Selesai', 'Kembalikan tiket ke operator'])
+                ->get();
+
+            foreach ($unassignedTickets as $ticket) {
+                // Pastikan notifikasi 'Tiket Belum Diambil' untuk tiket ini belum pernah dibuat untuk user ini
+                $exists = Notification::where('user_id', $user->id)
+                    ->where('ticket_id', $ticket->id)
+                    ->where('title', 'Tiket Belum Diambil')
+                    ->exists();
+
+                if (!$exists) {
+                    Notification::create([
+                        'user_id' => $user->id,
+                        'ticket_id' => $ticket->id,
+                        'title' => 'Tiket Belum Diambil',
+                        'message' => "Tiket {$ticket->id} ({$ticket->layananSub}) belum diambil oleh solver.",
+                        'is_read' => false,
+                    ]);
+                }
+            }
+        }
+
+        $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(30)
             ->get();
         return response()->json($notifications);
     }
 
-    /**
-     * Menandai semua notifikasi milik pengguna sebagai telah dibaca
-     */
     public function markNotificationsReadApi()
     {
         Notification::where('user_id', Auth::id())
             ->where('is_read', false)
+            ->where('title', '!=', 'Tiket Belum Diambil')
             ->update(['is_read' => true]);
         return response()->json(['success' => true]);
     }

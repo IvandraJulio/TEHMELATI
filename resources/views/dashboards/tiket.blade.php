@@ -93,40 +93,75 @@
                     @csrf
                     <!-- Comment Section -->
                     <div class="border-t border-slate-100 pt-5 flex flex-col space-y-4">
-                        <h3 class="text-sm font-bold text-gray-800 font-display flex items-center gap-2">
-                            <i data-lucide="message-square" class="w-4.5 h-4.5 text-[#b26d27]"></i>
-                            <span>Riwayat Aktivitas & Komentar</span>
-                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- LEFT COLUMN: Chat/Obrolan -->
+                            <div class="flex flex-col space-y-3">
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i data-lucide="message-square" class="w-4 h-4 text-[#b26d27]"></i>
+                                    <span>Obrolan & Komentar</span>
+                                </h3>
 
-                        <!-- Comments Thread -->
-                        <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="comments-box">
-                            <template x-for="c in getSelectedTicket().comments" :key="c.id">
-                                <div class="p-3.5 rounded-lg border leading-relaxed" 
-                                     :class="getCommentBubbleClass(c.type)">
-                                    <div class="flex items-center justify-between gap-2 mb-1.5">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <span class="font-bold text-gray-900 truncate" x-text="c.authorName"></span>
-                                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
-                                                  :class="getRoleBadgeClass(c.authorRole)"
-                                                  x-text="c.authorRole"></span>
+                                <!-- Comments Thread -->
+                                <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="comments-box">
+                                    <template x-for="c in getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
+                                        <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
+                                             :class="getCommentBubbleClass(c.type)">
+                                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                                <div class="flex items-center gap-2 min-w-0">
+                                                    <span class="font-bold text-gray-900 truncate" x-text="c.authorName"></span>
+                                                    <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
+                                                          :class="getRoleBadgeClass(c.authorRole)"
+                                                          x-text="c.authorRole"></span>
+                                                </div>
+                                                <span class="text-[9px] text-gray-400 font-mono" x-text="c.timestamp"></span>
+                                            </div>
+                                            <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
                                         </div>
-                                        <span class="text-[9px] text-gray-400 font-mono" x-text="c.timestamp"></span>
+                                    </template>
+                                    <div x-show="getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
+                                        Belum ada obrolan.
                                     </div>
-                                    <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
                                 </div>
-                            </template>
-                            <div x-show="getSelectedTicket().comments.length === 0" class="text-center py-6 text-gray-400 text-xs">
-                                Belum ada riwayat aktivitas.
+
+                                <!-- Post Comment Form -->
+                                <form @submit.prevent="submitComment()" class="flex gap-2">
+                                    <input type="text" x-model="commentText" placeholder="Ketik balasan atau komentar baru..." class="flex-1 bg-white border border-[#e2e6ea] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27] transition-all text-gray-800 placeholder-gray-400 font-medium">
+                                    <button type="submit" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white w-9.5 h-9.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-all shadow-sm">
+                                        <i data-lucide="send" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- RIGHT COLUMN: Log Aktivitas -->
+                            <div class="flex flex-col space-y-3">
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i data-lucide="history" class="w-4 h-4 text-[#b26d27]"></i>
+                                    <span>Log Aktivitas Sistem</span>
+                                </h3>
+
+                                <!-- Logs Thread -->
+                                <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="logs-box">
+                                    <template x-for="c in getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
+                                        <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
+                                             :class="getCommentBubbleClass(c.type)">
+                                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                                <div class="flex items-center gap-2 min-w-0">
+                                                    <span class="font-bold text-gray-900 truncate" x-text="c.authorName"></span>
+                                                    <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
+                                                          :class="getRoleBadgeClass(c.authorRole)"
+                                                          x-text="c.authorRole"></span>
+                                                </div>
+                                                <span class="text-[9px] text-gray-400 font-mono" x-text="c.timestamp"></span>
+                                            </div>
+                                            <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
+                                        </div>
+                                    </template>
+                                    <div x-show="getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
+                                        Belum ada log aktivitas.
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Post Comment Form -->
-                        <form @submit.prevent="submitComment()" class="flex gap-2">
-                            <input type="text" x-model="commentText" placeholder="Ketik balasan atau komentar baru..." class="flex-1 bg-white border border-[#e2e6ea] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27] transition-all text-gray-800 placeholder-gray-400 font-medium">
-                            <button type="submit" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white w-9.5 h-9.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-all shadow-sm">
-                                <i data-lucide="send" class="w-4 h-4"></i>
-                            </button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -283,6 +318,10 @@
                 const box = document.getElementById('comments-box');
                 if (box) {
                     box.scrollTop = box.scrollHeight;
+                }
+                const logBox = document.getElementById('logs-box');
+                if (logBox) {
+                    logBox.scrollTop = logBox.scrollHeight;
                 }
             }
         };

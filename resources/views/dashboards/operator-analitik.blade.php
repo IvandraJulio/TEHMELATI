@@ -36,6 +36,67 @@
                 'ditolak' => $subTickets->filter(fn($t) => $t->status === 'Kembalikan tiket ke operator')->count(),
             ];
         }
+
+        if (!function_exists('formatIndoDate')) {
+            function formatIndoDate($dateStr) {
+                if (empty($dateStr)) return '-';
+                $timestamp = strtotime(substr($dateStr, 0, 10));
+                if (!$timestamp) return $dateStr;
+                
+                $months = [
+                    1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ];
+                
+                $d = date('d', $timestamp);
+                $m = $months[(int)date('m', $timestamp)];
+                $y = date('Y', $timestamp);
+                
+                return "$d $m $y";
+            }
+        }
+
+        // Get 7 Days trend datasets
+        $last7Days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $last7Days[] = date('Y-m-d', strtotime("-$i days"));
+        }
+
+        $trendData = [];
+        foreach ($last7Days as $day) {
+            $trendData[] = [
+                'date' => $day,
+                'formatted' => formatIndoDate($day),
+                'incoming' => $tickets->filter(fn($t) => $t->tanggal === $day)->count(),
+                'completed' => $tickets->filter(fn($t) => $t->tanggalSelesai === $day && $t->status === 'Selesai')->count(),
+                'in_progress' => $tickets->filter(fn($t) => $t->tanggal === $day && in_array($t->status, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']))->count()
+            ];
+        }
+
+        // Get historical list of daily reports
+        $allDates = $tickets->pluck('tanggal')
+            ->merge($tickets->whereNotNull('tanggalSelesai')->pluck('tanggalSelesai'))
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $dailyReports = [];
+        foreach ($allDates as $date) {
+            $incomingCount = $tickets->filter(fn($t) => $t->tanggal === $date)->count();
+            $completedCount = $tickets->filter(fn($t) => $t->tanggalSelesai === $date && $t->status === 'Selesai')->count();
+            $inProgressCount = $tickets->filter(fn($t) => $t->tanggal === $date && in_array($t->status, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']))->count();
+
+            if ($incomingCount > 0 || $completedCount > 0 || $inProgressCount > 0) {
+                $dailyReports[] = [
+                    'date' => $date,
+                    'formatted' => formatIndoDate($date),
+                    'incoming' => $incomingCount,
+                    'in_progress' => $inProgressCount,
+                    'completed' => $completedCount
+                ];
+            }
+        }
     @endphp
 
     <!-- Dashboard Header -->
@@ -122,6 +183,107 @@
             <div class="mt-6 h-[250px] relative w-full">
                 <canvas id="subbagChart"></canvas>
             </div>
+        </div>
+    </div>
+
+    <!-- Daily Report Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Daily Trend Chart (Col 8) -->
+        <div class="bg-white border border-[#e2e6ea] p-5 rounded-2xl shadow-xs lg:col-span-8 flex flex-col justify-between">
+            <div>
+                <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-[#b26d27]"></i>
+                    <span>Tren Pelayanan Harian (7 Hari Terakhir)</span>
+                </h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">Perbandingan harian tiket masuk, selesai, dan aktif.</p>
+            </div>
+            <div class="mt-6 h-[250px] relative w-full">
+                <canvas id="dailyTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Summary Widget (Col 4) -->
+        <div class="bg-white border border-[#e2e6ea] p-5 rounded-2xl shadow-xs lg:col-span-4 flex flex-col justify-between">
+            <div>
+                <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Rangkuman Hari Ini</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">Statistik aktivitas pelayanan khusus hari ini.</p>
+            </div>
+            
+            <div class="space-y-4 my-auto py-4">
+                <div class="flex justify-between items-center p-3.5 bg-blue-50/50 border border-blue-100/50 rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">
+                            <i data-lucide="file-plus" class="w-4.5 h-4.5"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-700">Tiket Masuk Hari Ini</span>
+                    </div>
+                    <span class="text-lg font-extrabold text-blue-700">{{ $tickets->filter(fn($t) => $t->tanggal === date('Y-m-d'))->count() }}</span>
+                </div>
+
+                <div class="flex justify-between items-center p-3.5 bg-amber-50/50 border border-amber-100/50 rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center">
+                            <i data-lucide="clock" class="w-4.5 h-4.5"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-700">Sedang Dikerjakan</span>
+                    </div>
+                    <span class="text-lg font-extrabold text-amber-700">{{ $tickets->filter(fn($t) => in_array($t->status, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Dieskalasi']))->count() }}</span>
+                </div>
+
+                <div class="flex justify-between items-center p-3.5 bg-emerald-50/50 border border-emerald-100/50 rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                            <i data-lucide="check-circle" class="w-4.5 h-4.5"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-700">Tiket Selesai Hari Ini</span>
+                    </div>
+                    <span class="text-lg font-extrabold text-emerald-700">{{ $tickets->filter(fn($t) => $t->tanggalSelesai === date('Y-m-d') && $t->status === 'Selesai')->count() }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Report Table -->
+    <div class="bg-white border border-[#e2e6ea] rounded-2xl shadow-xs overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+            <div>
+                <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-4 h-4 text-[#b26d27]"></i>
+                    <span>Laporan Harian Tiket Pelayanan TI</span>
+                </h3>
+                <p class="text-[10px] text-gray-400 mt-0.5">Ringkasan harian tiket masuk, tiket selesai, dan tiket dalam pengerjaan.</p>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 text-gray-400 font-bold uppercase tracking-wider border-b border-gray-100 text-[10px]">
+                        <th class="p-3.5 pl-5">Tanggal</th>
+                        <th class="p-3.5 text-center">Tiket Masuk</th>
+                        <th class="p-3.5 text-center">Sedang Dikerjakan (Aktif)</th>
+                        <th class="p-3.5 text-center">Tiket Selesai</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 font-medium text-gray-700">
+                    @if(empty($dailyReports))
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-gray-400 text-xs font-medium">
+                                Belum ada data laporan harian.
+                            </td>
+                        </tr>
+                    @else
+                        @foreach($dailyReports as $report)
+                            <tr class="hover:bg-slate-50/30 transition-colors">
+                                <td class="p-3.5 pl-5 font-semibold text-gray-900">{{ $report['formatted'] }}</td>
+                                <td class="p-3.5 text-center text-blue-600 font-bold font-mono">{{ $report['incoming'] }}</td>
+                                <td class="p-3.5 text-center text-amber-600 font-bold font-mono">{{ $report['in_progress'] }}</td>
+                                <td class="p-3.5 text-center text-emerald-600 font-bold font-mono">{{ $report['completed'] }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -228,6 +390,88 @@
                     y: {
                         stacked: true,
                         ticks: {
+                            font: {
+                                size: 9
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. Initialize Line Chart for Daily Trend
+        const trendData = @json($trendData);
+        const trendLabels = trendData.map(d => d.formatted);
+        const trendIncoming = trendData.map(d => d.incoming);
+        const trendInProgress = trendData.map(d => d.in_progress);
+        const trendCompleted = trendData.map(d => d.completed);
+
+        const ctxTrend = document.getElementById('dailyTrendChart').getContext('2d');
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [
+                    {
+                        label: 'Tiket Masuk',
+                        data: trendIncoming,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.35,
+                        fill: true
+                    },
+                    {
+                        label: 'Sedang Dikerjakan',
+                        data: trendInProgress,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.35,
+                        fill: true
+                    },
+                    {
+                        label: 'Tiket Selesai',
+                        data: trendCompleted,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.35,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 10,
+                            font: {
+                                size: 10,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 9,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
                             font: {
                                 size: 9
                             }
