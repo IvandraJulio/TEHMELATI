@@ -634,11 +634,14 @@ Atau jika tidak ada kecocokan:
         $result = [];
 
         foreach ($solvers as $solver) {
-            $count = Comment::where('type', 'penugasan')
-                ->where('timestamp', 'like', $today . '%')
-                ->where(function($q) use ($solver) {
-                    $q->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
-                      ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+            $count = Ticket::where('solverId', $solver->id)
+                ->whereHas('comments', function($q) use ($solver, $today) {
+                    $q->where('type', 'penugasan')
+                      ->where('timestamp', 'like', $today . '%')
+                      ->where(function($q2) use ($solver) {
+                          $q2->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
+                             ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+                      });
                 })
                 ->count();
 

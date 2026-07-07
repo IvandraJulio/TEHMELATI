@@ -6,11 +6,14 @@
 @php
     $today = date('Y-m-d');
     $solver = Auth::user();
-    $assignedToday = \App\Models\Comment::where('type', 'penugasan')
-        ->where('timestamp', 'like', $today . '%')
-        ->where(function($q) use ($solver) {
-            $q->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
-              ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+    $assignedToday = \App\Models\Ticket::where('solverId', $solver->id)
+        ->whereHas('comments', function($q) use ($solver, $today) {
+            $q->where('type', 'penugasan')
+              ->where('timestamp', 'like', $today . '%')
+              ->where(function($q2) use ($solver) {
+                  $q2->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
+                     ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+              });
         })
         ->count();
     

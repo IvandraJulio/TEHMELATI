@@ -7,11 +7,14 @@
     $defaultSolverId = '';
     foreach($solvers as $s) {
         $today = date('Y-m-d');
-        $count = \App\Models\Comment::where('type', 'penugasan')
-            ->where('timestamp', 'like', $today . '%')
-            ->where(function($q) use ($s) {
-                $q->where('text', "Tiket ditugaskan kepada solver: {$s->name}.")
-                  ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$s->name}.");
+        $count = \App\Models\Ticket::where('solverId', $s->id)
+            ->whereHas('comments', function($q) use ($s, $today) {
+                $q->where('type', 'penugasan')
+                  ->where('timestamp', 'like', $today . '%')
+                  ->where(function($q2) use ($s) {
+                      $q2->where('text', "Tiket ditugaskan kepada solver: {$s->name}.")
+                         ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$s->name}.");
+                  });
             })
             ->count();
         if ($count < 3) {
