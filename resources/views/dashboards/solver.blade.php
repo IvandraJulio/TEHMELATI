@@ -3,6 +3,31 @@
 @section('title', 'Dashboard Solver - Portal Layanan TI BPK')
 
 @section('content')
+@php
+    $today = date('Y-m-d');
+    $solver = Auth::user();
+    $assignedToday = \App\Models\Comment::where('type', 'penugasan')
+        ->where('timestamp', 'like', $today . '%')
+        ->where(function($q) use ($solver) {
+            $q->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
+              ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+        })
+        ->count();
+    
+    if ($assignedToday >= 3) {
+        $busyLabel = 'Hi';
+        $busyBg = 'bg-rose-100 text-rose-800 border-rose-200';
+        $isBusyHi = true;
+    } elseif ($assignedToday >= 2) {
+        $busyLabel = 'Med';
+        $busyBg = 'bg-amber-100 text-amber-800 border-amber-200';
+        $isBusyHi = false;
+    } else {
+        $busyLabel = 'Low';
+        $busyBg = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        $isBusyHi = false;
+    }
+@endphp
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8.5rem)] animate-in fade-in duration-300" x-data="solverPage()">
     <!-- LEFT PANEL: Tasks list -->
     <div class="lg:col-span-4 bg-white border border-[#e2e6ea] rounded-2xl shadow-xs overflow-hidden flex flex-col h-full">
@@ -11,7 +36,13 @@
             <span class="text-[9px] bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded-md uppercase font-mono tracking-wider">
                 Petugas Solver TI
             </span>
-            <h3 class="text-xs font-bold text-gray-800 font-display mt-1.5">Tugas Penanganan Saya</h3>
+            <div class="flex items-center justify-between mt-1.5">
+                <h3 class="text-xs font-bold text-gray-800 font-display">Tugas Penanganan Saya</h3>
+                <span class="px-2 py-0.5 rounded text-[8px] font-black border uppercase tracking-wider transition-all"
+                      :class="busyLabel === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (busyLabel === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                      x-text="'Busy: ' + busyLabel + ' (' + assignedToday + '/3)'">
+                </span>
+            </div>
 
             <div class="flex gap-1.5 mt-3 bg-slate-50 p-1 rounded-xl">
                 <button @click="activeTab = 'aktif'; selectedId = null"
@@ -99,11 +130,13 @@
                         
                         <div class="flex flex-wrap gap-2.5">
                             <!-- Claim Ticket -->
-                            <button @click="claimTicket()" 
+                            <button @click="if (isBusyHi) { alert('Anda sedang Busy: Hi (telah mengambil/ditugaskan 3 atau lebih tiket hari ini). Anda tidak dapat mengambil tiket baru.'); return; } claimTicket()" 
                                     x-show="activeTab === 'bisa_diambil'"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
+                                    :class="isBusyHi ? 'bg-gray-300 text-gray-500 cursor-not-allowed border border-gray-200' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'"
+                                    class="font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5">
                                 <i data-lucide="play" class="w-4 h-4"></i>
-                                Ambil & Kerjakan Tiket
+                                <span>Ambil & Kerjakan Tiket</span>
+                                <span x-show="isBusyHi" class="text-[9px] bg-rose-600 text-white font-extrabold px-1.5 py-0.5 rounded ml-1 uppercase font-mono">Busy: Hi</span>
                             </button>
 
                             <!-- Start Working -->
@@ -267,15 +300,36 @@
             
             completeNotes: '',
             escalateReason: '',
+            isBusyHi: {{ $isBusyHi ? 'true' : 'false' }},
+            assignedToday: {{ $assignedToday }},
+            busyLabel: '{{ $busyLabel }}',
 
             init() {
                 this.fetchTickets();
+            },
+
+            async fetchBusyStatus() {
+                try {
+                    const res = await fetch('/api/solvers/busy-status');
+                    const solvers = await res.json();
+                    const me = solvers.find(s => s.id === '{{ Auth::id() }}');
+                    if (me) {
+                        this.assignedToday = me.assigned_today;
+                        this.busyLabel = me.busy_level;
+                        this.isBusyHi = me.busy_level === 'Hi';
+                    }
+                } catch (e) {
+                    console.error('Failed to fetch busy status', e);
+                }
             },
 
             async fetchTickets() {
                 try {
                     const res = await fetch('/api/tickets');
                     this.tickets = await res.json();
+                    
+                    // Fetch busy status dynamically
+                    await this.fetchBusyStatus();
                     
                     const displayed = this.getDisplayedTickets();
                     if (displayed.length > 0 && !this.selectedId) {

@@ -617,4 +617,47 @@ Atau jika tidak ada kecocokan:
             ->update(['is_read' => true]);
         return response()->json(['success' => true]);
     }
+
+    public function getSolversBusyStatusApi()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([], 401);
+        }
+
+        $subbagId = $user->subbagId;
+        $solvers = User::where('role', 'solver')
+            ->where('subbagId', $subbagId)
+            ->get();
+
+        $today = date('Y-m-d');
+        $result = [];
+
+        foreach ($solvers as $solver) {
+            $count = Comment::where('type', 'penugasan')
+                ->where('timestamp', 'like', $today . '%')
+                ->where(function($q) use ($solver) {
+                    $q->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
+                      ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+                })
+                ->count();
+
+            if ($count >= 3) {
+                $level = 'Hi';
+            } elseif ($count >= 2) {
+                $level = 'Med';
+            } else {
+                $level = 'Low';
+            }
+
+            $result[] = [
+                'id' => $solver->id,
+                'name' => $solver->name,
+                'assigned_today' => $count,
+                'busy_level' => $level,
+            ];
+        }
+
+        return response()->json($result);
+    }
 }

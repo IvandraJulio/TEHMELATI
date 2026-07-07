@@ -3,6 +3,26 @@
 @section('title', 'Dashboard Kasubbag - Portal Layanan TI BPK')
 
 @section('content')
+@php
+    $defaultSolverId = '';
+    foreach($solvers as $s) {
+        $today = date('Y-m-d');
+        $count = \App\Models\Comment::where('type', 'penugasan')
+            ->where('timestamp', 'like', $today . '%')
+            ->where(function($q) use ($s) {
+                $q->where('text', "Tiket ditugaskan kepada solver: {$s->name}.")
+                  ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$s->name}.");
+            })
+            ->count();
+        if ($count < 3) {
+            $defaultSolverId = $s->id;
+            break;
+        }
+    }
+    if (empty($defaultSolverId) && $solvers->isNotEmpty()) {
+        $defaultSolverId = $solvers->first()->id;
+    }
+@endphp
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8.5rem)] animate-in fade-in duration-300" x-data="kasubbagPage()">
     <!-- LEFT PANEL: Ticket List with Tab filters -->
     <div class="lg:col-span-4 bg-white border border-[#e2e6ea] rounded-2xl shadow-xs overflow-hidden flex flex-col h-full">
@@ -237,13 +257,45 @@
                 <i data-lucide="user-check" class="text-blue-600 w-5 h-5"></i>
                 Tugaskan Solver TI
             </h3>
-            <div>
+            <div x-data="{ dropdownOpen: false }">
                 <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Personel Solver</label>
-                <select x-model="selectedSolverId" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-sm outline-none transition-all font-medium">
-                    @foreach($solvers as $solver)
-                        <option value="{{ $solver->id }}">{{ $solver->name }}</option>
-                    @endforeach
-                </select>
+                <div class="relative">
+                    <!-- Dropdown Trigger button -->
+                    <button @click="dropdownOpen = !dropdownOpen" type="button" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-sm outline-none transition-all font-semibold flex items-center justify-between cursor-pointer">
+                        <span class="flex items-center gap-2">
+                            <template x-if="solvers.find(s => s.id === selectedSolverId)">
+                                <span class="flex items-center gap-2">
+                                    <span class="text-gray-900" x-text="solvers.find(s => s.id === selectedSolverId).name"></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider animate-in fade-in"
+                                          :class="solvers.find(s => s.id === selectedSolverId).busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (solvers.find(s => s.id === selectedSolverId).busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                                          x-text="solvers.find(s => s.id === selectedSolverId).busy_level + ' (' + solvers.find(s => s.id === selectedSolverId).assigned_today + '/3)'"></span>
+                                </span>
+                            </template>
+                            <template x-if="!solvers.find(s => s.id === selectedSolverId)">
+                                <span class="text-gray-400">Pilih Solver...</span>
+                            </template>
+                        </span>
+                        <svg class="w-4 h-4 text-gray-400 pointer-events-none transition-transform" :class="dropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Menu items -->
+                    <div x-show="dropdownOpen" @click.away="dropdownOpen = false" x-transition.origin.top.left class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
+                        <template x-for="s in solvers" :key="s.id">
+                            <button @click="if (s.busy_level !== 'Hi') { selectedSolverId = s.id; dropdownOpen = false; }" type="button" class="w-full text-left p-3 flex items-center justify-between text-sm transition-colors"
+                                    :class="s.busy_level === 'Hi' ? 'opacity-45 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 cursor-pointer bg-white'">
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="font-bold" :class="s.busy_level === 'Hi' ? 'text-gray-400' : 'text-gray-900'" x-text="s.name"></span>
+                                    <span class="text-xs text-gray-400" x-text="'Tugas hari ini: ' + s.assigned_today + '/3'"></span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider"
+                                      :class="s.busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (s.busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                                      x-text="s.busy_level === 'Hi' ? 'Hi (Penuh)' : s.busy_level"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
             </div>
             <div class="flex justify-end gap-2.5 pt-2">
                 <button @click="assignModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
@@ -304,18 +356,45 @@
             rejectModalOpen: false,
             completeModalOpen: false,
             
-            selectedSolverId: '{{ $solvers->first()->id ?? "" }}',
+            selectedSolverId: '{{ $defaultSolverId }}',
             rejectReason: '',
             completeNotes: '',
+            solvers: [
+                @foreach($solvers as $solver)
+                    { id: '{{ $solver->id }}', name: '{{ $solver->name }}', assigned_today: 0, busy_level: 'Low' },
+                @endforeach
+            ],
 
             init() {
                 this.fetchTickets();
+            },
+
+            async fetchSolversBusyStatus() {
+                try {
+                    const res = await fetch('/api/solvers/busy-status');
+                    const data = await res.json();
+                    this.solvers = data;
+                    
+                    // If currently selected solver is now busy, change it to a non-busy one
+                    const currentSelected = this.solvers.find(s => s.id === this.selectedSolverId);
+                    if (currentSelected && currentSelected.busy_level === 'Hi') {
+                        const firstNonBusy = this.solvers.find(s => s.busy_level !== 'Hi');
+                        if (firstNonBusy) {
+                            this.selectedSolverId = firstNonBusy.id;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to load solver busy status', e);
+                }
             },
 
             async fetchTickets() {
                 try {
                     const res = await fetch('/api/tickets');
                     this.tickets = await res.json();
+                    
+                    // Fetch solver busy status dynamically
+                    await this.fetchSolversBusyStatus();
                     
                     const displayed = this.getDisplayedTickets();
                     if (displayed.length > 0 && !this.selectedId) {

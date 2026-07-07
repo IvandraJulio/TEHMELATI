@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/tickets/{id}/actions', [DashboardController::class, 'updateTicketActionApi']);
     Route::post('/api/tickets/{id}/comments', [DashboardController::class, 'addCommentApi']);
     Route::post('/api/chat-recommend', [DashboardController::class, 'chatRecommendApi']);
+    Route::get('/api/solvers/busy-status', [DashboardController::class, 'getSolversBusyStatusApi']);
 
     // Rute API Notifikasi
     Route::get('/api/notifications', [DashboardController::class, 'getNotificationsApi']);
