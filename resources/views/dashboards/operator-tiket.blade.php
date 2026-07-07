@@ -24,7 +24,7 @@
                 <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase tracking-wider">Status</label>
                 <select x-model="statusFilter" class="w-full bg-slate-50 border border-slate-200 focus:border-[#b26d27] text-gray-700 rounded-lg p-1.5 text-[10px] font-bold">
                     <option value="All">Semua Status</option>
-                    <option value="Pending">Pending</option>
+                    <option value="Pending">Pending / New</option>
                     <option value="Diterima">Diterima</option>
                     <option value="Ditugaskan">Ditugaskan</option>
                     <option value="Dikerjakan">Dikerjakan</option>
@@ -49,7 +49,7 @@
                     <p class="text-[10px] text-gray-500 truncate" x-text="'Pelapor: ' + t.pengirimName"></p>
                     
                     <div class="flex items-center justify-between gap-2 mt-2.5">
-                        <span class="status-badge font-semibold" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : t.status"></span>
+                        <span class="status-badge font-semibold" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : (t.status === 'Pending' ? 'Pending / New' : t.status)"></span>
                     </div>
                 </div>
             </template>
@@ -70,7 +70,7 @@
                             <h2 class="text-base font-bold text-gray-800 font-display mt-0.5" x-text="getSelectedTicket().layanan"></h2>
                             <p class="text-[11px] text-gray-400 mt-1" x-text="'ID: ' + getSelectedTicket().id + ' | Pelapor: ' + getSelectedTicket().pengirimName"></p>
                         </div>
-                        <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : getSelectedTicket().status"></span>
+                        <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : (getSelectedTicket().status === 'Pending' ? 'Pending / New' : getSelectedTicket().status)"></span>
                     </div>
                 </div>
 

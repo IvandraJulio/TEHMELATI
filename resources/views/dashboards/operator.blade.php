@@ -119,7 +119,7 @@
                                     <td class="p-3 truncate max-w-[150px]">{{ $t->layanan }}</td>
                                     <td class="p-3">
                                         <span class="status-badge {{ $t->status === 'Dieskalasi' ? 'status-dieskalasi' : ($t->status === 'Dikerjakan' ? 'status-dikerjakan' : ($t->status === 'Ditugaskan' ? 'status-ditugaskan' : ($t->status === 'Diterima' ? 'status-diterima' : 'status-pending'))) }}">
-                                            {{ $t->status }}
+                                            {{ $t->status === 'Pending' ? 'Pending / New' : $t->status }}
                                         </span>
                                     </td>
                                 </tr>

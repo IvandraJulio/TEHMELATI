@@ -16,16 +16,21 @@
             </h3>
 
             <!-- Tab Control -->
-            <div class="flex gap-2 mt-3 bg-slate-50 p-1 rounded-xl">
+            <div class="flex gap-1 mt-3 bg-slate-50 p-1 rounded-xl">
+                <button @click="activeTab = 'pending'; selectedId = null"
+                        class="flex-1 py-2 text-center text-[10px] font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap"
+                        :class="activeTab === 'pending' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'">
+                    New (<span x-text="tickets.filter(t => t.status !== 'Selesai' && t.status !== 'Kembalikan tiket ke operator' && (!t.solverId || t.solverId === '')).length"></span>)
+                </button>
                 <button @click="activeTab = 'aktif'; selectedId = null"
-                        class="flex-1 py-2 text-center text-xs font-bold rounded-lg transition-all cursor-pointer"
+                        class="flex-1 py-2 text-center text-[10px] font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap"
                         :class="activeTab === 'aktif' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'">
-                    Aktif (<span x-text="tickets.filter(t => t.status !== 'Selesai' && t.status !== 'Kembalikan tiket ke operator').length"></span>)
+                    Aktif (<span x-text="tickets.filter(t => t.status !== 'Selesai' && t.status !== 'Kembalikan tiket ke operator' && t.solverId && t.solverId !== '').length"></span>)
                 </button>
                 <button @click="activeTab = 'selesai'; selectedId = null"
-                        class="flex-1 py-2 text-center text-xs font-bold rounded-lg transition-all cursor-pointer"
+                        class="flex-1 py-2 text-center text-[10px] font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap"
                         :class="activeTab === 'selesai' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'">
-                    Selesai / Kembali (<span x-text="tickets.filter(t => t.status === 'Selesai' || t.status === 'Kembalikan tiket ke operator').length"></span>)
+                    Selesai (<span x-text="tickets.filter(t => t.status === 'Selesai' || t.status === 'Kembalikan tiket ke operator').length"></span>)
                 </button>
             </div>
         </div>
@@ -45,7 +50,7 @@
                                 </span>
                             </template>
                         </div>
-                        <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Ditolak' : t.status"></span>
+                        <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Ditolak' : (t.status === 'Pending' ? 'New' : t.status)"></span>
                     </div>
 
                     <h4 class="text-xs font-bold text-gray-900 truncate" x-text="t.layanan"></h4>
@@ -75,7 +80,7 @@
                             <p class="text-[11px] text-gray-400 mt-1" x-text="'ID: ' + getSelectedTicket().id + ' | Pelapor: ' + getSelectedTicket().pengirimName"></p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Ditolak' : getSelectedTicket().status"></span>
+                            <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Ditolak' : (getSelectedTicket().status === 'Pending' ? 'New' : getSelectedTicket().status)"></span>
                         </div>
                     </div>
                 </div>
@@ -291,7 +296,7 @@
         return {
             tickets: [],
             selectedId: null,
-            activeTab: 'aktif',
+            activeTab: 'pending',
             commentText: '',
             
             // Modals
@@ -329,7 +334,13 @@
             getDisplayedTickets() {
                 return this.tickets.filter(t => {
                     const isClosed = t.status === 'Selesai' || t.status === 'Kembalikan tiket ke operator';
-                    return this.activeTab === 'aktif' ? !isClosed : isClosed;
+                    if (this.activeTab === 'pending') {
+                        return !isClosed && (!t.solverId || t.solverId === '');
+                    } else if (this.activeTab === 'aktif') {
+                        return !isClosed && t.solverId && t.solverId !== '';
+                    } else {
+                        return isClosed;
+                    }
                 });
             },
 
