@@ -136,38 +136,86 @@
                      </div>
 
                      <form @submit.prevent="submitForm()" class="space-y-3.5">
-                         <!-- Kategori Select -->
-                         <div>
-                             <label class="block text-[10px] font-bold text-gray-800 mb-1">Kategori (level 1)</label>
-                             <select x-model="kategori" @change="onCategoryChange()" class="w-full bg-[#fcf4ec]/30 border border-slate-200 focus:border-[#b26d27] text-gray-800 rounded-xl px-3.5 py-2.5 text-xs outline-none transition-all font-semibold">
-                                 <option value="">-Pilih Kategori-</option>
-                                 <template x-for="cat in catalog">
-                                     <option :value="cat.category" x-text="cat.category"></option>
-                                 </template>
-                             </select>
-                         </div>
+                          <!-- Kategori Select -->
+                          <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                              <label class="block text-[10px] font-bold text-gray-800 mb-1">Kategori (level 1)</label>
+                              <button type="button" @click="open = !open" 
+                                      class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none">
+                                  <span x-text="kategori ? formatDisplay(kategori) : '-Pilih Kategori-'"></span>
+                                  <i data-lucide="chevron-down" class="w-4 h-4 text-[#8C7662] transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                              </button>
+                              <div x-show="open" 
+                                   x-transition:enter="transition ease-out duration-100"
+                                   x-transition:enter-start="opacity-0 scale-95"
+                                   x-transition:enter-end="opacity-100 scale-100"
+                                   x-transition:leave="transition ease-in duration-75"
+                                   x-transition:leave-start="opacity-100 scale-100"
+                                   x-transition:leave-end="opacity-0 scale-95"
+                                   class="absolute z-50 left-0 right-0 mt-1 bg-[#EFE9DF] border-2 border-[#3D3025] rounded-xl shadow-lg overflow-hidden flex flex-col"
+                                   style="display: none;">
+                                   <template x-for="cat in catalog">
+                                       <button type="button" 
+                                               @click="kategori = cat.category; onCategoryChange(); open = false;"
+                                               class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
+                                               x-text="formatDisplay(cat.category)">
+                                       </button>
+                                   </template>
+                              </div>
+                          </div>
 
-                         <!-- Sub-Layanan Select -->
-                         <div>
-                             <label class="block text-[10px] font-bold text-gray-800 mb-1">Sub-Layanan (level 2)</label>
-                             <select x-model="subLayanan" @change="onSubChange()" :disabled="!kategori" class="w-full bg-[#fcf4ec]/30 border border-slate-200 focus:border-[#b26d27] text-gray-800 rounded-xl px-3.5 py-2.5 text-xs outline-none transition-all font-semibold disabled:opacity-50">
-                                 <option value="">-Pilih Kategori-</option>
-                                 <template x-for="sub in getSubLayananList()">
-                                     <option :value="sub.name" x-text="sub.name"></option>
-                                 </template>
-                             </select>
-                         </div>
+                          <!-- Sub-Layanan Select -->
+                          <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                              <label class="block text-[10px] font-bold text-gray-800 mb-1">Sub-Layanan (level 2)</label>
+                              <button type="button" @click="if (kategori) open = !open" :disabled="!kategori"
+                                      class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                  <span x-text="subLayanan ? formatDisplay(subLayanan) : '-Pilih Sub-Layanan-'"></span>
+                                  <i data-lucide="chevron-down" class="w-4 h-4 text-[#8C7662] transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                              </button>
+                              <div x-show="open" 
+                                   x-transition:enter="transition ease-out duration-100"
+                                   x-transition:enter-start="opacity-0 scale-95"
+                                   x-transition:enter-end="opacity-100 scale-100"
+                                   x-transition:leave="transition ease-in duration-75"
+                                   x-transition:leave-start="opacity-100 scale-100"
+                                   x-transition:leave-end="opacity-0 scale-95"
+                                   class="absolute z-50 left-0 right-0 mt-1 bg-[#EFE9DF] border-2 border-[#3D3025] rounded-xl shadow-lg overflow-hidden flex flex-col"
+                                   style="display: none;">
+                                   <template x-for="sub in getSubLayananList()">
+                                       <button type="button" 
+                                               @click="subLayanan = sub.name; onSubChange(); open = false;"
+                                               class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
+                                               x-text="formatDisplay(sub.name)">
+                                       </button>
+                                   </template>
+                              </div>
+                          </div>
 
-                         <!-- Detail Layanan Select (Level 3) -->
-                         <div x-show="getDetailLayananList().length > 0" style="display: none;">
-                             <label class="block text-[10px] font-bold text-gray-800 mb-1">Detail Layanan (level 3)</label>
-                             <select x-model="detailLayanan" :disabled="!subLayanan" class="w-full bg-[#fcf4ec]/30 border border-slate-200 focus:border-[#b26d27] text-gray-800 rounded-xl px-3.5 py-2.5 text-xs outline-none transition-all font-semibold disabled:opacity-50">
-                                 <option value="">-Pilih Detail-</option>
-                                 <template x-for="item in getDetailLayananList()">
-                                     <option :value="item" x-text="item"></option>
-                                 </template>
-                             </select>
-                         </div>
+                          <!-- Detail Layanan Select (Level 3) -->
+                          <div class="relative" x-show="getDetailLayananList().length > 0" x-data="{ open: false }" @click.away="open = false" style="display: none;">
+                              <label class="block text-[10px] font-bold text-gray-800 mb-1">Detail Layanan (level 3)</label>
+                              <button type="button" @click="if (subLayanan) open = !open" :disabled="!subLayanan"
+                                      class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                  <span x-text="detailLayanan ? formatDisplay(detailLayanan) : '-Pilih Detail-'"></span>
+                                  <i data-lucide="chevron-down" class="w-4 h-4 text-[#8C7662] transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                              </button>
+                              <div x-show="open" 
+                                   x-transition:enter="transition ease-out duration-100"
+                                   x-transition:enter-start="opacity-0 scale-95"
+                                   x-transition:enter-end="opacity-100 scale-100"
+                                   x-transition:leave="transition ease-in duration-75"
+                                   x-transition:leave-start="opacity-100 scale-100"
+                                   x-transition:leave-end="opacity-0 scale-95"
+                                   class="absolute z-50 left-0 right-0 mt-1 bg-[#EFE9DF] border-2 border-[#3D3025] rounded-xl shadow-lg overflow-hidden flex flex-col"
+                                   style="display: none;">
+                                   <template x-for="item in getDetailLayananList()">
+                                       <button type="button" 
+                                               @click="detailLayanan = item; open = false;"
+                                               class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
+                                               x-text="formatDisplay(item)">
+                                       </button>
+                                   </template>
+                              </div>
+                          </div>
 
                          <!-- Detail Masalah -->
                          <div>
@@ -291,6 +339,18 @@
                 'Aplikasi Pendukung': 'Subbagian Pengembangan Sistem Informasi Kelembagaan',
                 'Aplikasi Kolaborasi': 'Subbagian Pelayanan TIK',
                 'Layanan Survei': 'Subbagian Pelayanan TIK',
+            },
+
+            formatDisplay(text) {
+                if (!text) return '';
+                if (text === 'Layanan Dukungan TI Untuk Kegiatan Khusus') {
+                    return 'Layanan dukungan TI';
+                }
+                let parts = text.split(' ');
+                if (parts.length > 1) {
+                    return parts[0] + ' ' + parts.slice(1).join(' ').toLowerCase();
+                }
+                return text;
             },
 
             init() {
