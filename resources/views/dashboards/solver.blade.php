@@ -142,13 +142,7 @@
                                 <span x-show="isBusyHi" class="text-[9px] bg-rose-600 text-white font-extrabold px-1.5 py-0.5 rounded ml-1 uppercase font-mono">Busy: Hi</span>
                             </button>
 
-                            <!-- Start Working -->
-                            <button @click="startWorking()" 
-                                    x-show="activeTab === 'aktif' && getSelectedTicket().status === 'Ditugaskan'"
-                                    class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
-                                <i data-lucide="play" class="w-4 h-4"></i>
-                                Mulai Kerjakan
-                            </button>
+
 
                             <!-- Complete Ticket -->
                             <button @click="openCompleteModal()" 
@@ -421,11 +415,11 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
-                            status: 'Ditugaskan',
+                            status: 'Dikerjakan',
                             solverId: meId,
                             solverName: meName,
                             comment: {
-                                text: `Tiket diambil secara mandiri oleh Solver: ${meName}.`,
+                                text: `Tiket diambil secara mandiri dan mulai dikerjakan oleh Solver: ${meName}.`,
                                 type: 'penugasan'
                             }
                         })
@@ -441,35 +435,7 @@
                 }
             },
 
-            async startWorking() {
-                const ticket = this.getSelectedTicket();
-                if (!ticket) return;
 
-                const meName = '{{ Auth::user()->name }}';
-
-                try {
-                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            status: 'Dikerjakan',
-                            comment: {
-                                text: `Tiket mulai dikerjakan oleh Solver: ${meName}.`,
-                                type: 'mulai_kerjakan'
-                            }
-                        })
-                    });
-
-                    if (response.ok) {
-                        this.fetchTickets();
-                    }
-                } catch (e) {
-                    alert('Gagal memperbarui status pengerjaan.');
-                }
-            },
 
             openCompleteModal() {
                 this.completeNotes = '';

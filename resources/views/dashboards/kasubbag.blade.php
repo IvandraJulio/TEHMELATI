@@ -523,11 +523,11 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
-                            status: 'Ditugaskan',
+                            status: 'Dikerjakan',
                             solverId: this.selectedSolverId,
                             solverName: solverName,
                             comment: {
-                                text: `Tiket ditugaskan kepada solver: ${solverName}.`,
+                                text: `Tiket ditugaskan kepada solver: ${solverName} dan mulai dikerjakan.`,
                                 type: 'penugasan'
                             }
                         })
