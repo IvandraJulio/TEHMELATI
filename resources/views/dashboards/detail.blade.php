@@ -180,7 +180,7 @@
 <script>
     function tiketPage() {
         return {
-            tickets: [],
+            tickets: @json($tickets),
             selectedId: null,
             search: '',
             filter: 'All',
@@ -192,9 +192,14 @@
                 const queryId = urlParams.get('id');
                 if (queryId) {
                     this.selectedId = queryId;
+                } else if (this.tickets.length > 0) {
+                    this.selectedId = this.tickets[0].id;
                 }
                 
-                this.fetchTickets();
+                this.$nextTick(() => {
+                    lucide.createIcons();
+                    this.scrollComments();
+                });
             },
 
             async fetchTickets() {

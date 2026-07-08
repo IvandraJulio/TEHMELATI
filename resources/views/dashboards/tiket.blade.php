@@ -86,12 +86,12 @@
 <script>
     function tiketPage() {
         return {
-            tickets: [],
+            tickets: @json($tickets),
             search: '',
             filter: 'All',
 
             init() {
-                this.fetchTickets();
+                // Dimuat instan menggunakan data yang dipre-render oleh PHP
             },
 
             async fetchTickets() {
