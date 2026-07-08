@@ -17,8 +17,8 @@ Route::middleware('auth')->group(function () {
     // Rute khusus untuk peran Pengguna (Pelapor)
     Route::middleware('role:pengguna')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'pengguna'])->name('dashboard');
-        Route::get('/dashboard/lapor', [DashboardController::class, 'lapor'])->name('dashboard.lapor');
         Route::get('/dashboard/tiket', [DashboardController::class, 'tiketSaya'])->name('dashboard.tiket');
+        Route::get('/dashboard/detail', [DashboardController::class, 'tiketDetail'])->name('dashboard.detail');
     });
 
     // Rute khusus untuk peran Kasubbag

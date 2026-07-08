@@ -71,7 +71,8 @@
             if ($currentUser->role === 'pengguna') {
                 $navItems = [
                     ['label' => 'Beranda', 'route' => 'dashboard', 'icon' => 'home'],
-                    ['label' => 'Tiket saya', 'route' => 'dashboard.tiket', 'icon' => 'layers'],
+                    ['label' => 'Status Tiket', 'route' => 'dashboard.tiket', 'icon' => 'layers'],
+                    ['label' => 'Detail Tiket', 'route' => 'dashboard.detail', 'icon' => 'file-text'],
                 ];
             } elseif ($currentUser->role === 'kasubbag') {
                 $navItems = [
@@ -113,12 +114,7 @@
 
             <!-- Right Side: User Actions -->
             <div class="flex items-center gap-4.5">
-                @if($currentUser && $currentUser->role === 'pengguna')
-                    <!-- Create Ticket Button -->
-                    <a href="{{ route('dashboard.lapor') }}" class="bg-[#c69a6b] hover:bg-[#b27c3f] text-white font-bold text-xs px-4 py-2 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                        <span>+ Buat tiket</span>
-                    </a>
-                @endif
+
 
                 <!-- Notification Bell -->
                 <div class="relative" x-data="{ 
@@ -219,7 +215,7 @@
                     <nav class="px-3 space-y-1">
                         @foreach($navItems as $item)
                             @php
-                                $isActive = Route::currentRouteName() === $item['route'] || ($item['route'] === 'dashboard' && Route::currentRouteName() === 'dashboard.lapor');
+                                $isActive = Route::currentRouteName() === $item['route'];
                             @endphp
                             <a href="{{ route($item['route']) }}"
                                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all {{ $isActive ? 'bg-[#fcf4ec] text-[#b26d27]' : 'text-gray-500 hover:bg-slate-50 hover:text-gray-800' }}">
@@ -259,7 +255,7 @@
                         <nav class="space-y-1">
                             @foreach($navItems as $item)
                                 @php
-                                    $isActive = Route::currentRouteName() === $item['route'] || ($item['route'] === 'dashboard' && Route::currentRouteName() === 'dashboard.lapor');
+                                    $isActive = Route::currentRouteName() === $item['route'];
                                 @endphp
                                 <a href="{{ route($item['route']) }}" @click="mobileMenuOpen = false"
                                    class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all {{ $isActive ? 'bg-[#fcf4ec] text-[#b26d27]' : 'text-gray-500 hover:bg-slate-50 hover:text-gray-800' }}">

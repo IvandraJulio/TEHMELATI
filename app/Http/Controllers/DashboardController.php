@@ -26,11 +26,15 @@ class DashboardController extends Controller
     }
 
     /**
-     * Pengguna Lapor Tiket Form
+     * Pengguna Tiket Detail View
      */
-    public function lapor()
+    public function tiketDetail(Request $request)
     {
-        return view('dashboards.lapor');
+        $tickets = Ticket::where('pengirimId', Auth::id())
+            ->orderBy('tanggalUpdate', 'desc')
+            ->get();
+
+        return view('dashboards.detail', compact('tickets'));
     }
 
     /**

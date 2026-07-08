@@ -1,177 +1,83 @@
 @extends('layouts.app')
 
-@section('title', 'Tiket Saya - Portal Layanan TI BPK')
+@section('title', 'Status Tiket Saya - Portal Layanan TI BPK')
 
 @section('content')
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8.5rem)]" x-data="tiketPage()">
-    <!-- LEFT PANEL: Ticket List (Col 5) -->
-    <div class="lg:col-span-5 bg-white rounded-2xl border border-[#e2e6ea] shadow-xs flex flex-col h-full overflow-hidden">
-        <!-- Search & Filter Header -->
-        <div class="p-4 border-b border-[#e2e6ea] space-y-3 shrink-0">
-            <div class="flex items-center justify-between gap-4">
-                <h3 class="text-sm font-bold text-gray-800 font-display">Tiket Saya</h3>
-                <span class="text-[10px] text-gray-400 font-mono" x-text="filteredTickets().length + ' tiket ditemukan'"></span>
-            </div>
-            
-            <!-- Search Input -->
-            <div class="relative">
-                <input type="text" x-model="search" placeholder="Cari berdasarkan ID, kategori, deskripsi..." class="w-full bg-slate-50 border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl pl-9.5 pr-4 py-2 text-xs outline-none transition-all placeholder:text-gray-400 font-medium">
-                <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            </div>
-
-            <!-- Filters -->
-            <div class="flex gap-1.5">
-                <button @click="filter = 'All'" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" :class="filter === 'All' ? 'bg-[#b26d27] text-white' : 'bg-slate-50 border border-slate-200 text-gray-500 hover:bg-slate-100'">Semua</button>
-                <button @click="filter = 'Aktif'" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" :class="filter === 'Aktif' ? 'bg-[#b26d27] text-white' : 'bg-slate-50 border border-slate-200 text-gray-500 hover:bg-slate-100'">Aktif</button>
-                <button @click="filter = 'Selesai'" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all" :class="filter === 'Selesai' ? 'bg-[#b26d27] text-white' : 'bg-slate-50 border border-slate-200 text-gray-500 hover:bg-slate-100'">Selesai</button>
-            </div>
-        </div>
-
-        <!-- Scrollable Ticket List -->
-        <div class="flex-1 overflow-y-auto divide-y divide-[#e2e6ea]">
-            <template x-for="t in filteredTickets()" :key="t.id">
-                <div @click="selectTicket(t.id)" 
-                     class="p-4 text-left cursor-pointer transition-all hover:bg-slate-50/50"
-                     :class="selectedId === t.id ? 'bg-[#fcf4ec]/40 border-l-4 border-l-[#b26d27]' : ''">
-                    <div class="flex items-center justify-between gap-2 mb-1.5">
-                        <span class="font-mono font-bold text-[#b26d27] text-xs" x-text="t.id"></span>
-                        <span class="text-[10px] text-gray-400 font-mono" x-text="t.tanggal"></span>
-                    </div>
-                    <h4 class="text-xs font-bold text-gray-900 truncate" x-text="t.layananSub"></h4>
-                    <p class="text-[11px] text-gray-500 line-clamp-2 mt-1 mb-2.5 font-medium leading-relaxed" x-text="t.detail"></p>
-                    
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Pending' : t.status"></span>
-                    </div>
-                </div>
-            </template>
-            <div x-show="filteredTickets().length === 0" class="p-8 text-center text-gray-400 text-xs font-medium space-y-1">
-                <i data-lucide="layers" class="w-8 h-8 mx-auto text-gray-300"></i>
-                <p>Tidak ada tiket ditemukan.</p>
-            </div>
+<div class="space-y-6 animate-in fade-in duration-300" x-data="tiketPage()">
+    <!-- Section Heading -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-lg font-bold text-[#b26d27] font-display">Status Tiket Saya</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Daftar seluruh riwayat tiket pelaporan Anda</p>
         </div>
     </div>
 
-    <!-- RIGHT PANEL: Ticket Details (Col 7) -->
-    <div class="lg:col-span-7 bg-white rounded-2xl border border-[#e2e6ea] shadow-xs flex flex-col h-full overflow-hidden">
-        <template x-if="getSelectedTicket()">
-            <div class="flex flex-col h-full overflow-hidden">
-                <!-- Details Header -->
-                <div class="p-5 border-b border-[#e2e6ea] shrink-0 bg-slate-50/40">
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h2 class="text-base font-bold text-gray-800 font-display mt-0.5" x-text="getSelectedTicket().layananSub"></h2>
-                            <p class="text-[11px] text-gray-400 mt-1" x-text="'ID: ' + getSelectedTicket().id + ' | Diajukan: ' + getSelectedTicket().tanggal"></p>
-                        </div>
-                        <span class="status-badge" :class="getStatusBadgeClass(getSelectedTicket().status)" x-text="getSelectedTicket().status === 'Kembalikan tiket ke operator' ? 'Pending' : getSelectedTicket().status"></span>
-                    </div>
-                </div>
-
-                <!-- Scrollable Body -->
-                <div class="flex-1 overflow-y-auto p-5 space-y-6">
-                    <!-- Issue Detail -->
-                    <div class="space-y-2 bg-[#fffbeb]/20 border border-[#e8ceab]/30 p-4 rounded-xl">
-                        <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i data-lucide="info" class="w-4 h-4 text-[#b26d27]"></i>
-                            <span>Detail Pelaporan</span>
-                        </h3>
-                        <p class="text-xs text-gray-700 leading-relaxed font-medium whitespace-pre-wrap" x-text="getSelectedTicket().detail"></p>
-                    </div>
-
-                    <!-- Flow Information -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-gray-600">
-                        <div class="border border-slate-100 p-3 rounded-xl space-y-1">
-                            <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Diteruskan Ke</div>
-                            <div class="text-gray-800 font-bold" x-text="getSelectedTicket().kasubbagName"></div>
-                        </div>
-                        <div class="border border-slate-100 p-3 rounded-xl space-y-1" x-show="getSelectedTicket().solverName">
-                            <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Solver Ditugaskan</div>
-                            <div class="text-gray-800 font-bold" x-text="getSelectedTicket().solverName"></div>
-                        </div>
-                    </div>
-
-                    @csrf
-                    <!-- Comment Section -->
-                    <div class="border-t border-slate-100 pt-5 flex flex-col space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- LEFT COLUMN: Chat/Obrolan -->
-                            <div class="flex flex-col space-y-3">
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i data-lucide="message-square" class="w-4 h-4 text-[#b26d27]"></i>
-                                    <span>Obrolan & Komentar</span>
-                                </h3>
-
-                                <!-- Comments Thread -->
-                                <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="comments-box">
-                                    <template x-for="c in getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
-                                        <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
-                                             :class="getCommentBubbleClass(c.type)">
-                                            <div class="flex items-center justify-between gap-2 mb-1.5">
-                                                <div class="flex items-center gap-2 min-w-0">
-                                                    <span class="font-bold text-gray-900 truncate" x-text="c.authorName"></span>
-                                                    <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
-                                                          :class="getRoleBadgeClass(c.authorRole)"
-                                                          x-text="c.authorRole"></span>
-                                                </div>
-                                                <span class="text-[9px] text-gray-400 font-mono" x-text="c.timestamp"></span>
-                                            </div>
-                                            <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
-                                        </div>
-                                    </template>
-                                    <div x-show="getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
-                                        Belum ada obrolan.
-                                    </div>
-                                </div>
-
-                                <!-- Post Comment Form -->
-                                <form @submit.prevent="submitComment()" class="flex gap-2">
-                                    <input type="text" x-model="commentText" placeholder="Ketik balasan atau komentar baru..." class="flex-1 bg-white border border-[#e2e6ea] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27] transition-all text-gray-800 placeholder-gray-400 font-medium">
-                                    <button type="submit" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white w-9.5 h-9.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-all shadow-sm">
-                                        <i data-lucide="send" class="w-4 h-4"></i>
-                                    </button>
-                                </form>
-                            </div>
-
-                            <!-- RIGHT COLUMN: Log Aktivitas -->
-                            <div class="flex flex-col space-y-3">
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i data-lucide="history" class="w-4 h-4 text-[#b26d27]"></i>
-                                    <span>Log Aktivitas Sistem</span>
-                                </h3>
-
-                                <!-- Logs Thread -->
-                                <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="logs-box">
-                                    <template x-for="c in getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
-                                        <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
-                                             :class="getCommentBubbleClass(c.type)">
-                                            <div class="flex items-center justify-between gap-2 mb-1.5">
-                                                <div class="flex items-center gap-2 min-w-0">
-                                                    <span class="font-bold text-gray-900 truncate" x-text="c.authorName"></span>
-                                                    <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
-                                                          :class="getRoleBadgeClass(c.authorRole)"
-                                                          x-text="c.authorRole"></span>
-                                                </div>
-                                                <span class="text-[9px] text-gray-400 font-mono" x-text="c.timestamp"></span>
-                                            </div>
-                                            <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
-                                        </div>
-                                    </template>
-                                    <div x-show="getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
-                                        Belum ada log aktivitas.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Panel Card -->
+    <div class="bg-white rounded-2xl shadow-xs overflow-hidden border border-slate-100/30 flex flex-col">
+        <!-- Header with Search & Filter -->
+        <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+            <!-- Left: Search Box -->
+            <div class="relative w-full md:max-w-sm">
+                <input type="text" x-model="search" placeholder="Cari berdasarkan ID, kategori, deskripsi..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl pl-9.5 pr-4 py-2.5 text-xs outline-none transition-all placeholder:text-gray-400 font-semibold">
+                <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
             </div>
-        </template>
-        <template x-if="!getSelectedTicket()">
-            <div class="m-auto text-center py-12 text-gray-400 space-y-2">
-                <i data-lucide="layers" class="w-12 h-12 mx-auto text-gray-300"></i>
-                <p class="text-sm font-semibold">Pilih tiket dari daftar di sebelah kiri untuk melihat detail.</p>
+            
+            <!-- Right: Filter Buttons -->
+            <div class="flex gap-2">
+                <button @click="filter = 'All'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer" :class="filter === 'All' ? 'bg-[#b26d27] text-white shadow-sm' : 'bg-white border border-slate-200 text-gray-500 hover:bg-slate-100'">Semua</button>
+                <button @click="filter = 'Aktif'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer" :class="filter === 'Aktif' ? 'bg-[#b26d27] text-white shadow-sm' : 'bg-white border border-slate-200 text-gray-500 hover:bg-slate-100'">Aktif</button>
+                <button @click="filter = 'Selesai'" class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer" :class="filter === 'Selesai' ? 'bg-[#b26d27] text-white shadow-sm' : 'bg-white border border-slate-200 text-gray-500 hover:bg-slate-100'">Selesai</button>
             </div>
-        </template>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/30 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-slate-100">
+                        <th class="px-6 py-4">ID Tiket</th>
+                        <th class="px-6 py-4">Kategori Layanan</th>
+                        <th class="px-6 py-4">Layanan / Detail</th>
+                        <th class="px-6 py-4">Tanggal Update</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs font-medium text-gray-700">
+                    <template x-for="t in filteredTickets()" :key="t.id">
+                        <tr class="hover:bg-slate-50/20 transition-colors">
+                            <td class="px-6 py-4 font-mono font-bold text-[#b26d27]" x-text="t.id"></td>
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-gray-900 block" x-text="t.layananKategori"></span>
+                                <span class="text-gray-400 text-[10px] block mt-0.5" x-text="t.layananSub"></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-semibold text-gray-800 block truncate max-w-xs md:max-w-md" x-text="t.layanan" :title="t.layanan"></span>
+                                <span class="text-gray-400 text-[10px] block truncate max-w-xs md:max-w-md mt-0.5" x-text="t.detail"></span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 font-mono" x-text="t.tanggalUpdate"></td>
+                            <td class="px-6 py-4">
+                                <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Pending' : t.status"></span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a :href="'/dashboard/detail?id=' + t.id" class="inline-block bg-slate-100 hover:bg-[#fcf4ec] hover:text-[#b26d27] text-gray-700 font-bold px-4 py-2 rounded-xl transition-all cursor-pointer">
+                                    Lihat Detail
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+            
+            <!-- Empty State -->
+            <div x-show="filteredTickets().length === 0" class="text-center py-16 text-gray-400 space-y-2">
+                <i data-lucide="layers" class="w-10 h-10 mx-auto text-gray-300"></i>
+                <p class="text-xs font-semibold">Tidak ada tiket ditemukan dalam kategori ini.</p>
+                <a href="{{ route('dashboard') }}" class="inline-block mt-2 text-xs bg-[#b26d27] text-white font-bold px-4 py-2 rounded-full hover:bg-[#9b5a1b] transition-colors cursor-pointer">
+                    Buat Tiket Baru
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -181,19 +87,10 @@
     function tiketPage() {
         return {
             tickets: [],
-            selectedId: null,
             search: '',
             filter: 'All',
-            commentText: '',
 
             init() {
-                // Read from URL query param if exists
-                const urlParams = new URLSearchParams(window.location.search);
-                const queryId = urlParams.get('id');
-                if (queryId) {
-                    this.selectedId = queryId;
-                }
-                
                 this.fetchTickets();
             },
 
@@ -201,15 +98,6 @@
                 try {
                     const res = await fetch('/api/tickets');
                     this.tickets = await res.json();
-                    
-                    if (this.tickets.length > 0 && !this.selectedId) {
-                        this.selectedId = this.tickets[0].id;
-                    }
-                    
-                    this.$nextTick(() => {
-                        lucide.createIcons();
-                        this.scrollComments();
-                    });
                 } catch (e) {
                     console.error('Failed to load tickets', e);
                 }
@@ -230,24 +118,13 @@
                     if (this.search) {
                         const s = this.search.toLowerCase();
                         return t.id.toLowerCase().includes(s) ||
+                               t.layananKategori.toLowerCase().includes(s) ||
                                t.layananSub.toLowerCase().includes(s) ||
+                               t.layanan.toLowerCase().includes(s) ||
                                t.detail.toLowerCase().includes(s);
                     }
 
                     return true;
-                });
-            },
-
-            getSelectedTicket() {
-                return this.tickets.find(t => t.id === this.selectedId);
-            },
-
-            selectTicket(id) {
-                this.selectedId = id;
-                this.commentText = '';
-                this.$nextTick(() => {
-                    lucide.createIcons();
-                    this.scrollComments();
                 });
             },
 
@@ -261,67 +138,6 @@
                     case 'Dieskalasi': return 'status-dieskalasi';
                     case 'Selesai': return 'status-selesai';
                     default: return 'status-pending';
-                }
-            },
-
-            getCommentBubbleClass(type) {
-                switch (type) {
-                    case 'sistem': return 'bg-slate-50 border-slate-200 text-slate-700';
-                    case 'terima': return 'bg-emerald-50 border-l-4 border-l-emerald-500 text-emerald-800';
-                    case 'penugasan': return 'bg-blue-50 border-l-4 border-l-blue-500 text-blue-800';
-                    case 'mulai_kerjakan': return 'bg-purple-50 border-l-4 border-l-purple-500 text-purple-800';
-                    case 'penyelesaian': return 'bg-green-50 border-l-4 border-l-green-600 text-green-800';
-                    case 'eskalasi': return 'bg-amber-50 border-l-4 border-l-amber-500 text-amber-800';
-                    default: return 'bg-white border-[#e2e6ea] shadow-xs text-gray-800';
-                }
-            },
-
-            getRoleBadgeClass(role) {
-                if (role === 'pengguna') return 'bg-[#fcf4ec] text-[#b26d27]';
-                if (role === 'kasubbag') return 'bg-blue-100 text-blue-800';
-                if (role === 'solver') return 'bg-purple-100 text-purple-800';
-                return 'bg-slate-100 text-slate-700';
-            },
-
-            async submitComment() {
-                if (!this.commentText.trim()) return;
-
-                const text = this.commentText.trim();
-                this.commentText = '';
-
-                try {
-                    const response = await fetch(`/api/tickets/${this.selectedId}/comments`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            comment: {
-                                text: text,
-                                type: 'komentar'
-                            }
-                        })
-                    });
-
-                    if (response.ok) {
-                        this.fetchTickets();
-                    } else {
-                        alert('Gagal mengirim komentar.');
-                    }
-                } catch (err) {
-                    alert('Terjadi kesalahan jaringan.');
-                }
-            },
-
-            scrollComments() {
-                const box = document.getElementById('comments-box');
-                if (box) {
-                    box.scrollTop = box.scrollHeight;
-                }
-                const logBox = document.getElementById('logs-box');
-                if (logBox) {
-                    logBox.scrollTop = logBox.scrollHeight;
                 }
             }
         };
