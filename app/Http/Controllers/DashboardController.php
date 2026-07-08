@@ -30,7 +30,7 @@ class DashboardController extends Controller
      */
     public function tiketDetail(Request $request)
     {
-        $tickets = Ticket::where('pengirimId', Auth::id())
+        $tickets = Ticket::with('comments')->where('pengirimId', Auth::id())
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
 
@@ -93,7 +93,7 @@ class DashboardController extends Controller
      */
     public function operatorTiket()
     {
-        $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
+        $tickets = Ticket::with('comments')->orderBy('tanggalUpdate', 'desc')->get();
 
         return view('dashboards.operator-tiket', compact('tickets'));
     }
