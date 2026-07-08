@@ -197,7 +197,7 @@
 <script>
     function operatorTicketsPage() {
         return {
-            tickets: [],
+            tickets: @json($tickets),
             selectedId: null,
             search: '',
             statusFilter: 'All',
@@ -222,7 +222,20 @@
                     this.selectedId = qId;
                 }
                 
-                this.fetchTickets();
+                const displayed = this.filteredTickets();
+                if (displayed.length > 0 && !this.selectedId) {
+                    this.selectedId = displayed[0].id;
+                }
+                
+                const selected = this.getSelectedTicket();
+                if (selected) {
+                    this.selectedSubbagId = selected.kasubbagId;
+                }
+                
+                this.$nextTick(() => {
+                    lucide.createIcons();
+                    this.scrollComments();
+                });
             },
 
             async fetchTickets() {
