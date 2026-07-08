@@ -262,6 +262,17 @@ class DashboardController extends Controller
     public function updateTicketActionApi(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
+        $user = Auth::user();
+
+        // Validasi Otorisasi Keamanan (Cegah IDOR / Akses Ilegal)
+        if ($user->role === 'pengguna') {
+            return response()->json(['error' => 'Forbidden'], 403);
+        } elseif ($user->role === 'kasubbag' || $user->role === 'solver') {
+            if ($ticket->kasubbagId !== $user->subbagId) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
+
         $now = date('Y-m-d H:i');
 
         $oldStatus = $ticket->status;
@@ -358,6 +369,20 @@ class DashboardController extends Controller
      */
     public function addCommentApi(Request $request, $id)
     {
+        $ticket = Ticket::findOrFail($id);
+        $user = Auth::user();
+
+        // Validasi Otorisasi Keamanan (Cegah IDOR / Komentar Ilegal)
+        if ($user->role === 'pengguna') {
+            if ($ticket->pengirimId !== $user->id) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        } elseif ($user->role === 'kasubbag' || $user->role === 'solver') {
+            if ($ticket->kasubbagId !== $user->subbagId) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
+
         $request->validate([
             'comment' => 'required|array',
             'comment.text' => 'required|string',
