@@ -652,7 +652,9 @@ Atau jika tidak ada kecocokan:
                       ->where('timestamp', 'like', $today . '%')
                       ->where(function($q2) use ($solver) {
                           $q2->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
-                             ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.");
+                             ->orWhere('text', "Tiket ditugaskan kepada solver: {$solver->name} dan mulai dikerjakan.")
+                             ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.")
+                             ->orWhere('text', "Tiket diambil secara mandiri dan mulai dikerjakan oleh Solver: {$solver->name}.");
                       });
                 })
                 ->count();
