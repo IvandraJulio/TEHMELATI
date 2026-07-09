@@ -517,21 +517,22 @@
                 const cleanedInput = userText.toLowerCase();
 
                 const rules = [
-                    { keywords: ["lan", "kabel lan", "kabel", "colokan lan", "port lan"], category: "Layanan Teknologi", sub: "Layanan Intranet", service: "Penyediaan kabel LAN ruang kerja" },
-                    { keywords: ["wifi", "wi-fi", "wireless", "internet kantor", "sinyal wifi"], category: "Layanan Teknologi", sub: "Layanan Intranet", service: "Pengaturan konfigurasi Wifi Biro" },
-                    { keywords: ["mfa", "multi factor", "google authenticator", "otp", "token mfa"], category: "Layanan Identitas", sub: "Layanan MFA", service: "Registrasi Multi-Factor Authentication Baru" },
-                    { keywords: ["mfa reset", "reset mfa", "authenticator", "otp salah"], category: "Layanan Identitas", sub: "Layanan MFA", service: "Reset Token MFA / Google Authenticator" },
-                    { keywords: ["vpn", "vpn bpk", "akses intranet", "vpn error", "connect vpn"], category: "Layanan Teknologi", sub: "Layanan Virtual Private Network", service: "Pemasangan VPN BPK di Laptop" },
-                    { keywords: ["buat akun", "akun baru", "daftar portal", "user baru"], category: "Layanan Identitas", sub: "Layanan Akun", service: "Pembuatan Akun Baru Portal BPK" },
-                    { keywords: ["lupa password", "reset password", "password locked", "ganti sandi"], category: "Layanan Identitas", sub: "Layanan Akun", service: "Reset Password / Masalah Login" },
-                    { keywords: ["tte", "tanda tangan", "tanda tangan elektronik", "sertifikat tte"], category: "Layanan Identitas", sub: "Layanan TTE", service: "Registrasi Sertifikat TTE Baru" },
-                    { keywords: ["email", "email dinas", "email bpk", "buat email"], category: "Layanan Identitas", sub: "Layanan Email", service: "Pembuatan Email Baru @bpk.go.id" },
-                    { keywords: ["email penuh", "kuota email", "storage email"], category: "Layanan Identitas", sub: "Layanan Email", service: "Masalah Kuota Email Penuh" },
-                    { keywords: ["laptop lambat", "laptop lemot", "upgrade ram", "perbaikan"], category: "Layanan Perangkat", sub: "Pemeliharaan Perangkat", service: "Perbaikan Kerusakan Fisik Laptop Dinas" },
-                    { keywords: ["virus", "antivirus", "malware", "scan laptop"], category: "Layanan Perangkat", sub: "Pemeliharaan Perangkat", service: "Instalasi Antivirus / Scan Malware Perangkat" },
-                    { keywords: ["siap", "siap-bpk", "audit siap", "unggah kkp"], category: "Layanan Aplikasi", sub: "Aplikasi Pemeriksaan", service: "SiAP-BPK (Sistem Informasi Pemeriksaan)" },
-                    { keywords: ["sisdm", "kepegawaian", "absen sisdm", "cuti sisdm"], category: "Layanan Aplikasi", sub: "Aplikasi Kelembagaan", service: "Aplikasi Kepegawaian (SISDM BPK)" },
-                    { keywords: ["e-office", "eoffice", "persuratan", "naskah dinas"], category: "Layanan Aplikasi", sub: "Aplikasi Kelembagaan", service: "Aplikasi Persuratan Dinas (E-Office)" }
+                    { keywords: ["lan", "kabel lan", "kabel", "colokan lan", "port lan"], category: "Layanan Teknologi", sub: "Layanan Intranet", service: "Penyediaan kabel LAN ruang kerja", hint: "Cobalah untuk menggunakan kabel LAN cadangan atau periksa koneksi colokan port LAN pada komputer/dinding." },
+                    { keywords: ["wifi", "wi-fi", "wireless", "internet kantor", "sinyal wifi"], category: "Layanan Teknologi", sub: "Layanan Intranet", service: "Pengaturan konfigurasi Wifi Biro", hint: "Pastikan Wifi laptop Anda dalam keadaan ON, disconnect dan hubungkan kembali, atau periksa sinyal hotspot Anda." },
+                    { keywords: ["mfa", "multi factor", "google authenticator", "otp", "token mfa"], category: "Layanan Identitas", sub: "Layanan MFA", service: "Registrasi Multi-Factor Authentication Baru", hint: "Buka aplikasi Google Authenticator di handphone Anda, pastikan sinkronisasi waktu sudah tepat." },
+                    { keywords: ["mfa reset", "reset mfa", "authenticator", "otp salah"], category: "Layanan Identitas", sub: "Layanan MFA", service: "Reset Token MFA / Google Authenticator", hint: "Jika OTP tidak sinkron, silakan atur sinkronisasi waktu (Time Sync) pada aplikasi Google Authenticator Anda." },
+                    { keywords: ["vpn", "vpn bpk", "akses intranet", "vpn error", "connect vpn"], category: "Layanan Teknologi", sub: "Layanan Virtual Private Network", service: "Pemasangan VPN BPK di Laptop", hint: "Pastikan koneksi internet Anda stabil sebelum mengaktifkan VPN BPK. Coba sambungkan ulang client VPN Anda." },
+                    { keywords: ["buat akun", "akun baru", "daftar portal", "user baru"], category: "Layanan Identitas", sub: "Layanan Akun", service: "Pembuatan Akun Baru Portal BPK", hint: "Silakan akses halaman registrasi di portal utama untuk membuat akun baru BPK." },
+                    { keywords: ["lupa password", "reset password", "password locked", "ganti sandi"], category: "Layanan Identitas", sub: "Layanan Akun", service: "Reset Password / Masalah Login", hint: "Cobalah reset password menggunakan fitur lupa password di portal, pastikan Caps Lock tidak aktif." },
+                    { keywords: ["tte", "tanda tangan", "tanda tangan elektronik", "sertifikat tte"], category: "Layanan Identitas", sub: "Layanan TTE", service: "Registrasi Sertifikat TTE Baru", hint: "Pastikan token USB TTE terpasang dan jalankan aplikasi support e-Signer BPK dengan benar." },
+                    { keywords: ["email", "email dinas", "email bpk", "buat email"], category: "Layanan Identitas", sub: "Layanan Email", service: "Pembuatan Email Baru @bpk.go.id", hint: "Silakan hubungi Administrator untuk pembuatan email baru BPK." },
+                    { keywords: ["email penuh", "kuota email", "storage email"], category: "Layanan Identitas", sub: "Layanan Email", service: "Masalah Kuota Email Penuh", hint: "Silakan buka webmail BPK, pastikan folder kiriman/sampah dibersihkan untuk melegakan kapasitas kotak masuk." },
+                    { keywords: ["laptop lambat", "laptop lemot", "upgrade ram", "perbaikan"], category: "Layanan Perangkat", sub: "Pemeliharaan Perangkat", service: "Perbaikan Kerusakan Fisik Laptop Dinas", hint: "Untuk laptop lemot, coba matikan aplikasi latar belakang yang berat, atau lakukan restart laptop terlebih dahulu." },
+                    { keywords: ["cairan", "air", "ketumpahan", "basah"], category: "Layanan Perangkat", sub: "Pemeliharaan Perangkat", service: "Perbaikan Kerusakan Fisik Laptop Dinas", hint: "Segera matikan daya perangkat apabila laptop terkena cairan (tumpahan air) dan cabut baterai/charger. Jangan dinyalakan sampai benar-benar kering." },
+                    { keywords: ["virus", "antivirus", "malware", "scan laptop"], category: "Layanan Perangkat", sub: "Pemeliharaan Perangkat", service: "Instalasi Antivirus / Scan Malware Perangkat", hint: "Gunakan antivirus ter-update dan lakukan pemindaian penuh (Full Scan) pada direktori sistem Anda." },
+                    { keywords: ["siap", "siap-bpk", "audit siap", "unggah kkp"], category: "Layanan Aplikasi", sub: "Aplikasi Pemeriksaan", service: "SiAP-BPK (Sistem Informasi Pemeriksaan)", hint: "Pastikan status internet aktif untuk menyinkronkan KKP offline ke sistem SiAP BPK." },
+                    { keywords: ["sisdm", "kepegawaian", "absen sisdm", "cuti sisdm"], category: "Layanan Aplikasi", sub: "Aplikasi Kelembagaan", service: "Aplikasi Kepegawaian (SISDM BPK)", hint: "Untuk SISDM, pastikan jaringan intranet terhubung atau gunakan VPN BPK jika di luar kantor." },
+                    { keywords: ["e-office", "eoffice", "persuratan", "naskah dinas"], category: "Layanan Aplikasi", sub: "Aplikasi Kelembagaan", service: "Aplikasi Persuratan Dinas (E-Office)", hint: "Periksa daftar surat masuk/keluar di E-Office, lakukan reload halaman jika respon lambat." }
                 ];
 
                 let bestRule = null;
@@ -552,21 +553,32 @@
 
                 if (maxScore > 0 && bestRule) {
                     const confidence = maxScore >= 2 ? "Tinggi" : "Sedang";
-                    this.chatMessages.push({
-                        id: 'bot-' + Date.now(),
-                        sender: 'bot',
-                        text: '[Offline Fallback] Berdasarkan kata kunci Anda, berikut adalah rekomendasi katalog yang sesuai:',
-                        recommendation: {
-                            category: bestRule.category,
-                            sub: bestRule.sub,
-                            service: bestRule.service,
-                            confidence: confidence
-                        }
-                    });
+
+                    if (this.getBotResponseCount() < 4) {
+                        // Under 5th bot bubble: Only give troubleshooting tips/solving help
+                        this.chatMessages.push({
+                            id: 'bot-' + Date.now(),
+                            sender: 'bot',
+                            text: `[Offline Fallback] Masalah Anda terdeteksi berkaitan dengan ${bestRule.service}. Tips Solusi: ${bestRule.hint} Apakah kendala Anda sudah teratasi?`
+                        });
+                    } else {
+                        // 5th bot bubble or later: Suggest ticket creation
+                        this.chatMessages.push({
+                            id: 'bot-' + Date.now(),
+                            sender: 'bot',
+                            text: '[Offline Fallback] Jika kendala belum terselesaikan, berikut adalah rekomendasi katalog untuk membuat tiket pelayanan:',
+                            recommendation: {
+                                category: bestRule.category,
+                                sub: bestRule.sub,
+                                service: bestRule.service,
+                                confidence: confidence
+                            }
+                        });
+                    }
                 } else {
                     const fallbackReplies = [
-                        "Maaf, saya belum menemukan kategori layanan yang cocok. Bisakah Anda menjelaskannya dengan kata kunci lain? Seperti menggunakan kata 'email', 'wifi', 'laptop', 'siap-bpk', atau 'password'.",
-                        "Kata kunci tersebut tidak terdaftar di Katalog Layanan TI BPK RI. Mohon deskripsikan kembali masalah hardware, software, atau akun yang Anda alami."
+                        "Maaf, saya belum menemukan solusi yang cocok. Bisakah Anda menjelaskan masalah Anda dengan kata kunci lain? Seperti menggunakan kata 'email', 'wifi', 'laptop', 'siap-bpk', atau 'password'.",
+                        "Saya tidak menemukan solusi untuk kata kunci tersebut di basis data offline. Harap jelaskan kembali detail kendala hardware, software, atau akun yang Anda alami."
                     ];
                     const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
                     this.chatMessages.push({

@@ -407,6 +407,14 @@ class DashboardController extends Controller
             return response()->json(['error' => 'messages array is required'], 400);
         }
 
+        // Count existing AI chat bubbles in history
+        $aiBubbleCount = 0;
+        foreach ($messages as $msg) {
+            if ($msg['sender'] === 'bot') {
+                $aiBubbleCount++;
+            }
+        }
+
         // Format history for Gemini API
         $contents = [];
         foreach ($messages as $msg) {
@@ -483,23 +491,26 @@ class DashboardController extends Controller
 ';
 
         $systemInstruction = "Anda adalah Asisten Virtual Layanan TI BPK RI (Badan Pemeriksa Keuangan Republik Indonesia).
-Tugas utama Anda adalah membantu pengguna (pegawai BPK) mengidentifikasi dan mencocokkan masalah TI mereka dengan Katalog Layanan TI BPK RI secara akurat menggunakan kecerdasan buatan, sekaligus memberikan jawaban panduan yang ramah dan solutif.
+Tugas utama Anda adalah membantu pengguna (pegawai BPK) menyelesaikan masalah TI mereka secara ramah dan solutif (problem solving) terlebih dahulu.
 
-Berikut adalah Katalog Layanan TI BPK RI yang valid dan resmi:
-$catalogGuide
+Saat ini, percakapan telah memiliki {$aiBubbleCount} bubble chat dari AI.
 
-Aturan Pencocokan:
-1. Jika kendala yang diceritakan pengguna dapat dipetakan secara logis ke salah satu Layanan Level 3 (items) di katalog di atas, Anda WAJIB memberikan rekomendasi tersebut.
-2. Nama 'category', 'sub', dan 'service' di dalam objek 'recommendation' harus SANGAT PERSIS (exact match) dengan teks yang ada di katalog di atas. Jangan disingkat atau diubah.
-3. Berikan penilaian tingkat keyakinan ('confidence'):
-   - 'Tinggi': Jika pengguna menyebutkan kata kunci atau konteks yang sangat jelas cocok dengan layanan spesifik.
-   - 'Sedang': Jika konteks merujuk secara tidak langsung namun kuat ke layanan tersebut.
-   - 'Rendah': Jika ada keraguan atau minim detail.
-4. Jika tidak ada kecocokan yang masuk akal, atau pengguna hanya mengobrol santai (greeting/sapaan), biarkan objek 'recommendation' bernilai null.
+ATURAN TENTANG REKOMENDASI TIKET:
+1. Jika jumlah bubble chat dari AI SAAT INI kurang dari 5 (saat ini: {$aiBubbleCount} bubble):
+   - Anda DILARANG KERAS memberikan saran pembuatan tiket atau rekomendasi katalog tiket. Objek 'recommendation' di JSON wajib bernilai null.
+   - Fokus sepenuhnya untuk memberikan panduan solusi/troubleshooting untuk menyelesaikan masalah pengguna secara langsung.
+   - Jika Anda merasa panduan solusi telah selesai diberikan dan masalah mungkin sudah teratasi, tanyakan secara eksplisit kepada pengguna untuk memastikan apakah masalahnya sudah benar-benar selesai (solve).
+
+2. Jika jumlah bubble chat dari AI SAAT INI sudah 5 atau lebih (saat ini: {$aiBubbleCount} bubble):
+   - Jika masalah pengguna belum terselesaikan setelah Anda memandu mereka, Anda wajib merekomendasikan pembuatan tiket berdasarkan Katalog Layanan TI BPK RI berikut:
+   $catalogGuide
+   
+   - Dalam kasus ini, isi objek 'recommendation' dengan kategori, sub, dan service yang tepat sesuai katalog di atas.
+   - Namun, jika masalah pengguna sudah berhasil diselesaikan (atau pengguna mengonfirmasi sudah solve), jangan merekomendasikan tiket (isi objek 'recommendation' dengan null).
 
 Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur berikut:
 {
-  \"reply\": \"Jawaban sapaan atau penjelasan bantuan Anda dalam Bahasa Indonesia yang ramah dan profesional.\",
+  \"reply\": \"Jawaban solusi, sapaan, panduan troubleshooting, atau pertanyaan konfirmasi Anda dalam Bahasa Indonesia yang ramah dan profesional.\",
   \"recommendation\": {
     \"category\": \"Nama Kategori Level 1\",
     \"sub\": \"Nama Sub-Layanan Level 2\",
@@ -509,9 +520,9 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
   }
 }
 
-Atau jika tidak ada kecocokan:
+Or jika tidak menyarankan tiket:
 {
-  \"reply\": \"Jawaban sapaan atau penjelasan bantuan Anda.\",
+  \"reply\": \"Jawaban solusi, panduan troubleshooting, atau pertanyaan konfirmasi Anda dalam Bahasa Indonesia yang ramah dan profesional.\",
   \"recommendation\": null
 }";
 
@@ -545,7 +556,14 @@ Atau jika tidak ada kecocokan:
                         if ($response->successful()) {
                             $data = $response->json();
                             $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
-                            return response()->json(json_decode($text, true));
+                            $result = json_decode($text, true);
+
+                            // Enforce rule programmatically: no recommendations before 5 AI bubbles (4 in history + 1 being generated)
+                            if ($aiBubbleCount < 4) {
+                                $result['recommendation'] = null;
+                            }
+
+                            return response()->json($result);
                         }
 
                         $lastError = $response->body();
