@@ -74,12 +74,15 @@
                      </div>
                  </template>
                  
-                 <!-- Lanjutkan Button inside Chat -->
-                 <div x-show="!showForm" class="flex justify-center py-2">
-                     <button @click="showForm = true" class="bg-[#E7BE8D] hover:bg-[#d9ab75] text-white font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                         <span>+ Lanjutkan dengan membuat form pelayanan</span>
-                     </button>
-                 </div>
+                  <!-- Lanjutkan Button inside Chat -->
+                  <div x-show="!showForm" class="flex justify-center py-2">
+                      <!-- Button: Only shown when conditions are met -->
+                      <button x-show="getBotResponseCount() >= 6 || timerExpired"
+                              @click="showForm = true"
+                              class="bg-[#E7BE8D] hover:bg-[#d9ab75] text-white font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                          <span>+ Lanjutkan dengan membuat form pelayanan</span>
+                      </button>
+                  </div>
 
                  <!-- Typing Indicator -->
                  <div x-show="chatLoading" class="flex gap-3 max-w-[85%] mr-auto" style="display: none;">
@@ -259,6 +262,10 @@
                     text: 'Halo! Saya adalah Asisten Virtual Layanan TI BPK berbasis Google Gemini AI. Deskripsikan kendala atau permintaan layanan Anda dalam bahasa sehari-hari (contoh: "kabel LAN saya rusak" atau "lupa password email dinas"), dan saya akan merekomendasikan kategori layanan yang tepat secara cerdas.'
                 }
             ],
+            timerExpired: false,
+            firstUserMessageTime: null,
+            remainingSeconds: 300,
+            timerInterval: null,
 
             catalog: [
                 {
@@ -351,6 +358,16 @@
                     return parts[0] + ' ' + parts.slice(1).join(' ').toLowerCase();
                 }
                 return text;
+            },
+
+            getBotResponseCount() {
+                return this.chatMessages.filter(m => m.sender === 'bot' && m.id !== 'welcome').length;
+            },
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             },
 
             init() {
@@ -449,6 +466,20 @@
                 this.chatMessages.push(newUserMsg);
                 this.chatInput = '';
                 this.chatLoading = true;
+
+                // Start 5-minute timer on first user message
+                if (!this.firstUserMessageTime) {
+                    this.firstUserMessageTime = Date.now();
+                    this.remainingSeconds = 300;
+                    this.timerInterval = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - this.firstUserMessageTime) / 1000);
+                        this.remainingSeconds = Math.max(0, 300 - elapsed);
+                        if (this.remainingSeconds <= 0) {
+                            this.timerExpired = true;
+                            clearInterval(this.timerInterval);
+                        }
+                    }, 1000);
+                }
 
                 this.scrollChat();
 
