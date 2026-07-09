@@ -46,6 +46,18 @@ class DashboardController extends Controller
     }
 
     /**
+     * Pengguna Tiket Detail
+     */
+    public function tiketDetail()
+    {
+        $tickets = Ticket::where('pengirimId', Auth::id())
+            ->orderBy('tanggalUpdate', 'desc')
+            ->get();
+
+        return view('dashboards.detail', compact('tickets'));
+    }
+
+    /**
      * Kasubbag Dashboard
      */
     public function kasubbag()

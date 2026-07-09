@@ -74,16 +74,6 @@
                      </div>
                  </template>
                  
-                  <!-- Lanjutkan Button inside Chat -->
-                  <div x-show="!showForm" class="flex justify-center py-2">
-                      <!-- Button: Only shown when conditions are met -->
-                      <button x-show="getBotResponseCount() >= 6 || timerExpired"
-                              @click="showForm = true"
-                              class="bg-[#E7BE8D] hover:bg-[#d9ab75] text-white font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                          <span>+ Lanjutkan dengan membuat form pelayanan</span>
-                      </button>
-                  </div>
-
                  <!-- Typing Indicator -->
                  <div x-show="chatLoading" class="flex gap-3 max-w-[85%] mr-auto" style="display: none;">
                      <div class="w-8 h-8 rounded-full bg-[#fcf4ec] text-[#b26d27] flex items-center justify-center border border-[#f7e3ce]">
