@@ -46,7 +46,7 @@
                          <div class="space-y-2">
                              <div class="p-3.5 rounded-2xl text-xs leading-relaxed shadow-xs border"
                                   :class="msg.sender === 'bot' ? 'bg-[#F3EDE2] text-gray-700 rounded-tl-none border-gray-200/60' : 'bg-[#F0DCC0] text-gray-800 border-orange-200/50 rounded-tr-none'"
-                                  x-text="msg.text"></div>
+                                  x-html="formatMarkdown(msg.text)"></div>
 
                              <!-- Recommendation Card -->
                              <template x-if="msg.sender === 'bot' && msg.recommendation">
@@ -594,6 +594,22 @@
                 if (chatBox) {
                     chatBox.scrollTop = chatBox.scrollHeight;
                 }
+            },
+
+            formatMarkdown(text) {
+                if (!text) return '';
+                // Escape HTML first to prevent XSS
+                let temp = document.createElement('div');
+                temp.textContent = text;
+                let safeHtml = temp.innerHTML;
+                
+                // Replace **text** with <strong>text</strong>
+                safeHtml = safeHtml.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                // Replace *text* with <em>text</em>
+                safeHtml = safeHtml.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                // Replace newlines with <br>
+                safeHtml = safeHtml.replace(/\n/g, '<br>');
+                return safeHtml;
             }
         };
     }
