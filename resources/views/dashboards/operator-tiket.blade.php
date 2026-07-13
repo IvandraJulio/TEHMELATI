@@ -1,4 +1,4 @@
-@extends('layouts.app')
+    @extends('layouts.app')
 
 @section('title', 'Semua Tiket - Operator Biro TI BPK')
 
@@ -231,6 +231,11 @@
                 if (selected) {
                     this.selectedSubbagId = selected.kasubbagId;
                 }
+
+                // Listen to global header search box
+                window.addEventListener('search-tickets', (e) => {
+                    this.search = e.detail;
+                });
                 
                 this.$nextTick(() => {
                     lucide.createIcons();
