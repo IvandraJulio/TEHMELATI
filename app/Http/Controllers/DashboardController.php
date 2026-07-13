@@ -496,12 +496,12 @@ Tugas utama Anda adalah membantu pengguna (pegawai BPK) menyelesaikan masalah TI
 Saat ini, percakapan telah memiliki {$aiBubbleCount} bubble chat dari AI.
 
 ATURAN TENTANG REKOMENDASI TIKET:
-1. Jika jumlah bubble chat dari AI SAAT INI kurang dari 5 (saat ini: {$aiBubbleCount} bubble):
+1. Jika jumlah bubble chat dari AI SAAT INI kurang dari 6 (saat ini: {$aiBubbleCount} bubble):
    - Anda DILARANG KERAS memberikan saran pembuatan tiket atau rekomendasi katalog tiket. Objek 'recommendation' di JSON wajib bernilai null.
    - Fokus sepenuhnya untuk memberikan panduan solusi/troubleshooting untuk menyelesaikan masalah pengguna secara langsung.
    - Jika Anda merasa panduan solusi telah selesai diberikan dan masalah mungkin sudah teratasi, tanyakan secara eksplisit kepada pengguna untuk memastikan apakah masalahnya sudah benar-benar selesai (solve).
 
-2. Jika jumlah bubble chat dari AI SAAT INI sudah 5 atau lebih (saat ini: {$aiBubbleCount} bubble):
+2. Jika jumlah bubble chat dari AI SAAT INI sudah 6 atau lebih (saat ini: {$aiBubbleCount} bubble):
    - Jika masalah pengguna belum terselesaikan setelah Anda memandu mereka, Anda wajib merekomendasikan pembuatan tiket berdasarkan Katalog Layanan TI BPK RI berikut:
    $catalogGuide
    
@@ -603,8 +603,8 @@ Or jika tidak menyarankan tiket:
 
                             $result = json_decode($text, true);
 
-                            // Enforce rule programmatically: no recommendations before 5 AI bubbles (4 in history + 1 being generated)
-                            if ($result && $aiBubbleCount < 4) {
+                            // Enforce rule programmatically: no recommendations before 6 AI bubbles (5 in history + 1 being generated)
+                            if ($result && $aiBubbleCount < 5) {
                                 $result['recommendation'] = null;
                             }
 

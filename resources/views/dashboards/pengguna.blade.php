@@ -48,8 +48,25 @@
                                   :class="msg.sender === 'bot' ? 'bg-[#F3EDE2] text-gray-700 rounded-tl-none border-gray-200/60' : 'bg-[#F0DCC0] text-gray-800 border-orange-200/50 rounded-tr-none'"
                                   x-html="formatMarkdown(msg.text)"></div>
 
+                             <!-- Confirmation Prompt -->
+                             <template x-if="msg.sender === 'bot' && msg.recommendation && msg.showConfirmation">
+                                 <div class="bg-[#FCF7ED] border border-[#f5dcb3] rounded-xl p-3.5 shadow-xs space-y-2.5 max-w-full">
+                                     <p class="text-[11px] font-bold text-[#78430e] leading-snug">
+                                         Apakah Anda ingin membuat tiket bantuan untuk rekomendasi ini atau melanjutkan chat?
+                                     </p>
+                                     <div class="flex gap-2">
+                                         <button type="button" @click="msg.showConfirmation = false; msg.confirmed = true; applyRecommendation(msg.recommendation);" class="flex-1 bg-[#b26d27] hover:bg-[#9b5a1b] text-white py-1.5 px-2.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center">
+                                             Ya, Buat Tiket
+                                         </button>
+                                         <button type="button" @click="msg.showConfirmation = false; msg.confirmed = false;" class="flex-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 py-1.5 px-2.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center">
+                                             Tidak, Lanjutkan
+                                         </button>
+                                     </div>
+                                 </div>
+                             </template>
+
                              <!-- Recommendation Card -->
-                             <template x-if="msg.sender === 'bot' && msg.recommendation">
+                             <template x-if="msg.sender === 'bot' && msg.recommendation && !msg.showConfirmation && msg.confirmed">
                                  <div class="bg-white border border-[#f7e3ce] rounded-xl p-3.5 shadow-sm space-y-3 max-w-full">
                                      <div class="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
                                          <span class="text-[10px] font-bold text-[#b26d27] uppercase tracking-wider flex items-center gap-1">
@@ -496,7 +513,9 @@
                             id: 'bot-' + Date.now(),
                             sender: 'bot',
                             text: data.reply,
-                            recommendation: data.recommendation
+                            recommendation: data.recommendation,
+                            showConfirmation: !!data.recommendation,
+                            confirmed: false
                         });
                     } else {
                         throw new Error("Backend error or rate limit");
@@ -554,8 +573,8 @@
                 if (maxScore > 0 && bestRule) {
                     const confidence = maxScore >= 2 ? "Tinggi" : "Sedang";
 
-                    if (this.getBotResponseCount() < 4) {
-                        // Under 5th bot bubble: Only give troubleshooting tips/solving help
+                    if (this.getBotResponseCount() < 5) {
+                        // Under 6th bot bubble: Only give troubleshooting tips/solving help
                         this.chatMessages.push({
                             id: 'bot-' + Date.now(),
                             sender: 'bot',
@@ -566,13 +585,15 @@
                         this.chatMessages.push({
                             id: 'bot-' + Date.now(),
                             sender: 'bot',
-                            text: '[Offline Fallback] Jika kendala belum terselesaikan, berikut adalah rekomendasi katalog untuk membuat tiket pelayanan:',
+                            text: '[Offline Fallback] Saya menemukan rekomendasi layanan yang sesuai untuk kendala Anda.',
                             recommendation: {
                                 category: bestRule.category,
                                 sub: bestRule.sub,
                                 service: bestRule.service,
                                 confidence: confidence
-                            }
+                            },
+                            showConfirmation: true,
+                            confirmed: false
                         });
                     }
                 } else {
