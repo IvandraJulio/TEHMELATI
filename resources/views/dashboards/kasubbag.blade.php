@@ -352,6 +352,7 @@
     function kasubbagPage() {
         return {
             tickets: [],
+            searchQuery: '',
             selectedId: null,
             activeTab: 'pending',
             commentText: '',
@@ -372,6 +373,9 @@
 
             init() {
                 this.fetchTickets();
+                window.addEventListener('search-tickets', (e) => {
+                    this.searchQuery = e.detail;
+                });
             },
 
             async fetchSolversBusyStatus() {
@@ -418,13 +422,32 @@
             getDisplayedTickets() {
                 return this.tickets.filter(t => {
                     const isClosed = t.status === 'Selesai' || t.status === 'Kembalikan tiket ke operator';
+                    
+                    let tabMatches = false;
                     if (this.activeTab === 'pending') {
-                        return !isClosed && (!t.solverId || t.solverId === '');
+                        tabMatches = !isClosed && (!t.solverId || t.solverId === '');
                     } else if (this.activeTab === 'aktif') {
-                        return !isClosed && t.solverId && t.solverId !== '';
+                        tabMatches = !isClosed && t.solverId && t.solverId !== '';
                     } else {
-                        return isClosed;
+                        tabMatches = isClosed;
                     }
+
+                    if (!tabMatches) return false;
+
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        const idStr = String(t.id).toLowerCase();
+                        const layananStr = String(t.layanan).toLowerCase();
+                        const pengirimStr = String(t.pengirimName).toLowerCase();
+                        const detailStr = t.detail ? String(t.detail).toLowerCase() : '';
+                        
+                        return idStr.includes(query) || 
+                               layananStr.includes(query) || 
+                               pengirimStr.includes(query) ||
+                               detailStr.includes(query);
+                    }
+
+                    return true;
                 });
             },
 

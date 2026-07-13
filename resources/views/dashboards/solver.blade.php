@@ -290,6 +290,7 @@
     function solverPage() {
         return {
             tickets: [],
+            searchQuery: '',
             selectedId: null,
             activeTab: 'aktif',
             commentText: '',
@@ -305,6 +306,9 @@
 
             init() {
                 this.fetchTickets();
+                window.addEventListener('search-tickets', (e) => {
+                    this.searchQuery = e.detail;
+                });
             },
 
             async fetchBusyStatus() {
@@ -347,14 +351,32 @@
             getDisplayedTickets() {
                 const me = '{{ Auth::id() }}';
                 return this.tickets.filter(t => {
+                    let tabMatches = false;
                     if (this.activeTab === 'aktif') {
-                        return t.solverId === me && (t.status === 'Ditugaskan' || t.status === 'Dikerjakan');
+                        tabMatches = t.solverId === me && (t.status === 'Ditugaskan' || t.status === 'Dikerjakan');
                     } else if (this.activeTab === 'bisa_diambil') {
-                        return t.kasubbagId === '{{ Auth::user()->subbagId }}' && !t.solverId && t.status !== 'Selesai' && t.status !== 'Kembalikan tiket ke operator';
+                        tabMatches = t.kasubbagId === '{{ Auth::user()->subbagId }}' && !t.solverId && t.status !== 'Selesai' && t.status !== 'Kembalikan tiket ke operator';
                     } else { // selesai
                         const completedByMe = t.comments && t.comments.some(c => c.authorId === me && c.type === 'penyelesaian');
-                        return completedByMe || (t.solverId === me && t.status === 'Selesai');
+                        tabMatches = completedByMe || (t.solverId === me && t.status === 'Selesai');
                     }
+
+                    if (!tabMatches) return false;
+
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        const idStr = String(t.id).toLowerCase();
+                        const layananStr = String(t.layanan).toLowerCase();
+                        const pengirimStr = String(t.pengirimName).toLowerCase();
+                        const detailStr = t.detail ? String(t.detail).toLowerCase() : '';
+                        
+                        return idStr.includes(query) || 
+                               layananStr.includes(query) || 
+                               pengirimStr.includes(query) ||
+                               detailStr.includes(query);
+                    }
+
+                    return true;
                 });
             },
 
