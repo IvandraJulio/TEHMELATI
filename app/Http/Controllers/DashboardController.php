@@ -547,6 +547,42 @@ Or jika tidak menyarankan tiket:
                     ],
                     'generationConfig' => [
                         'responseMimeType' => 'application/json',
+                        'responseSchema' => [
+                            'type' => 'OBJECT',
+                            'properties' => [
+                                'reply' => [
+                                    'type' => 'STRING',
+                                    'description' => 'Jawaban solusi, sapaan, panduan troubleshooting, atau pertanyaan konfirmasi Anda dalam Bahasa Indonesia yang ramah dan profesional.'
+                                ],
+                                'recommendation' => [
+                                    'type' => 'OBJECT',
+                                    'nullable' => true,
+                                    'properties' => [
+                                        'category' => [
+                                            'type' => 'STRING',
+                                            'description' => 'Nama Kategori Level 1 dari Katalog Layanan'
+                                        ],
+                                        'sub' => [
+                                            'type' => 'STRING',
+                                            'description' => 'Nama Sub-Layanan Level 2 dari Katalog Layanan'
+                                        ],
+                                        'service' => [
+                                            'type' => 'STRING',
+                                            'description' => 'Nama Detail Layanan Level 3 dari Katalog Layanan'
+                                        ],
+                                        'confidence' => [
+                                            'type' => 'STRING',
+                                            'enum' => ['Tinggi', 'Sedang', 'Rendah']
+                                        ],
+                                        'score' => [
+                                            'type' => 'INTEGER'
+                                        ]
+                                    ],
+                                    'required' => ['category', 'sub', 'service', 'confidence']
+                                ]
+                            ],
+                            'required' => ['reply']
+                        ]
                     ]
                 ];
 
@@ -557,10 +593,18 @@ Or jika tidak menyarankan tiket:
                         if ($response->successful()) {
                             $data = $response->json();
                             $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+                            
+                            // Clean up markdown code block wrappers if present
+                            $text = trim($text);
+                            if (strpos($text, '```') === 0) {
+                                $text = preg_replace('/^```(?:json)?\s*|\s*```$/s', '', $text);
+                            }
+                            $text = trim($text);
+
                             $result = json_decode($text, true);
 
                             // Enforce rule programmatically: no recommendations before 5 AI bubbles (4 in history + 1 being generated)
-                            if ($aiBubbleCount < 4) {
+                            if ($result && $aiBubbleCount < 4) {
                                 $result['recommendation'] = null;
                             }
 
