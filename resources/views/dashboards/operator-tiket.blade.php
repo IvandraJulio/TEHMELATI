@@ -97,22 +97,77 @@
                         </div>
                     </div>
 
-                    <!-- REASSIGN SECTION (Only if Operator role has access or if ticket status allows) -->
-                    <div class="border-t border-slate-100 pt-5 space-y-3.5">
-                        <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Penugasan Ulang Subbagian (Reassign)</h4>
-                        
-                        <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col md:flex-row md:items-end gap-3.5">
-                            <div class="flex-1">
-                                <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pindahkan Subbagian TI</label>
-                                <select x-model="selectedSubbagId" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-700 rounded-lg p-2.5 text-xs font-bold">
-                                    <template x-for="(name, id) in subbags">
-                                        <option :value="id" x-text="name" :selected="id === getSelectedTicket().kasubbagId"></option>
-                                    </template>
-                                </select>
+                    <!-- ASSIGNMENT SECTIONS (Reassign & Direct Assign Solver) -->
+                    <div class="border-t border-slate-100 pt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- LEFT COLUMN: Reassign Subbagian -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Penugasan Ulang Subbagian (Reassign)</h4>
+                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-end gap-3.5 min-h-[110px]">
+                                <div class="flex-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pindahkan Subbagian TI</label>
+                                    <select x-model="selectedSubbagId" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-700 rounded-lg p-2.5 text-xs font-bold">
+                                        <template x-for="(name, id) in subbags">
+                                            <option :value="id" x-text="name" :selected="id === getSelectedTicket().kasubbagId"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <button @click="reassignTicket()" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0">
+                                    Pindahkan Rute
+                                </button>
                             </div>
-                            <button @click="reassignTicket()" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0">
-                                Pindahkan Rute
-                            </button>
+                        </div>
+
+                        <!-- RIGHT COLUMN: Assign directly to solver -->
+                        <div class="space-y-2" x-show="getSelectedTicket().status !== 'Selesai'">
+                            <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Tugaskan Langsung ke Solver</h4>
+                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-end gap-3.5 min-h-[110px]">
+                                <div class="flex-1" x-data="{ dropdownOpen: false }">
+                                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider font-mono">Pilih Personel Solver</label>
+                                    <div class="relative">
+                                        <!-- Dropdown Trigger button -->
+                                        <button @click="dropdownOpen = !dropdownOpen" type="button" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-semibold flex items-center justify-between cursor-pointer">
+                                            <span class="flex items-center gap-2 min-w-0">
+                                                <template x-if="solvers.find(s => s.id === selectedSolverId)">
+                                                    <span class="flex items-center gap-2 text-left min-w-0">
+                                                        <span class="text-gray-900 truncate max-w-[100px] md:max-w-[125px]" x-text="solvers.find(s => s.id === selectedSolverId).name"></span>
+                                                        <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider animate-in fade-in shrink-0"
+                                                              :class="solvers.find(s => s.id === selectedSolverId).busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (solvers.find(s => s.id === selectedSolverId).busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                                                              x-text="solvers.find(s => s.id === selectedSolverId).busy_level + ' (' + solvers.find(s => s.id === selectedSolverId).assigned_today + '/6)'"></span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="!solvers.find(s => s.id === selectedSolverId)">
+                                                    <span class="text-gray-400">Pilih Solver...</span>
+                                                </template>
+                                            </span>
+                                            <svg class="w-4 h-4 text-gray-400 pointer-events-none transition-transform shrink-0" :class="dropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown Menu items -->
+                                        <div x-show="dropdownOpen" @click.away="dropdownOpen = false" x-transition.origin.top.left class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
+                                            <template x-for="s in solvers" :key="s.id">
+                                                <button @click="if (s.busy_level !== 'Hi') { selectedSolverId = s.id; dropdownOpen = false; }" type="button" class="w-full text-left p-3 flex items-center justify-between text-xs transition-colors bg-white hover:bg-slate-50 cursor-pointer"
+                                                        :class="s.busy_level === 'Hi' ? 'opacity-45 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 cursor-pointer bg-white'">
+                                                    <div class="flex flex-col gap-0.5">
+                                                        <span class="font-bold text-gray-900" x-text="s.name"></span>
+                                                        <span class="text-[10px] text-gray-400" x-text="(subbags[s.subbagId] ? subbags[s.subbagId].replace('Subbagian ', '') : '') + ' | Tugas aktif: ' + s.assigned_today + '/6'"></span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider shrink-0"
+                                                          :class="s.busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (s.busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                                                          x-text="s.busy_level === 'Hi' ? 'Hi (Penuh)' : s.busy_level"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button @click="assignTicketToSolver()" 
+                                        :disabled="!selectedSolverId"
+                                        :class="!selectedSolverId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'"
+                                        class="font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md shrink-0">
+                                    Tugaskan Solver
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -198,10 +253,12 @@
     function operatorTicketsPage() {
         return {
             tickets: @json($tickets),
+            solvers: @json($solvers),
             selectedId: null,
             search: '',
             statusFilter: 'All',
             selectedSubbagId: '',
+            selectedSolverId: '',
 
             subbags: {
                 'k1': 'Subbagian Pengelolaan Infrastruktur dan Jaringan',
@@ -230,12 +287,16 @@
                 const selected = this.getSelectedTicket();
                 if (selected) {
                     this.selectedSubbagId = selected.kasubbagId;
+                    this.selectedSolverId = selected.solverId || '';
                 }
 
                 // Listen to global header search box
                 window.addEventListener('search-tickets', (e) => {
                     this.search = e.detail;
                 });
+                
+                // Fetch dynamic busy status
+                this.fetchSolversBusyStatus();
                 
                 this.$nextTick(() => {
                     lucide.createIcons();
@@ -248,6 +309,8 @@
                     const res = await fetch('/api/tickets');
                     this.tickets = await res.json();
                     
+                    await this.fetchSolversBusyStatus();
+                    
                     const displayed = this.filteredTickets();
                     if (displayed.length > 0 && !this.selectedId) {
                         this.selectedId = displayed[0].id;
@@ -256,6 +319,7 @@
                     const selected = this.getSelectedTicket();
                     if (selected) {
                         this.selectedSubbagId = selected.kasubbagId;
+                        this.selectedSolverId = selected.solverId || '';
                     }
                     
                     this.$nextTick(() => {
@@ -296,6 +360,7 @@
                 const t = this.getSelectedTicket();
                 if (t) {
                     this.selectedSubbagId = t.kasubbagId;
+                    this.selectedSolverId = t.solverId || '';
                 }
                 this.$nextTick(() => {
                     lucide.createIcons();
@@ -368,6 +433,57 @@
                         this.fetchTickets();
                     } else {
                         alert('Gagal memindahkan rute tiket.');
+                    }
+                } catch (e) {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            },
+
+            async fetchSolversBusyStatus() {
+                try {
+                    const res = await fetch('/api/solvers/busy-status');
+                    const data = await res.json();
+                    this.solvers = data;
+                } catch (e) {
+                    console.error('Failed to load solver busy status', e);
+                }
+            },
+
+            async assignTicketToSolver() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket || !this.selectedSolverId) return;
+
+                const solver = this.solvers.find(s => s.id === this.selectedSolverId);
+                if (!solver) return;
+
+                const subbagName = this.subbags[solver.subbagId] || '';
+                const operatorName = '{{ Auth::user()->name }}';
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Ditugaskan',
+                            kasubbagId: solver.subbagId,
+                            kasubbagName: `Kasubbag ${subbagName}`,
+                            solverId: solver.id,
+                            solverName: solver.name,
+                            comment: {
+                                text: `Operator ${operatorName} menugaskan tiket langsung kepada solver: ${solver.name}.`,
+                                type: 'penugasan'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.assignModalOpen = false;
+                        this.fetchTickets();
+                    } else {
+                        alert('Gagal menugaskan solver.');
                     }
                 } catch (e) {
                     alert('Terjadi kesalahan jaringan.');

@@ -22,6 +22,20 @@ class RoleMiddleware
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Akses ditolak.'], 403);
             }
+            
+            if ($user) {
+                switch ($user->role) {
+                    case 'pengguna':
+                        return redirect()->route('dashboard');
+                    case 'kasubbag':
+                        return redirect()->route('kasubbag');
+                    case 'solver':
+                        return redirect()->route('solver');
+                    case 'operator':
+                        return redirect()->route('operator');
+                }
+            }
+            
             // Arahkan kembali ke halaman utama untuk rute web biasa
             return redirect('/');
         }

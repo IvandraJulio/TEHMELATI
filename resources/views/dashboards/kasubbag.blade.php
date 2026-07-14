@@ -6,20 +6,10 @@
 @php
     $defaultSolverId = '';
     foreach($solvers as $s) {
-        $today = date('Y-m-d');
         $count = \App\Models\Ticket::where('solverId', $s->id)
-            ->whereHas('comments', function($q) use ($s, $today) {
-                $q->where('type', 'penugasan')
-                  ->where('timestamp', 'like', $today . '%')
-                  ->where(function($q2) use ($s) {
-                      $q2->where('text', "Tiket ditugaskan kepada solver: {$s->name}.")
-                         ->orWhere('text', "Tiket ditugaskan kepada solver: {$s->name} dan mulai dikerjakan.")
-                         ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$s->name}.")
-                         ->orWhere('text', "Tiket diambil secara mandiri dan mulai dikerjakan oleh Solver: {$s->name}.");
-                  });
-            })
+            ->whereIn('status', ['Ditugaskan', 'Dikerjakan'])
             ->count();
-        if ($count < 3) {
+        if ($count < 6) {
             $defaultSolverId = $s->id;
             break;
         }
@@ -273,7 +263,7 @@
                                     <span class="text-gray-900" x-text="solvers.find(s => s.id === selectedSolverId).name"></span>
                                     <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider animate-in fade-in"
                                           :class="solvers.find(s => s.id === selectedSolverId).busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (solvers.find(s => s.id === selectedSolverId).busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
-                                          x-text="solvers.find(s => s.id === selectedSolverId).busy_level + ' (' + solvers.find(s => s.id === selectedSolverId).assigned_today + '/3)'"></span>
+                                          x-text="solvers.find(s => s.id === selectedSolverId).busy_level + ' (' + solvers.find(s => s.id === selectedSolverId).assigned_today + '/6)'"></span>
                                 </span>
                             </template>
                             <template x-if="!solvers.find(s => s.id === selectedSolverId)">
@@ -292,7 +282,7 @@
                                     :class="s.busy_level === 'Hi' ? 'opacity-45 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 cursor-pointer bg-white'">
                                 <div class="flex flex-col gap-0.5">
                                     <span class="font-bold" :class="s.busy_level === 'Hi' ? 'text-gray-400' : 'text-gray-900'" x-text="s.name"></span>
-                                    <span class="text-xs text-gray-400" x-text="'Tugas hari ini: ' + s.assigned_today + '/3'"></span>
+                                    <span class="text-xs text-gray-400" x-text="'Tugas aktif: ' + s.assigned_today + '/6'"></span>
                                 </div>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider"
                                       :class="s.busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (s.busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"

@@ -102,8 +102,9 @@ class DashboardController extends Controller
     public function operatorTiket()
     {
         $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
+        $solvers = User::where('role', 'solver')->get();
 
-        return view('dashboards.operator-tiket', compact('tickets'));
+        return view('dashboards.operator-tiket', compact('tickets', 'solvers'));
     }
 
     /**
@@ -701,30 +702,22 @@ Or jika tidak menyarankan tiket:
         }
 
         $subbagId = $user->subbagId;
-        $solvers = User::where('role', 'solver')
-            ->where('subbagId', $subbagId)
-            ->get();
+        $query = User::where('role', 'solver');
+        if ($user->role !== 'operator') {
+            $query->where('subbagId', $subbagId);
+        }
+        $solvers = $query->get();
 
-        $today = date('Y-m-d');
         $result = [];
 
         foreach ($solvers as $solver) {
             $count = Ticket::where('solverId', $solver->id)
-                ->whereHas('comments', function($q) use ($solver, $today) {
-                    $q->where('type', 'penugasan')
-                      ->where('timestamp', 'like', $today . '%')
-                      ->where(function($q2) use ($solver) {
-                          $q2->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
-                             ->orWhere('text', "Tiket ditugaskan kepada solver: {$solver->name} dan mulai dikerjakan.")
-                             ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.")
-                             ->orWhere('text', "Tiket diambil secara mandiri dan mulai dikerjakan oleh Solver: {$solver->name}.");
-                      });
-                })
+                ->whereIn('status', ['Ditugaskan', 'Dikerjakan'])
                 ->count();
 
-            if ($count >= 3) {
+            if ($count >= 6) {
                 $level = 'Hi';
-            } elseif ($count >= 2) {
+            } elseif ($count >= 3) {
                 $level = 'Med';
             } else {
                 $level = 'Low';
@@ -733,6 +726,7 @@ Or jika tidak menyarankan tiket:
             $result[] = [
                 'id' => $solver->id,
                 'name' => $solver->name,
+                'subbagId' => $solver->subbagId,
                 'assigned_today' => $count,
                 'busy_level' => $level,
             ];

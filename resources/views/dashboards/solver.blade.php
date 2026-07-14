@@ -4,26 +4,16 @@
 
 @section('content')
 @php
-    $today = date('Y-m-d');
     $solver = Auth::user();
     $assignedToday = \App\Models\Ticket::where('solverId', $solver->id)
-        ->whereHas('comments', function($q) use ($solver, $today) {
-            $q->where('type', 'penugasan')
-              ->where('timestamp', 'like', $today . '%')
-              ->where(function($q2) use ($solver) {
-                  $q2->where('text', "Tiket ditugaskan kepada solver: {$solver->name}.")
-                     ->orWhere('text', "Tiket ditugaskan kepada solver: {$solver->name} dan mulai dikerjakan.")
-                     ->orWhere('text', "Tiket diambil secara mandiri oleh Solver: {$solver->name}.")
-                     ->orWhere('text', "Tiket diambil secara mandiri dan mulai dikerjakan oleh Solver: {$solver->name}.");
-              });
-        })
+        ->whereIn('status', ['Ditugaskan', 'Dikerjakan'])
         ->count();
     
-    if ($assignedToday >= 3) {
+    if ($assignedToday >= 6) {
         $busyLabel = 'Hi';
         $busyBg = 'bg-rose-100 text-rose-800 border-rose-200';
         $isBusyHi = true;
-    } elseif ($assignedToday >= 2) {
+    } elseif ($assignedToday >= 3) {
         $busyLabel = 'Med';
         $busyBg = 'bg-amber-100 text-amber-800 border-amber-200';
         $isBusyHi = false;
@@ -45,7 +35,7 @@
                 <h3 class="text-xs font-bold text-gray-800 font-display">Tugas Penanganan Saya</h3>
                 <span class="px-2 py-0.5 rounded text-[8px] font-black border uppercase tracking-wider transition-all"
                       :class="busyLabel === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (busyLabel === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
-                      x-text="'Busy: ' + busyLabel + ' (' + assignedToday + '/3)'">
+                      x-text="'Busy: ' + busyLabel + ' (' + assignedToday + '/6)'">
                 </span>
             </div>
 
@@ -135,7 +125,7 @@
                         
                         <div class="flex flex-wrap gap-2.5">
                             <!-- Claim Ticket -->
-                            <button @click="if (isBusyHi) { alert('Anda sedang Busy: Hi (telah mengambil/ditugaskan 3 atau lebih tiket hari ini). Anda tidak dapat mengambil tiket baru.'); return; } claimTicket()" 
+                            <button @click="if (isBusyHi) { alert('Anda sedang Busy: Hi (telah mengambil/memiliki 6 atau lebih tiket aktif). Anda tidak dapat mengambil tiket baru.'); return; } claimTicket()" 
                                     x-show="activeTab === 'bisa_diambil'"
                                     :class="isBusyHi ? 'bg-gray-300 text-gray-500 cursor-not-allowed border border-gray-200' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'"
                                     class="font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5">
