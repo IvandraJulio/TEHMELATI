@@ -148,13 +148,150 @@ class DatabaseSeeder extends Seeder
         }
 
         // 4. Seed the 50 tickets from seed_50_tickets.sql
-        $seedSqlPath = base_path('../melati web ril/MELATIMELATI-main/seed_50_tickets.sql');
+        $seedSqlPath = database_path('seeders/seed_50_tickets.sql');
         if (File::exists($seedSqlPath)) {
             $sqlContent = File::get($seedSqlPath);
             // Remove 'USE db_layanan_ti;'
             $sqlContent = preg_replace('/USE\s+db_layanan_ti\s*;/i', '', $sqlContent);
             // Execute the raw query
             DB::unprepared($sqlContent);
+        }
+
+        // 5. Programmatically generate realistic comments for the newly seeded tickets
+        $tickets = Ticket::where('id', '!=', 'TKT-2026-001')
+            ->where('id', '!=', 'TKT-2026-002')
+            ->get();
+
+        $subbagMaster = [
+            'k1' => 'Subbagian Pengelolaan Infrastruktur dan Jaringan',
+            'k2' => 'Subbagian Pelayanan TIK',
+            'k3' => 'Subbagian Pengembangan Sistem Informasi Pemeriksaan',
+            'k4' => 'Subbagian Pengembangan Sistem Informasi Kelembagaan',
+            'k5' => 'Subbagian Sains Data',
+            'k6' => 'Subbagian Tata Kelola Data',
+            'k7' => 'Subbagian Keamanan Informasi',
+            'k8' => 'Subbagian MIOT',
+        ];
+
+        foreach ($tickets as $ticket) {
+            $subbagName = $subbagMaster[$ticket->kasubbagId] ?? 'Subbagian Pelayanan TIK';
+            $now = $ticket->tanggalUpdate ?: date('Y-m-d H:i');
+
+            // Time calculations to create a realistic flow of comments
+            $submissionTime = $ticket->tanggal . ' 08:30';
+            if (strtotime($now) < strtotime($submissionTime)) {
+                $submissionTime = date('Y-m-d H:i', strtotime($now) - 3600); // 1 hour before update
+            }
+
+            // 1. Initial System Comment
+            Comment::updateOrCreate(
+                ['id' => 'cmt-sys-' . $ticket->id],
+                [
+                    'ticketId' => $ticket->id,
+                    'authorId' => $ticket->pengirimId,
+                    'authorName' => $ticket->pengirimName,
+                    'authorRole' => 'pengguna',
+                    'text' => "Tiket baru berhasil diajukan dengan kategori \"{$ticket->layananKategori}\" → \"{$ticket->layananSub}\" → \"{$ticket->layanan}\". Otomatis diteruskan ke {$subbagName}.",
+                    'timestamp' => $submissionTime,
+                    'type' => 'sistem',
+                ]
+            );
+
+            // 2. User explanation comment
+            Comment::updateOrCreate(
+                ['id' => 'cmt-user-' . $ticket->id],
+                [
+                    'ticketId' => $ticket->id,
+                    'authorId' => $ticket->pengirimId,
+                    'authorName' => $ticket->pengirimName,
+                    'authorRole' => 'pengguna',
+                    'text' => "Mohon bantuan penanganan secepatnya, ini sangat mendesak untuk tugas kami di lapangan.",
+                    'timestamp' => date('Y-m-d H:i', strtotime($submissionTime) + 300), // 5 mins after submission
+                    'type' => 'komentar',
+                ]
+            );
+
+            // 3. Status-based Comments
+            if (in_array($ticket->status, ['Diterima', 'Ditugaskan', 'Dikerjakan', 'Selesai', 'Kembalikan tiket ke operator'])) {
+                // Kasubbag received it
+                $receiveTime = date('Y-m-d H:i', strtotime($submissionTime) + 1800); // 30 mins after submission
+                Comment::updateOrCreate(
+                    ['id' => 'cmt-rcv-' . $ticket->id],
+                    [
+                        'ticketId' => $ticket->id,
+                        'authorId' => $ticket->kasubbagId,
+                        'authorName' => $ticket->kasubbagName ?: 'Kasubbag',
+                        'authorRole' => 'kasubbag',
+                        'text' => "Tiket diterima, sedang kami periksa kelayakannya.",
+                        'timestamp' => $receiveTime,
+                        'type' => 'terima',
+                    ]
+                );
+
+                if (in_array($ticket->status, ['Ditugaskan', 'Dikerjakan', 'Selesai']) && $ticket->solverId) {
+                    // Kasubbag assigned solver
+                    $assignTime = date('Y-m-d H:i', strtotime($receiveTime) + 1200); // 20 mins after receive
+                    Comment::updateOrCreate(
+                        ['id' => 'cmt-asg-' . $ticket->id],
+                        [
+                            'ticketId' => $ticket->id,
+                            'authorId' => $ticket->kasubbagId,
+                            'authorName' => $ticket->kasubbagName ?: 'Kasubbag',
+                            'authorRole' => 'kasubbag',
+                            'text' => "Tiket ditugaskan kepada solver: {$ticket->solverName}.",
+                            'timestamp' => $assignTime,
+                            'type' => 'penugasan',
+                        ]
+                    );
+
+                    if (in_array($ticket->status, ['Dikerjakan', 'Selesai'])) {
+                        // Solver working comment
+                        $workTime = date('Y-m-d H:i', strtotime($assignTime) + 900); // 15 mins after assign
+                        Comment::updateOrCreate(
+                            ['id' => 'cmt-wrk-' . $ticket->id],
+                            [
+                                'ticketId' => $ticket->id,
+                                'authorId' => $ticket->solverId,
+                                'authorName' => $ticket->solverName,
+                                'authorRole' => 'solver',
+                                'text' => "Baik, laporan saya terima. Sedang saya lakukan pengecekan dan troubleshooting lapangan.",
+                                'timestamp' => $workTime,
+                                'type' => 'komentar',
+                            ]
+                        );
+
+                        if ($ticket->status === 'Selesai') {
+                            // Solver completion comment
+                            Comment::updateOrCreate(
+                                ['id' => 'cmt-fin-' . $ticket->id],
+                                [
+                                    'ticketId' => $ticket->id,
+                                    'authorId' => $ticket->solverId,
+                                    'authorName' => $ticket->solverName,
+                                    'authorRole' => 'solver',
+                                    'text' => "Tiket telah selesai dikerjakan. Catatan penyelesaian: " . ($ticket->catatanKasubbag ?: 'Masalah telah diselesaikan sesuai SOP.'),
+                                    'timestamp' => $ticket->tanggalUpdate ?: date('Y-m-d H:i', strtotime($workTime) + 3600),
+                                    'type' => 'selesai',
+                                ]
+                            );
+                        }
+                    }
+                } elseif ($ticket->status === 'Kembalikan tiket ke operator') {
+                    // Rejected/Returned by Kasubbag
+                    Comment::updateOrCreate(
+                        ['id' => 'cmt-rej-' . $ticket->id],
+                        [
+                            'ticketId' => $ticket->id,
+                            'authorId' => $ticket->kasubbagId,
+                            'authorName' => $ticket->kasubbagName ?: 'Kasubbag',
+                            'authorRole' => 'kasubbag',
+                            'text' => "Tiket dikembalikan ke operator. Alasan: " . ($ticket->alasanTolak ?: 'Kategori tidak sesuai.'),
+                            'timestamp' => $ticket->tanggalUpdate ?: date('Y-m-d H:i', strtotime($receiveTime) + 1800),
+                            'type' => 'tolak',
+                        ]
+                    );
+                }
+            }
         }
     }
 }
