@@ -31,8 +31,8 @@
         <div class="flex-1 overflow-y-auto divide-y divide-[#e2e6ea]">
             <template x-for="t in filteredTickets()" :key="t.id">
                 <div @click="selectTicket(t.id)" 
-                     class="p-4 text-left cursor-pointer transition-all hover:bg-slate-50/50"
-                     :class="selectedId === t.id ? 'bg-[#fcf4ec]/40 border-l-4 border-l-[#b26d27]' : ''">
+                     class="p-4 text-left cursor-pointer transition-all"
+                     :class="selectedId === t.id ? 'bg-[#fcf4ec] border-l-4 border-l-[#b26d27]' : 'hover:bg-slate-50/50'">
                     <div class="flex items-center justify-between gap-2 mb-1.5">
                         <span class="font-mono font-bold text-[#b26d27] text-xs" x-text="t.id"></span>
                         <span class="text-[10px] text-gray-400 font-mono" x-text="t.tanggal"></span>

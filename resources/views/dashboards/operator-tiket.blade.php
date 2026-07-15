@@ -54,8 +54,8 @@
         <div class="flex-1 overflow-y-auto divide-y divide-[#e2e6ea]">
             <template x-for="t in filteredTickets()" :key="t.id">
                 <div @click="selectTicket(t.id)" 
-                     class="p-4 text-left cursor-pointer transition-all hover:bg-slate-50/50"
-                     :class="selectedId === t.id ? 'bg-[#fcf4ec]/40 border-l-4 border-l-[#b26d27]' : ''">
+                     class="p-4 text-left cursor-pointer transition-all"
+                     :class="selectedId === t.id ? 'bg-[#fcf4ec] border-l-4 border-l-[#b26d27]' : 'hover:bg-slate-50/50'">
                     <div class="flex items-center justify-between gap-2 mb-1.5">
                         <span class="font-mono font-bold text-[#b26d27] text-xs" x-text="t.id"></span>
                         <span class="text-[10px] text-gray-400 font-mono" x-text="t.tanggal"></span>
@@ -179,7 +179,7 @@
 
                                         <!-- Dropdown Menu items -->
                                         <div x-show="dropdownOpen" @click.away="dropdownOpen = false" x-transition.origin.top.left class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
-                                            <template x-for="s in solvers" :key="s.id">
+                                            <template x-for="s in solvers.filter(solver => !selectedSubbagId || solver.subbagId === selectedSubbagId)" :key="s.id">
                                                 <button @click="if (s.busy_level !== 'Hi') { selectedSolverId = s.id; dropdownOpen = false; }" type="button" class="w-full text-left p-3 flex items-center justify-between text-xs transition-colors bg-white hover:bg-slate-50 cursor-pointer"
                                                         :class="s.busy_level === 'Hi' ? 'opacity-45 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 cursor-pointer bg-white'">
                                                     <div class="flex flex-col gap-0.5">
@@ -322,6 +322,14 @@
                     this.selectedSubbagId = selected.kasubbagId;
                     this.selectedSolverId = selected.solverId || '';
                 }
+
+                // Listen to selectedSubbagId changes to reset selectedSolverId if it doesn't match
+                this.$watch('selectedSubbagId', (value) => {
+                    const currentSolver = this.solvers.find(s => s.id === this.selectedSolverId);
+                    if (currentSolver && currentSolver.subbagId !== value) {
+                        this.selectedSolverId = '';
+                    }
+                });
 
                 // Listen to global header search box
                 window.addEventListener('search-tickets', (e) => {

@@ -63,7 +63,7 @@
             <template x-for="t in getDisplayedTickets()" :key="t.id">
                 <button @click="selectTicket(t.id)"
                         class="w-full p-4 text-left transition-all block cursor-pointer"
-                        :class="selectedId === t.id ? 'bg-white border-l-4 border-l-[#b26d27] shadow-xs' : 'bg-transparent hover:bg-slate-50'">
+                        :class="selectedId === t.id ? 'bg-[#fcf4ec] border-l-4 border-l-[#b26d27]' : 'bg-transparent hover:bg-slate-50'">
                     <div class="flex items-center justify-between gap-1.5 mb-1.5">
                         <span class="font-mono font-bold text-xs text-gray-800" x-text="t.id"></span>
                         <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Pending' ? 'New' : t.status"></span>
