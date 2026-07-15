@@ -103,7 +103,7 @@
 
                                 <!-- Comments Thread -->
                                 <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="comments-box">
-                                    <template x-for="c in getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
+                                    <template x-for="c in getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type))" :key="c.id">
                                         <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
                                              :class="getCommentBubbleClass(c.type)">
                                             <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -118,7 +118,7 @@
                                             <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
                                         </div>
                                     </template>
-                                    <div x-show="getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
+                                    <div x-show="getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
                                         Belum ada obrolan.
                                     </div>
                                 </div>
@@ -141,7 +141,7 @@
 
                                 <!-- Logs Thread -->
                                 <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="logs-box">
-                                    <template x-for="c in getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
+                                    <template x-for="c in getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type))" :key="c.id">
                                         <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
                                              :class="getCommentBubbleClass(c.type)">
                                             <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -156,7 +156,7 @@
                                             <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
                                         </div>
                                     </template>
-                                    <div x-show="getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
+                                    <div x-show="getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs">
                                         Belum ada log aktivitas.
                                     </div>
                                 </div>
@@ -277,6 +277,7 @@
                     case 'mulai_kerjakan': return 'bg-purple-50 border-l-4 border-l-purple-500 text-purple-800';
                     case 'penyelesaian': return 'bg-green-50 border-l-4 border-l-green-600 text-green-800';
                     case 'eskalasi': return 'bg-amber-50 border-l-4 border-l-amber-500 text-amber-800';
+                    case 'tindaklanjuti': return 'bg-sky-50 border-l-4 border-l-sky-500 text-sky-800';
                     default: return 'bg-white border-[#e2e6ea] shadow-xs text-gray-800';
                 }
             },

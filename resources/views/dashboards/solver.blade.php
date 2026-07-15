@@ -144,6 +144,14 @@
                                 Selesaikan Tiket
                             </button>
 
+                            <!-- Tindaklanjuti Ticket -->
+                            <button @click="openTindaklanjutiModal()" 
+                                    x-show="activeTab === 'aktif'"
+                                    class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
+                                <i data-lucide="wrench" class="w-4 h-4"></i>
+                                Tindaklanjuti
+                            </button>
+
                             <!-- Escalate Ticket -->
                             <button @click="openEscalateModal()" 
                                     x-show="activeTab === 'aktif'"
@@ -166,7 +174,7 @@
 
                                 <!-- Comments Thread -->
                                 <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="comments-box">
-                                    <template x-for="c in getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
+                                    <template x-for="c in getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type))" :key="c.id">
                                         <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
                                              :class="getCommentBubbleClass(c.type)">
                                             <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -181,7 +189,7 @@
                                             <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
                                         </div>
                                     </template>
-                                    <div x-show="getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs font-medium">
+                                    <div x-show="getSelectedTicket().comments.filter(c => !['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs font-medium">
                                         Belum ada obrolan.
                                     </div>
                                 </div>
@@ -204,7 +212,7 @@
 
                                 <!-- Logs Thread -->
                                 <div class="space-y-3.5 max-h-[300px] overflow-y-auto pr-1" id="logs-box">
-                                    <template x-for="c in getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type))" :key="c.id">
+                                    <template x-for="c in getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type))" :key="c.id">
                                         <div class="p-3.5 rounded-lg border leading-relaxed text-xs" 
                                              :class="getCommentBubbleClass(c.type)">
                                             <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -219,7 +227,7 @@
                                             <p class="text-xs font-medium text-gray-700 whitespace-pre-wrap" x-text="c.text"></p>
                                         </div>
                                     </template>
-                                    <div x-show="getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs font-medium">
+                                    <div x-show="getSelectedTicket().comments.filter(c => ['sistem', 'terima', 'penugasan', 'mulai_kerjakan', 'penyelesaian', 'eskalasi', 'tindaklanjuti'].includes(c.type)).length === 0" class="text-center py-6 text-gray-400 text-xs font-medium">
                                         Belum ada log aktivitas.
                                     </div>
                                 </div>
@@ -272,6 +280,24 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL: Tindaklanjuti Ticket -->
+    <div x-show="tindaklanjutiModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
+            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                <i data-lucide="wrench" class="text-sky-600 w-5 h-5"></i>
+                Tindaklanjuti Tiket
+            </h3>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Log Tindaklanjuti</label>
+                <textarea x-model="tindaklanjutiNotes" rows="3" placeholder="Detail tindak lanjut yang dilakukan..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-medium"></textarea>
+            </div>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button @click="tindaklanjutiModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
+                <button @click="confirmTindaklanjuti()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold">Kirim</button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -287,9 +313,11 @@
             
             completeModalOpen: false,
             escalateModalOpen: false,
+            tindaklanjutiModalOpen: false,
             
             completeNotes: '',
             escalateReason: '',
+            tindaklanjutiNotes: '',
             isBusyHi: {{ $isBusyHi ? 'true' : 'false' }},
             assignedToday: {{ $assignedToday }},
             busyLabel: '{{ $busyLabel }}',
@@ -403,6 +431,7 @@
                     case 'mulai_kerjakan': return 'bg-purple-50 border-l-4 border-l-purple-500 text-purple-800';
                     case 'penyelesaian': return 'bg-green-50 border-l-4 border-l-green-600 text-green-800';
                     case 'eskalasi': return 'bg-amber-50 border-l-4 border-l-amber-500 text-amber-800';
+                    case 'tindaklanjuti': return 'bg-sky-50 border-l-4 border-l-sky-500 text-sky-800';
                     default: return 'bg-white border-[#e2e6ea] shadow-xs text-gray-800';
                 }
             },
@@ -525,6 +554,42 @@
                     }
                 } catch (e) {
                     alert('Gagal mengeksekusi eskalasi.');
+                }
+            },
+
+            openTindaklanjutiModal() {
+                this.tindaklanjutiNotes = '';
+                this.tindaklanjutiModalOpen = true;
+            },
+
+            async confirmTindaklanjuti() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket || !this.tindaklanjutiNotes.trim()) return;
+
+                const meName = '{{ Auth::user()->name }}';
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Dikerjakan',
+                            comment: {
+                                text: `Tindak Lanjut Solver: ${this.tindaklanjutiNotes.trim()}`,
+                                type: 'tindaklanjuti'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.tindaklanjutiModalOpen = false;
+                        this.fetchTickets();
+                    }
+                } catch (e) {
+                    alert('Gagal mengirim tindak lanjut.');
                 }
             },
 
