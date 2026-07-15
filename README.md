@@ -1,59 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌸 Melati V2 — Portal Layanan TI Biro TIK BPK RI
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel 12.0](https://img.shields.io/badge/Laravel-12.0-red?style=flat-square&logo=laravel)](https://laravel.com)
+[![Vite](https://img.shields.io/badge/Vite-7.0-purple?style=flat-square&logo=vite)](https://vite.dev)
+[![Tailwind CSS 4.0](https://img.shields.io/badge/Tailwind_CSS-4.0-blue?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
+[![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-emerald?style=flat-square&logo=alpine.js)](https://alpinejs.dev)
 
-## About Laravel
+**Melati V2** adalah portal terintegrasi layanan bantuan Teknologi Informasi (IT Helpdesk & Service Desk) yang dirancang khusus untuk lingkungan internal **Badan Pemeriksa Keuangan Republik Indonesia (BPK RI)**. Aplikasi ini mempermudah pelaporan insiden, permintaan layanan, pengelolaan antrean tiket bantuan, hingga penugasan kerja solver TI secara cerdas dan efisien.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Fitur Utama & Keunggulan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🤖 1. Asisten Virtual Layanan TI (Gemini AI Chatbot)
+* **Diagnosis Cerdas:** Pengguna dapat menceritakan kendala dengan bahasa sehari-hari. AI akan menganalisis masalah secara langsung dan menyarankan solusi troubleshooting mandiri.
+* **Unggah & Tempel (Paste) Screenshot:** Pengguna dapat menempelkan screenshot (`Ctrl + V`) atau mengunggah gambar/foto kendala. AI akan secara otomatis menganalisis tampilan error atau masalah visual untuk memberikan arahan yang tepat.
+* **Deteksi GIF Otomatis:** Mengamankan pengiriman dengan membatasi format `.gif` baik di frontend maupun backend.
+* **Auto-Routing Tiket:** Jika kendala belum teratasi setelah dipandu AI, sistem secara cerdas akan merekomendasikan kategori layanan Level 1, 2, dan 3 yang sesuai dari katalog layanan BPK RI dan mengisi form tiket secara otomatis.
 
-## Learning Laravel
+### 👥 2. Workflow Kolaboratif Berbasis Peran (Roles)
+* **Pelapor (Pengguna):** Mengajukan tiket baru, berdiskusi melalui obrolan langsung, dan melacak kemajuan pengerjaan tiket.
+* **Operator Biro TI:** Memiliki visibilitas penuh atas seluruh tiket masuk, dapat memindahkan rute subbagian (*Reassign*), atau langsung menugaskan tiket ke solver tertentu.
+* **Kasubbag (Dispatcher):** Memverifikasi tiket masuk, mendistribusikan penugasan solver, mengembalikan tiket tidak layak ke operator, dan mengonfirmasi penyelesaian tiket.
+* **Solver (Petugas Lapangan):** Mengambil tiket secara mandiri (*Claim*), menulis progress log penanganan (*Tindaklanjuti*), eskalasi balik ke Kasubbag jika memerlukan arahan khusus, dan menyelesaikan tiket.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### ⚡ 3. Real-time Notification & Busy Status Limit
+* **Notification Bell:** Notifikasi instan di dalam aplikasi bagi pelapor, kasubbag, dan solver ketika terjadi perubahan status atau penugasan tiket baru.
+* **Busy Status Indicator:** Mencegah overload kerja solver dengan membatasi jumlah tiket aktif maksimal **6 tiket**. Status beban kerja diwakili indikator warna dinamis:
+  * 🟢 **Low** (0-2 tiket aktif)
+  * 🟡 **Med** (3-5 tiket aktif)
+  * 🔴 **Hi / Penuh** (6 atau lebih tiket aktif — melarang solver mengambil tiket baru).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🗺️ Alur Tiket Melati V2 (Ticket Lifecycle)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```mermaid
+graph TD
+    A[Pengguna: Ajukan Tiket via Chat/Form] --> B{Operator TI}
+    B -- Reassign Rute --> B
+    B -- Tugaskan Solver Langsung --> D[Solver: Dikerjakan]
+    B -- Teruskan Rute --> C{Kasubbag}
+    C -- Tolak / Balikkan --> B
+    C -- Tugaskan Solver --> D
+    D -- Claim Mandiri / Ambil --> D
+    D -- Tindaklanjuti / Progress Log --> D
+    D -- Eskalasi Ulang --> C
+    D -- Laporkan Selesai --> E[Selesai]
+```
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🛠️ Spesifikasi Teknologi Stack
 
-## Contributing
+* **Framework Backend:** Laravel 12.0 (PHP 8.2+)
+* **Asset Bundler:** Vite 7.0
+* **CSS Framework:** Tailwind CSS 4.0
+* **Frontend Logic & Reactivity:** Alpine.js 3.x
+* **AI Engine:** Google Gemini API (menggunakan model `gemini-3.5-flash` dengan fallback `gemini-2.5-flash` & `gemini-2.5-flash-lite`)
+* **Icons:** Lucide Icons
+* **Database:** SQLite (Default / Local file database)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🔑 Akun Uji Coba (Demo Credentials)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Untuk memudahkan peninjauan alur kerja multi-role, gunakan akun seed berikut:
 
-## Security Vulnerabilities
+| Peran (Role) | Username | Password | Deskripsi / Subbagian |
+|---|---|---|---|
+| **Operator TI** | `admin` | `admin123` | Operator Utama Biro TI |
+| **Pengguna 1** | `budi` | `budi123` | Pegawai BPK (Pelapor 1) |
+| **Pengguna 2** | `siti` | `siti123` | Pegawai BPK (Pelapor 2) |
+| **Kasubbag 1** | `kasubbag.infrastruktur` | `pass123` | Kasubbag Jaringan & Infrastruktur (`k1`) |
+| **Kasubbag 2** | `kasubbag.pelayanan` | `pass123` | Kasubbag Pelayanan TIK (`k2`) |
+| **Solver 1** | `solver.infra.1` | `solver123` | Solver Jaringan & Infrastruktur |
+| **Solver 2** | `solver.tik.1` | `solver123` | Solver Pelayanan TIK |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## ⚙️ Petunjuk Instalasi & Menjalankan Lokal
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Ikuti langkah-langkah berikut untuk setup environment lokal Anda:
+
+### 1. Kloning Repository
+```bash
+git clone https://github.com/IvandraJulio/TEHMELATI.git
+cd TEHMELATI
+```
+
+### 2. Jalankan Perintah Setup
+Gunakan script composer `setup` yang telah dikonfigurasi untuk otomatis menginstal seluruh dependensi PHP & Node.js, men-copy `.env`, men-generate key, membuat file database SQLite, serta melakukan migrasi database:
+```bash
+composer run setup
+```
+
+### 3. Konfigurasi Google Gemini API Key
+Untuk mengaktifkan Asisten Virtual AI, buka file `.env` yang baru digenerate dan tambahkan API Key Google Gemini Anda:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 4. Seed Database dengan Data Uji Coba
+Jalankan seeder untuk mengisi tabel user demo dan mengimpor **50 tiket riwayat layanan**:
+```bash
+php artisan db:seed
+```
+
+### 5. Jalankan Development Server
+Gunakan script terintegrasi untuk menjalankan Laravel Server, Queue listener, dan Vite Dev Server secara bersamaan dalam satu command:
+
+* **Sistem Operasi Windows:**
+  ```bash
+  composer run dev-win
+  ```
+* **Sistem Operasi macOS / Linux:**
+  ```bash
+  composer run dev
+  ```
+
+Akses portal melalui browser Anda di alamat: **`http://127.0.0.1:8000`**
+
+---
+
+## 📝 Catatan Tambahan (Developer Note)
+* **Queue Listener:** Beberapa notifikasi dan proses latar belakang bergantung pada Queue. Pastikan tab server development tetap aktif agar `php artisan queue:listen` terus memproses antrean job.
+* **MIME Verification:** Pengunggahan gambar divalidasi ketat di level frontend dan controller backend untuk mencegah format gif atau file non-gambar masuk ke prompt multimodal AI.
