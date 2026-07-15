@@ -102,8 +102,8 @@
                         <!-- LEFT COLUMN: Reassign Subbagian -->
                         <div class="space-y-2">
                             <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Penugasan Ulang Subbagian (Reassign)</h4>
-                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-end gap-3.5 min-h-[110px]">
-                                <div class="flex-1">
+                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-3.5 justify-between min-h-[120px]">
+                                <div class="w-full">
                                     <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pindahkan Subbagian TI</label>
                                     <select x-model="selectedSubbagId" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-700 rounded-lg p-2.5 text-xs font-bold">
                                         <template x-for="(name, id) in subbags">
@@ -111,7 +111,7 @@
                                         </template>
                                     </select>
                                 </div>
-                                <button @click="reassignTicket()" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0">
+                                <button @click="reassignTicket()" class="w-full bg-[#b26d27] hover:bg-[#9b5a1b] text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer">
                                     Pindahkan Rute
                                 </button>
                             </div>
@@ -120,8 +120,8 @@
                         <!-- RIGHT COLUMN: Assign directly to solver -->
                         <div class="space-y-2" x-show="getSelectedTicket().status !== 'Selesai'">
                             <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Tugaskan Langsung ke Solver</h4>
-                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-end gap-3.5 min-h-[110px]">
-                                <div class="flex-1" x-data="{ dropdownOpen: false }">
+                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-3.5 justify-between min-h-[120px]">
+                                <div class="w-full" x-data="{ dropdownOpen: false }">
                                     <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider font-mono">Pilih Personel Solver</label>
                                     <div class="relative">
                                         <!-- Dropdown Trigger button -->
@@ -129,7 +129,7 @@
                                             <span class="flex items-center gap-2 min-w-0">
                                                 <template x-if="solvers.find(s => s.id === selectedSolverId)">
                                                     <span class="flex items-center gap-2 text-left min-w-0">
-                                                        <span class="text-gray-900 truncate max-w-[100px] md:max-w-[125px]" x-text="solvers.find(s => s.id === selectedSolverId).name"></span>
+                                                        <span class="text-gray-900 truncate max-w-[150px] sm:max-w-[200px]" x-text="solvers.find(s => s.id === selectedSolverId).name"></span>
                                                         <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider animate-in fade-in shrink-0"
                                                               :class="solvers.find(s => s.id === selectedSolverId).busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (solvers.find(s => s.id === selectedSolverId).busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
                                                               x-text="solvers.find(s => s.id === selectedSolverId).busy_level + ' (' + solvers.find(s => s.id === selectedSolverId).assigned_today + '/6)'"></span>
@@ -164,7 +164,7 @@
                                 <button @click="assignTicketToSolver()" 
                                         :disabled="!selectedSolverId"
                                         :class="!selectedSolverId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'"
-                                        class="font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md shrink-0">
+                                        class="w-full font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md">
                                     Tugaskan Solver
                                 </button>
                             </div>
