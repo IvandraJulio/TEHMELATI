@@ -271,6 +271,11 @@ class DashboardController extends Controller
     public function updateTicketActionApi(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
+
+        if ($ticket->status === 'Selesai') {
+            return response()->json(['error' => 'Tiket yang sudah selesai tidak dapat diubah.'], 400);
+        }
+
         $now = date('Y-m-d H:i');
 
         $oldStatus = $ticket->status;

@@ -113,7 +113,7 @@
                     </div>
 
                     <!-- ASSIGNMENT SECTIONS (Reassign & Direct Assign Solver) -->
-                    <div class="border-t border-slate-100 pt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border-t border-slate-100 pt-5 grid grid-cols-1 md:grid-cols-2 gap-4" x-show="getSelectedTicket().status !== 'Selesai'">
                         <!-- LEFT COLUMN: Reassign Subbagian -->
                         <div class="space-y-2">
                             <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Penugasan Ulang Subbagian (Reassign)</h4>
