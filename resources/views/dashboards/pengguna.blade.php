@@ -48,6 +48,13 @@
                                   :class="msg.sender === 'bot' ? 'bg-[#F3EDE2] text-gray-700 rounded-tl-none border-gray-200/60' : 'bg-[#F0DCC0] text-gray-800 border-orange-200/50 rounded-tr-none'"
                                   x-html="formatMarkdown(msg.text)"></div>
 
+                             <!-- Image Sent by User -->
+                             <template x-if="msg.image">
+                                 <div class="rounded-xl overflow-hidden border border-slate-200 max-w-xs shadow-xs mt-1 cursor-pointer" @click="openImageLightbox(msg.image.dataUrl)">
+                                     <img :src="msg.image.dataUrl" class="w-full max-h-48 object-cover hover:scale-102 transition-transform duration-200">
+                                 </div>
+                             </template>
+
                              <!-- Confirmation Prompt -->
                              <template x-if="msg.sender === 'bot' && msg.recommendation && msg.showConfirmation">
                                  <div class="bg-[#FCF7ED] border border-[#f5dcb3] rounded-xl p-3.5 shadow-xs space-y-2.5 max-w-full">
@@ -104,9 +111,29 @@
                  </div>
              </div>
 
+             <!-- Attachment Preview Panel -->
+             <div x-show="attachedImage" class="p-2.5 bg-slate-50/60 border-t border-[#e2e6ea] flex items-center gap-3 shrink-0" style="display: none;">
+                 <div class="relative w-14 h-14 rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-white flex items-center justify-center">
+                     <img :src="attachedImage ? attachedImage.dataUrl : ''" class="w-full h-full object-cover">
+                     <button type="button" @click="removeAttachedImage()" class="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-black/80 transition-all cursor-pointer flex items-center justify-center">
+                         <i data-lucide="x" class="w-2.5 h-2.5"></i>
+                     </button>
+                 </div>
+                 <div class="text-[10px] text-gray-500 font-semibold min-w-0">
+                     <p class="text-gray-800 font-bold truncate max-w-[180px] sm:max-w-[240px]" x-text="attachedImage ? attachedImage.name : ''"></p>
+                     <p x-text="attachedImage ? formatBytes(attachedImage.size) : ''"></p>
+                 </div>
+             </div>
+
              <!-- Chat Input Form -->
-             <form @submit.prevent="sendChatMessage()" class="p-3.5 bg-white border-t border-[#e2e6ea] flex gap-2 shrink-0">
-                 <input type="text" x-model="chatInput" placeholder="Tulis kendala Anda (contoh: wifi lemot total)..." class="flex-1 bg-[#f5f6f8] border border-slate-100 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-full px-5 py-3 text-xs outline-none transition-all placeholder:text-gray-400 font-semibold">
+             <form @submit.prevent="sendChatMessage()" class="p-3.5 bg-white border-t border-[#e2e6ea] flex gap-2 shrink-0 items-center">
+                 <!-- Attachment Button -->
+                 <button type="button" @click="document.getElementById('chat-file-input').click()" class="text-gray-400 hover:text-[#b26d27] p-2 rounded-full hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-center shrink-0">
+                     <i data-lucide="paperclip" class="w-5 h-5"></i>
+                 </button>
+                 <input type="file" id="chat-file-input" class="hidden" accept="image/*" @change="handleImageUpload($event)">
+
+                 <input type="text" x-model="chatInput" @paste="handleImagePaste($event)" placeholder="Tulis kendala Anda atau paste screenshot..." class="flex-1 bg-[#f5f6f8] border border-slate-100 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-full px-5 py-3 text-xs outline-none transition-all placeholder:text-gray-400 font-semibold">
                  <button type="submit" class="bg-[#b26d27] hover:bg-[#9b5a1b] text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 cursor-pointer shadow-sm hover:shadow-md transition-all">
                      <i data-lucide="send" class="w-4 h-4"></i>
                  </button>
@@ -244,6 +271,17 @@
         </div>
 
     </div>
+
+    <!-- Lightbox Modal -->
+    <div x-show="lightboxOpen" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" @click="lightboxOpen = false" style="display: none;" x-transition>
+        <div class="relative max-w-4xl max-h-[90vh] bg-transparent" @click.stop>
+            <img :src="lightboxImageUrl" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl">
+            <button @click="lightboxOpen = false" class="absolute -top-10 right-0 text-white font-bold hover:text-slate-300 transition-colors flex items-center gap-1 cursor-pointer text-xs">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>Tutup</span>
+            </button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -258,6 +296,9 @@
             loadingSubmit: false,
             successMessage: '',
             showForm: false,
+            attachedImage: null,
+            lightboxOpen: false,
+            lightboxImageUrl: '',
             
             // Chatbot State
             chatInput: '',
@@ -460,18 +501,99 @@
                 }
             },
 
+            handleImageUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.processImageFile(file);
+                }
+            },
+
+            handleImagePaste(event) {
+                const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+                        const file = item.getAsFile();
+                        this.processImageFile(file);
+                        event.preventDefault();
+                        break;
+                    }
+                }
+            },
+
+            processImageFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Harap unggah file gambar saja.');
+                    return;
+                }
+                if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+                    alert('Format GIF tidak didukung. Harap unggah format gambar lain seperti PNG atau JPEG.');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Ukuran gambar maksimal adalah 5MB.');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Data = e.target.result.split(',')[1];
+                    this.attachedImage = {
+                        name: file.name || 'Pasted-Screenshot.png',
+                        size: file.size,
+                        mimeType: file.type,
+                        dataUrl: e.target.result,
+                        base64: base64Data
+                    };
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                };
+                reader.readAsDataURL(file);
+            },
+
+            removeAttachedImage() {
+                this.attachedImage = null;
+                const fileInput = document.getElementById('chat-file-input');
+                if (fileInput) fileInput.value = '';
+            },
+
+            openImageLightbox(url) {
+                this.lightboxImageUrl = url;
+                this.lightboxOpen = true;
+                this.$nextTick(() => {
+                    lucide.createIcons();
+                });
+            },
+
+            formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            },
+
             async sendChatMessage() {
-                if (!this.chatInput.trim()) return;
+                if (!this.chatInput.trim() && !this.attachedImage) return;
 
                 const userText = this.chatInput.trim();
                 const newUserMsg = {
                     id: 'usr-' + Date.now(),
                     sender: 'user',
-                    text: userText
+                    text: userText || 'Mengirim gambar...',
+                    image: this.attachedImage ? {
+                        dataUrl: this.attachedImage.dataUrl,
+                        mimeType: this.attachedImage.mimeType,
+                        data: this.attachedImage.base64
+                    } : null
                 };
 
                 this.chatMessages.push(newUserMsg);
                 this.chatInput = '';
+                
+                const currentAttachedImage = this.attachedImage;
+                this.removeAttachedImage();
+                
                 this.chatLoading = true;
 
                 // Start 5-minute timer on first user message
@@ -491,10 +613,19 @@
                 this.scrollChat();
 
                 try {
-                    const updatedMessages = this.chatMessages.map(m => ({
-                        sender: m.sender,
-                        text: m.text
-                    }));
+                    const updatedMessages = this.chatMessages.map(m => {
+                        const msgObj = {
+                            sender: m.sender,
+                            text: m.text
+                        };
+                        if (m.image) {
+                            msgObj.image = {
+                                mimeType: m.image.mimeType,
+                                data: m.image.data
+                            };
+                        }
+                        return msgObj;
+                    });
 
                     const response = await fetch('/api/chat-recommend', {
                         method: 'POST',
@@ -522,7 +653,7 @@
                     }
                 } catch (err) {
                     console.warn("AI Chatbot failed, using local keyword matching fallback:", err);
-                    this.localFallback(userText);
+                    this.localFallback(userText || '');
                 } finally {
                     this.$nextTick(() => {
                         this.scrollChat();

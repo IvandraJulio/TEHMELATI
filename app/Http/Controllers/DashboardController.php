@@ -413,6 +413,16 @@ class DashboardController extends Controller
             return response()->json(['error' => 'messages array is required'], 400);
         }
 
+        // Validate no gif images are present
+        foreach ($messages as $msg) {
+            if (isset($msg['image']) && is_array($msg['image'])) {
+                $mime = $msg['image']['mimeType'] ?? '';
+                if ($mime === 'image/gif') {
+                    return response()->json(['error' => 'Format GIF tidak didukung.'], 400);
+                }
+            }
+        }
+
         // Count existing AI chat bubbles in history
         $aiBubbleCount = 0;
         foreach ($messages as $msg) {
@@ -424,9 +434,24 @@ class DashboardController extends Controller
         // Format history for Gemini API
         $contents = [];
         foreach ($messages as $msg) {
+            $parts = [];
+            if (isset($msg['text']) && $msg['text'] !== '') {
+                $parts[] = ['text' => $msg['text']];
+            }
+            if (isset($msg['image']) && is_array($msg['image']) && isset($msg['image']['data'])) {
+                $parts[] = [
+                    'inlineData' => [
+                        'mimeType' => $msg['image']['mimeType'] ?? 'image/png',
+                        'data' => $msg['image']['data']
+                    ]
+                ];
+            }
+            if (empty($parts)) {
+                $parts[] = ['text' => ''];
+            }
             $contents[] = [
                 'role' => $msg['sender'] === 'user' ? 'user' : 'model',
-                'parts' => [['text' => $msg['text']]],
+                'parts' => $parts,
             ];
         }
 
@@ -498,6 +523,9 @@ class DashboardController extends Controller
 
         $systemInstruction = "Anda adalah Asisten Virtual Layanan TI BPK RI (Badan Pemeriksa Keuangan Republik Indonesia).
 Tugas utama Anda adalah membantu pengguna (pegawai BPK) menyelesaikan masalah TI mereka secara ramah dan solutif (problem solving) terlebih dahulu.
+
+Jika pengguna menyertakan gambar atau screenshot, Anda wajib menganalisisnya (seperti mendeteksi error, konfigurasi, atau tampilan sistem yang bermasalah) dan mengaitkannya dengan solusi Anda.
+Jika dirasa perlu untuk mendiagnosis masalah dengan lebih baik, Anda sangat disarankan untuk meminta pengguna secara sopan mengunggah screenshot atau foto spesifik (misalnya pesan error, pengaturan IP, atau status perangkat).
 
 Saat ini, percakapan telah memiliki {$aiBubbleCount} bubble chat dari AI.
 
