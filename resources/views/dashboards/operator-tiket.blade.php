@@ -20,18 +20,33 @@
             </div>
 
             <!-- Filters -->
-            <div class="mb-4">
-                <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase tracking-wider">Status</label>
-                <select x-model="statusFilter" class="w-full bg-slate-50 border border-slate-200 focus:border-[#b26d27] text-gray-700 rounded-lg p-1.5 text-[10px] font-bold">
-                    <option value="All">Semua Status</option>
-                    <option value="Pending">Pending / New</option>
-                    <option value="Diterima">Diterima</option>
-                    <option value="Ditugaskan">Ditugaskan</option>
-                    <option value="Dikerjakan">Dikerjakan</option>
-                    <option value="Dieskalasi">Dieskalasi</option>
-                    <option value="Selesai">Selesai</option>
-                    <option value="Kembalikan tiket ke operator">Dikembalikan</option>
-                </select>
+            <div class="mb-4" x-data="{ openStatusDropdown: false }">
+                <label class="block text-[8px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider font-mono">Status</label>
+                <div class="relative" @click.away="openStatusDropdown = false">
+                    <!-- Dropdown Trigger button -->
+                    <button @click="openStatusDropdown = !openStatusDropdown" type="button" 
+                            class="w-full flex items-center justify-between bg-white border border-[#b26d27] text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-bold cursor-pointer">
+                        <span class="truncate pr-2" x-text="statusFilter === 'All' ? 'Semua Status' : (statusFilter === 'Pending' ? 'Pending / New' : (statusFilter === 'Kembalikan tiket ke operator' ? 'Dikembalikan' : statusFilter))"></span>
+                        <svg class="w-4 h-4 text-gray-400 pointer-events-none transition-transform shrink-0" :class="openStatusDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown Menu items -->
+                    <div x-show="openStatusDropdown" 
+                         x-transition.origin.top.left 
+                         class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100"
+                         style="display: none;">
+                        <button @click="statusFilter = 'All'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'All' ? 'text-[#b26d27]' : ''">Semua Status</button>
+                        <button @click="statusFilter = 'Pending'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Pending' ? 'text-[#b26d27]' : ''">Pending / New</button>
+                        <button @click="statusFilter = 'Diterima'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Diterima' ? 'text-[#b26d27]' : ''">Diterima</button>
+                        <button @click="statusFilter = 'Ditugaskan'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Ditugaskan' ? 'text-[#b26d27]' : ''">Ditugaskan</button>
+                        <button @click="statusFilter = 'Dikerjakan'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Dikerjakan' ? 'text-[#b26d27]' : ''">Dikerjakan</button>
+                        <button @click="statusFilter = 'Dieskalasi'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Dieskalasi' ? 'text-[#b26d27]' : ''">Dieskalasi</button>
+                        <button @click="statusFilter = 'Selesai'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Selesai' ? 'text-[#b26d27]' : ''">Selesai</button>
+                        <button @click="statusFilter = 'Kembalikan tiket ke operator'; openStatusDropdown = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer" :class="statusFilter === 'Kembalikan tiket ke operator' ? 'text-[#b26d27]' : ''">Dikembalikan</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -104,38 +119,32 @@
                             <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Penugasan Ulang Subbagian (Reassign)</h4>
                             <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-3.5 justify-between min-h-[120px]">
                                 <div class="w-full" x-data="{ open: false }" @click.away="open = false">
-                                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pindahkan Subbagian TI</label>
+                                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider font-mono">Pindahkan Subbagian TI</label>
                                     <div class="relative">
                                         <!-- Dropdown Trigger button -->
-                                        <button type="button" @click="open = !open" 
-                                                class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none cursor-pointer">
-                                            <span class="truncate pr-2" x-text="selectedSubbagId ? subbags[selectedSubbagId] : '-Pilih Subbagian-'"></span>
-                                            <svg class="w-4 h-4 text-[#8C7662] pointer-events-none transition-transform shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button @click="open = !open" type="button" class="w-full bg-white border border-[#b26d27] text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-bold flex items-center justify-between cursor-pointer">
+                                            <span class="truncate pr-2" x-text="selectedSubbagId && subbags[selectedSubbagId] ? subbags[selectedSubbagId].replace('Subbagian ', '') : 'Pilih Subbagian...'"></span>
+                                            <svg class="w-4 h-4 text-gray-400 pointer-events-none transition-transform shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
                                         
                                         <!-- Dropdown Menu items -->
                                         <div x-show="open" 
-                                             x-transition:enter="transition ease-out duration-100"
-                                             x-transition:enter-start="opacity-0 scale-95"
-                                             x-transition:enter-end="opacity-100 scale-100"
-                                             x-transition:leave="transition ease-in duration-75"
-                                             x-transition:leave-start="opacity-100 scale-100"
-                                             x-transition:leave-end="opacity-0 scale-95"
-                                             class="absolute z-50 left-0 right-0 mt-1 bg-[#EFE9DF] border-2 border-[#3D3025] rounded-xl shadow-lg max-h-56 overflow-y-auto divide-y divide-[#3D3025]/20 flex flex-col"
+                                             x-transition.origin.top.left 
+                                             class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100"
                                              style="display: none;">
-                                            <template x-for="(name, id) in subbags">
-                                                <button type="button" 
-                                                        @click="selectedSubbagId = id; open = false;"
-                                                        class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
-                                                        x-text="name">
+                                            <template x-for="(name, id) in subbags" :key="id">
+                                                <button @click="selectedSubbagId = id; open = false;" type="button" class="w-full text-left p-3 text-xs text-gray-900 hover:bg-slate-50 font-bold transition-colors bg-white cursor-pointer truncate" :class="selectedSubbagId === id ? 'text-[#b26d27]' : ''" x-text="name">
                                                 </button>
                                             </template>
                                         </div>
                                     </div>
                                 </div>
-                                <button @click="reassignTicket()" class="w-full bg-[#b26d27] hover:bg-[#9b5a1b] text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer">
+                                <button @click="reassignTicket()" 
+                                        :disabled="!selectedSubbagId"
+                                        :class="!selectedSubbagId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#b26d27] hover:bg-[#9b5a1b] text-white cursor-pointer'"
+                                        class="w-full font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md">
                                     Pindahkan Rute
                                 </button>
                             </div>

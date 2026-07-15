@@ -50,7 +50,7 @@ class DashboardController extends Controller
      */
     public function tiketDetail()
     {
-        $tickets = Ticket::where('pengirimId', Auth::id())
+        $tickets = Ticket::with('comments')->where('pengirimId', Auth::id())
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
 
@@ -63,7 +63,7 @@ class DashboardController extends Controller
     public function kasubbag()
     {
         $user = Auth::user();
-        $tickets = Ticket::where('kasubbagId', $user->subbagId)
+        $tickets = Ticket::with('comments')->where('kasubbagId', $user->subbagId)
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
 
@@ -79,7 +79,7 @@ class DashboardController extends Controller
      */
     public function solver()
     {
-        $tickets = Ticket::where('solverId', Auth::id())
+        $tickets = Ticket::with('comments')->where('solverId', Auth::id())
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
 
@@ -101,7 +101,7 @@ class DashboardController extends Controller
      */
     public function operatorTiket()
     {
-        $tickets = Ticket::orderBy('tanggalUpdate', 'desc')->get();
+        $tickets = Ticket::with('comments')->orderBy('tanggalUpdate', 'desc')->get();
         $solvers = User::where('role', 'solver')->get();
 
         return view('dashboards.operator-tiket', compact('tickets', 'solvers'));
