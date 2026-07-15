@@ -1,0 +1,2 @@
+ERROR: Failed to query database.
+SQLSTATE[08006] [7] timeout expired (Connection: pgsql, Host: ep-lively-glade-at7qk3hs-pooler.c-9.us-east-1.aws.neon.tech, Port: 5432, Database: neondb, SQL: select count(*) as aggregate from "users")

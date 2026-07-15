@@ -103,13 +103,37 @@
                         <div class="space-y-2">
                             <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Penugasan Ulang Subbagian (Reassign)</h4>
                             <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-3.5 justify-between min-h-[120px]">
-                                <div class="w-full">
+                                <div class="w-full" x-data="{ open: false }" @click.away="open = false">
                                     <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pindahkan Subbagian TI</label>
-                                    <select x-model="selectedSubbagId" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-700 rounded-lg p-2.5 text-xs font-bold">
-                                        <template x-for="(name, id) in subbags">
-                                            <option :value="id" x-text="name" :selected="id === getSelectedTicket().kasubbagId"></option>
-                                        </template>
-                                    </select>
+                                    <div class="relative">
+                                        <!-- Dropdown Trigger button -->
+                                        <button type="button" @click="open = !open" 
+                                                class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none cursor-pointer">
+                                            <span class="truncate pr-2" x-text="selectedSubbagId ? subbags[selectedSubbagId] : '-Pilih Subbagian-'"></span>
+                                            <svg class="w-4 h-4 text-[#8C7662] pointer-events-none transition-transform shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        
+                                        <!-- Dropdown Menu items -->
+                                        <div x-show="open" 
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="opacity-0 scale-95"
+                                             x-transition:enter-end="opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="opacity-100 scale-100"
+                                             x-transition:leave-end="opacity-0 scale-95"
+                                             class="absolute z-50 left-0 right-0 mt-1 bg-[#EFE9DF] border-2 border-[#3D3025] rounded-xl shadow-lg max-h-56 overflow-y-auto divide-y divide-[#3D3025]/20 flex flex-col"
+                                             style="display: none;">
+                                            <template x-for="(name, id) in subbags">
+                                                <button type="button" 
+                                                        @click="selectedSubbagId = id; open = false;"
+                                                        class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
+                                                        x-text="name">
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
                                 <button @click="reassignTicket()" class="w-full bg-[#b26d27] hover:bg-[#9b5a1b] text-white font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer">
                                     Pindahkan Rute

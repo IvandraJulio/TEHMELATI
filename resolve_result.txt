@@ -1,0 +1,1 @@
+ERROR via host: SQLSTATE[08006] [7] SSL SYSCALL error: Connection reset by peer (0x00002746/10054)

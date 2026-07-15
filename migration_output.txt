@@ -1,0 +1,25 @@
+Exit code: 1
+Output:
+
+
+   Illuminate\Database\QueryException
+
+  SQLSTATE[08006] [7] timeout expired (Connection: pgsql, Host: ep-lively-glade-at7qk3hs-pooler.c-9.us-east-1.aws.neon.tech, Port: 5432, Database: neondb, SQL: select exists (select 1 from pg_class c, pg_namespace n where n.nspname = current_schema() and c.relname = 'migrations' and c.relkind in ('r', 'p') and n.oid = c.relnamespace))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:66
+      PDOException::("SQLSTATE[08006] [7] timeout expired")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:66
+      PDO::__construct("pgsql:host=ep-lively-glade-at7qk3hs-pooler.c-9.us-east-1.aws.neon.tech;dbname='neondb';port=5432;client_encoding='utf8';sslmode=require", "neondb_owner", Object(SensitiveParameterValue), [])
+
