@@ -9,7 +9,28 @@
         
         <!-- LEFT COLUMN: Chatbot (virtual assistant) -->
         <div :class="showForm ? 'lg:col-span-8' : 'lg:col-span-12 max-w-4xl mx-auto w-full'" 
-             class="bg-white border border-[#e2e6ea] rounded-2xl shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300">
+             class="relative bg-white border border-[#e2e6ea] rounded-2xl shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300"
+             @dragover.prevent="isDragging = true"
+             @dragenter.prevent="isDragging = true">
+             
+             <!-- Drag and Drop Overlay -->
+             <div x-show="isDragging" 
+                  @dragleave.prevent="isDragging = false"
+                  @drop.prevent="handleDrop($event)"
+                  x-transition:enter="transition ease-out duration-200"
+                  x-transition:enter-start="opacity-0 scale-95"
+                  x-transition:enter-end="opacity-100 scale-100"
+                  x-transition:leave="transition ease-in duration-150"
+                  x-transition:leave-start="opacity-100 scale-100"
+                  x-transition:leave-end="opacity-0 scale-95"
+                  class="absolute inset-0 bg-[#b26d27]/90 backdrop-blur-xs z-50 flex flex-col items-center justify-center text-white border-2 border-dashed border-[#F0DCC0] rounded-2xl m-2"
+                  style="display: none;">
+                  <div class="p-6 rounded-full bg-white/10 mb-4 animate-bounce pointer-events-none">
+                      <i data-lucide="upload-cloud" class="w-12 h-12 text-white"></i>
+                  </div>
+                  <h3 class="text-lg font-bold pointer-events-none">Lepaskan Gambar di Sini</h3>
+                  <p class="text-xs text-[#F0DCC0] mt-1 font-medium pointer-events-none">Unggah screenshot atau foto kendala TI Anda</p>
+             </div>
              
              <!-- Chat Header -->
              <div class="bg-[#F0DCC0] text-[#78430e] px-5 py-4 flex items-center gap-3 shrink-0 border-b border-orange-100">
@@ -297,6 +318,7 @@
             successMessage: '',
             showForm: false,
             attachedImage: null,
+            isDragging: false,
             lightboxOpen: false,
             lightboxImageUrl: '',
             
@@ -518,6 +540,14 @@
                         event.preventDefault();
                         break;
                     }
+                }
+            },
+
+            handleDrop(event) {
+                this.isDragging = false;
+                const files = event.dataTransfer.files;
+                if (files && files.length > 0) {
+                    this.processImageFile(files[0]);
                 }
             },
 
