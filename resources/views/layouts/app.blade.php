@@ -106,16 +106,7 @@
                 </a>
             </div>
 
-            <!-- Center: Search Input -->
-            @if(!request()->routeIs('dashboard', 'dashboard.tiket', 'dashboard.detail', 'operator', 'operator.analitik'))
-             <div class="flex-1 max-w-sm mx-6 relative hidden md:block">
-                <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                <input type="text" 
-                       placeholder="Cari Tiket Anda" 
-                       @input="window.dispatchEvent(new CustomEvent('search-tickets', { detail: $event.target.value }))"
-                       class="w-full bg-[#f5f6f8] border-0 text-gray-700 rounded-full pl-9.5 pr-4 py-2 text-xs outline-none focus:ring-1 focus:ring-[#b26d27]/30 transition-all font-semibold placeholder:text-gray-400">
-            </div>
-            @endif
+
 
             <!-- Right Side: User Actions -->
             <div class="flex items-center gap-4.5">
