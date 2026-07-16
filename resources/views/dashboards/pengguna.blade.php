@@ -169,7 +169,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-x-0"
              x-transition:leave-end="opacity-0 translate-x-8"
-             class="lg:col-span-4 bg-white p-5 md:p-6 rounded-2xl border border-[#e2e6ea] shadow-xs flex flex-col justify-between h-full overflow-hidden"
+             class="lg:col-span-4 bg-white p-5 md:p-6 rounded-2xl border border-[#e2e6ea] shadow-xs flex flex-col justify-between h-full relative"
              style="display: none;">
              
              <div class="flex flex-col h-full justify-between">
@@ -195,7 +195,7 @@
 
                      <form @submit.prevent="submitForm()" class="space-y-3.5">
                           <!-- Kategori Select -->
-                          <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                          <div class="relative" x-data="{ open: false, hoveredCat: null }" @click.away="open = false; hoveredCat = null">
                               <label class="block text-[10px] font-bold text-gray-800 mb-1">Kategori (level 1)</label>
                               <button type="button" @click="open = !open" 
                                       class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none">
@@ -213,16 +213,38 @@
                                    style="display: none;">
                                    <template x-for="cat in catalog">
                                        <button type="button" 
-                                               @click="kategori = cat.category; onCategoryChange(); open = false;"
+                                               @mouseenter="hoveredCat = cat.category"
+                                               @mouseleave="hoveredCat = null"
+                                               @click="kategori = cat.category; onCategoryChange(); open = false; hoveredCat = null;"
                                                class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
                                                x-text="formatDisplay(cat.category)">
                                        </button>
                                    </template>
                               </div>
+                                                             <!-- Tooltip Card -->
+                               <div x-show="open && hoveredCat"
+                                    x-transition:enter="transition ease-out duration-150"
+                                    x-transition:enter-start="opacity-0 translate-x-2"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-2"
+                                    class="hidden lg:block absolute right-[calc(100%+0.75rem)] top-[54px] w-72 bg-[#FDFBF7] border-2 border-[#3D3025] rounded-xl p-4 shadow-lg z-[60] pointer-events-none text-left"
+                                    style="display: none;">
+                                    <div class="text-[10px] font-extrabold uppercase text-[#b26d27] mb-1.5 tracking-wider" x-text="formatDisplay(hoveredCat)"></div>
+                                    <div class="text-xs text-[#5A4535] font-semibold leading-relaxed whitespace-pre-line">
+                                        <template x-if="getExplanation(hoveredCat)">
+                                            <span x-text="getExplanation(hoveredCat)"></span>
+                                        </template>
+                                        <template x-if="!getExplanation(hoveredCat)">
+                                            <span class="text-red-500 font-bold">(?)</span>
+                                        </template>
+                                    </div>
+                               </div>
                           </div>
 
                           <!-- Sub-Layanan Select -->
-                          <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                          <div class="relative" x-data="{ open: false, hoveredSub: null }" @click.away="open = false; hoveredSub = null">
                               <label class="block text-[10px] font-bold text-gray-800 mb-1">Sub-Layanan (level 2)</label>
                               <button type="button" @click="if (kategori) open = !open" :disabled="!kategori"
                                       class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed">
@@ -240,16 +262,38 @@
                                    style="display: none;">
                                    <template x-for="sub in getSubLayananList()">
                                        <button type="button" 
-                                               @click="subLayanan = sub.name; onSubChange(); open = false;"
+                                               @mouseenter="hoveredSub = sub.name"
+                                               @mouseleave="hoveredSub = null"
+                                               @click="subLayanan = sub.name; onSubChange(); open = false; hoveredSub = null;"
                                                class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
                                                x-text="formatDisplay(sub.name)">
                                        </button>
                                    </template>
                               </div>
+                                                             <!-- Tooltip Card -->
+                               <div x-show="open && hoveredSub"
+                                    x-transition:enter="transition ease-out duration-150"
+                                    x-transition:enter-start="opacity-0 translate-x-2"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-2"
+                                    class="hidden lg:block absolute right-[calc(100%+0.75rem)] top-[54px] w-72 bg-[#FDFBF7] border-2 border-[#3D3025] rounded-xl p-4 shadow-lg z-[60] pointer-events-none text-left"
+                                    style="display: none;">
+                                    <div class="text-[10px] font-extrabold uppercase text-[#b26d27] mb-1.5 tracking-wider" x-text="formatDisplay(hoveredSub)"></div>
+                                    <div class="text-xs text-[#5A4535] font-semibold leading-relaxed whitespace-pre-line">
+                                        <template x-if="getExplanation(hoveredSub)">
+                                            <span x-text="getExplanation(hoveredSub)"></span>
+                                        </template>
+                                        <template x-if="!getExplanation(hoveredSub)">
+                                            <span class="text-red-500 font-bold">(?)</span>
+                                        </template>
+                                    </div>
+                               </div>
                           </div>
 
                           <!-- Detail Layanan Select (Level 3) -->
-                          <div class="relative" x-show="getDetailLayananList().length > 0" x-data="{ open: false }" @click.away="open = false" style="display: none;">
+                          <div class="relative" x-show="getDetailLayananList().length > 0" x-data="{ open: false, hoveredItem: null }" @click.away="open = false; hoveredItem = null" style="display: none;">
                               <label class="block text-[10px] font-bold text-gray-800 mb-1">Detail Layanan (level 3)</label>
                               <button type="button" @click="if (subLayanan) open = !open" :disabled="!subLayanan"
                                       class="w-full flex items-center justify-between bg-[#EFE9DF] border-2 border-[#3D3025] text-[#5A4535] rounded-xl px-4 py-2.5 text-xs font-bold transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed">
@@ -266,14 +310,36 @@
                                    class="absolute z-50 left-0 right-0 mt-1 bg-[#EFE9DF] border-2 border-[#3D3025] rounded-xl shadow-lg overflow-hidden flex flex-col"
                                    style="display: none;">
                                    <template x-for="item in getDetailLayananList()">
-                                       <button type="button" 
-                                               @click="detailLayanan = item; open = false;"
-                                               class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
-                                               x-text="formatDisplay(item)">
-                                       </button>
-                                   </template>
-                              </div>
-                          </div>
+                                        <button type="button" 
+                                                @mouseenter="hoveredItem = item"
+                                                @mouseleave="hoveredItem = null"
+                                                @click="detailLayanan = item; open = false; hoveredItem = null;"
+                                                class="w-full text-left px-4 py-2.5 text-xs text-[#785E4E] hover:bg-[#E6DDD0] font-semibold transition-colors cursor-pointer"
+                                                x-text="formatDisplay(item)">
+                                        </button>
+                                    </template>
+                               </div>
+                               <!-- Tooltip Card -->
+                               <div x-show="open && hoveredItem"
+                                    x-transition:enter="transition ease-out duration-150"
+                                    x-transition:enter-start="opacity-0 translate-x-2"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-2"
+                                    class="hidden lg:block absolute right-[calc(100%+0.75rem)] top-[54px] w-72 bg-[#FDFBF7] border-2 border-[#3D3025] rounded-xl p-4 shadow-lg z-[60] pointer-events-none text-left"
+                                    style="display: none;">
+                                    <div class="text-[10px] font-extrabold uppercase text-[#b26d27] mb-1.5 tracking-wider" x-text="formatDisplay(hoveredItem)"></div>
+                                    <div class="text-xs text-[#5A4535] font-semibold leading-relaxed whitespace-pre-line">
+                                        <template x-if="getExplanation(hoveredItem)">
+                                            <span x-text="getExplanation(hoveredItem)"></span>
+                                        </template>
+                                        <template x-if="!getExplanation(hoveredItem)">
+                                            <span class="text-red-500 font-bold">(?)</span>
+                                        </template>
+                                    </div>
+                               </div>
+                           </div>
 
                          <!-- Detail Masalah -->
                          <div>
@@ -428,6 +494,60 @@
                     return parts[0] + ' ' + parts.slice(1).join(' ').toLowerCase();
                 }
                 return text;
+            },
+
+            getExplanation(key) {
+                const explanations = {
+                    // Layanan Identitas (Level 2 subs)
+                    "Layanan Akun": "Cakupan Layanan Akun: Pembuatan akun, Perubahan akun, Pengaktifan/penonaktifan akun, dan reset password akun.",
+                    "Layanan TTE": "Layanan TTE dengan cakupan: Informasi TTE, Pendaftaran, verifikasi data pendaftar, Pembaruan dan Penonaktifan TTE.",
+                    "Layanan Segel Elektronik": "Layanan Segel Elektronik dengan lingkup: Informasi layanan, Registrasi dan verifikasi calon penanggung jawab segel, Penerbitan segel elektronik, Pembaruan dan Penonaktifan segel elektronik.",
+                    "Layanan Email": "Cakupan Layanan Email: Pembuatan, perubahan, dan penonaktifan akun email, akun Shared Mailbox, Mailing list, dan broadcast email.",
+                    "Layanan MFA": "Cakupan Layanan MFA: Pendaftaran, Perubahan, dan Penonaktifan MFA.",
+
+                    // Layanan Data (Level 3 items)
+                    "Perencanaan Data": "Layanan Perencanaan Data mencakup: Pendaftaran kebutuhan data, dan Perubahan kebutuhan data.",
+                    "Pengumpulan Data": "Layanan Pengumpulan Data mencakup: Penyediaan, Penerimaan, dan Pertukaran data.",
+                    "Pengolahan Data": "Layanan Pengolahan Data mencakup: Kompilasi, Pembersihan, serta Verifikasi dan validasi data.",
+                    "Penyimpanan Data": "Layanan Penyimpanan Data mencakup: Pengunggahan, Restore, dan Pembuatan salinan/backup data.",
+                    "Penyebarluasan Data": "Layanan Penyebarluasan Data mencakup: Pemberian akses data, Pendistribusian data, dan Pertukaran data antar Satuan Kerja.",
+                    "Analisis Data": "Layanan Analisis Data: Pengembangan model analitik, Pengembangan cluster penyajian data, Perubahan model analitik data, Perubahan cluster penyajian data, Pendaftaran, Perubahan, dan Pencabutan akses, Penyediaan data dan Pendampingan analisis data.",
+                    "Pengamanan Data": "Layanan Pengamanan Data: Pengamanan perangkat pengolahan data, Enkripsi data, Penandatanganan Pakta Integritas Penggunaan Data BPK, Penandatanganan Perjanjian Kerahasiaan Data, dan Pengembalian data di saat pengguna data sudah tidak memiliki kewenangan menggunakan data.",
+                    "Pemusnahan Data": "Layanan Pemusnahan Data mencakup: Informasi data yang dimusnahkan, dan Pemusnahan fisik data.",
+                    "BIDICS Dashboard": "BIDICS Dashboard mencakup: Pengembangan model analitik, Pengembangan cluster, dan Platform BIDICS-SSA.",
+                    "BIDICS-SSA": "BIDICS-SSA: Layanan ini mencakup pemanfaatan hasil analisis data yang disajikan pada BIDICS-SSA.",
+
+                    // Layanan Aplikasi (Level 2 subs)
+                    "Pengembangan Aplikasi": "Pengembangan Aplikasi:\nPembangunan, perubahan, dan penghapusan.",
+                    "Aplikasi Pemeriksaan": "Aplikasi Pemeriksaan:\nTerkait dengan aplikasi pendukung proses bisnis pemeriksaan BPK yang dikembangkan secara in-house, outsource, atau kombinasi (in-house dan outsource).",
+                    "Aplikasi Kelembagaan": "Aplikasi Kelembagaan:\nAplikasi pendukung proses bisnis kelembagaan.",
+                    "Aplikasi Pendukung": "Aplikasi Pendukung:\nMerupakan aplikasi pihak ketiga yang dapat diterapkan pada perangkat di luar aplikasi standar BPK (install/uninstall, upgrade, patch aplikasi, dan konfigurasi aplikasi).",
+                    "Aplikasi Kolaborasi": "Aplikasi Kolaborasi:\nTerkait dengan pengelolaan aplikasi pendukung perkantoran dan aplikasi lain yang disediakan pada platform on-premise dan/atau on-cloud, digunakan untuk pelaksanaan tugas BPK secara kolaboratif di mana Pegawai BPK dapat bekerja bersama-sama.",
+                    "Layanan Survei": "Layanan Survei:\nMerupakan layanan untuk mendukung pelaksanaan pengumpulan data dan informasi dari berbagai responden.",
+
+                    // Layanan Teknologi (Level 2 subs)
+                    "Layanan Intranet": "Layanan Intranet:\nCakupan: Pembuatan, konfigurasi, dan penonaktifan LAN, Pemasangan, konfigurasi, dan penonaktifan Wi-Fi.",
+                    "Layanan Internet": "Layanan Internet:\nCakupan: Pemasangan, pengaturan, dan penonaktifan internet.",
+                    "Layanan Virtual Private Network": "Layanan Virtual Private Network (VPN):\nCakupan: Pemasangan dan penonaktifan VPN.",
+                    "Layanan Hosting": "Layanan Hosting:\nLayanan ini mencakup: Pendaftaran hosting subdomain, Pembuatan Virtual Machine (VM), Pengaturan kapasitas penyimpanan dan komputasi, Pengaturan konfigurasi hosting subdomain, serta Pengaktifan atau penonaktifan hosting subdomain.",
+
+                    // Layanan Perangkat (Level 2 subs)
+                    "Standarisasi Perangkat Komputer": "Standarisasi Perangkat:\nMencakup standarisasi perangkat baru dan perangkat dalam rangka pemeliharaan.",
+                    "Peminjaman Perangkat": "Layanan Peminjaman Perangkat:\nPeminjaman modem, router, access point Wi-Fi, serta peminjaman perangkat video conference dan perangkat pendukung lainnya.",
+                    "Pemeliharaan Perangkat": "Layanan Pemeliharaan Perangkat Komputer:\nPemeliharaan Personal Computer (PC) berupa desktop dan laptop, Konfigurasi periferal baik yang dilakukan di ruangan layanan TI secara langsung maupun remote, serta pemberian penugasan kepada personel untuk melakukan kunjungan ke tempat perangkat berada.",
+                    "Penyediaan Barang Persediaan": "Penyediaan Barang Persediaan:\nMencakup penyediaan suku cadang dan periferal komputer lainnya.",
+
+                    // Layanan Dukungan TI (Level 1 category & Level 2 sub)
+                    "Layanan Dukungan TI Untuk Kegiatan Khusus": "Layanan Dukungan TI untuk Kegiatan Khusus:\nMencakup penugasan personel sebagai narasumber dan pendamping dukungan teknis kegiatan, termasuk pemenuhan kebutuhan perangkat yang diperlukan.",
+                    "Pendampingan Personel TI": "Layanan Dukungan TI untuk Kegiatan Khusus:\nMencakup penugasan personel sebagai narasumber dan pendamping dukungan teknis kegiatan, termasuk pemenuhan kebutuhan perangkat yang diperlukan.",
+
+                    // Layanan Informasi (Level 1 category & Level 2 subs)
+                    "Layanan Informasi": "Layanan Informasi:\nKnowledge base produk TI, Informasi dan produk layanan TI, serta Tugas dan fungsi Biro TI.",
+                    "Knowledge Base Produk TI": "Layanan Informasi:\nKnowledge base produk TI, Informasi dan produk layanan TI, serta Tugas dan fungsi Biro TI.",
+                    "Informasi Produk TI": "Layanan Informasi:\nKnowledge base produk TI, Informasi dan produk layanan TI, serta Tugas dan fungsi Biro TI.",
+                    "Tugas dan Fungsi Biro TI": "Layanan Informasi:\nKnowledge base produk TI, Informasi dan produk layanan TI, serta Tugas dan fungsi Biro TI.",
+                };
+                return explanations[key] || '';
             },
 
             getBotResponseCount() {
