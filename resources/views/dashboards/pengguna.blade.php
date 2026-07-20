@@ -175,10 +175,9 @@
              <div class="flex flex-col h-full justify-between">
                  <div class="space-y-4">
                      <div class="flex justify-between items-start">
-                         <div>
-                             <h2 class="text-sm font-bold text-gray-800 font-display">Form Permintaan Layanan</h2>
-                             <p class="text-[10px] text-gray-400 mt-1">Lorem ipsum dolor sit amet</p>
-                         </div>
+                          <div>
+                              <h2 class="text-sm font-bold text-gray-800 font-display">Form Permintaan Layanan</h2>
+                          </div>
                          <button @click="showForm = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
                              <i data-lucide="x" class="w-4 h-4"></i>
                          </button>
