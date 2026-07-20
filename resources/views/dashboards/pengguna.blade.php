@@ -368,6 +368,42 @@
             </button>
         </div>
     </div>
+
+    <!-- Success Ticket Modal -->
+    <div x-show="showSuccessModal" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-[100] p-4" 
+         style="display: none;">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl text-center border border-gray-100 relative" @click.stop>
+            <!-- Icon -->
+            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <i data-lucide="check-circle" class="w-8 h-8"></i>
+            </div>
+            
+            <h3 class="text-base font-bold text-gray-900 font-display">Tiket Berhasil Dibuat</h3>
+            
+            <p class="text-xs text-gray-600 mt-2 leading-relaxed font-medium">
+                Permintaan layanan Anda telah berhasil terdaftar dengan kode tiket:
+            </p>
+            
+            <div class="mt-3 py-2 px-4 bg-[#FAF4EE] border border-[#F0DCC0] rounded-xl inline-block">
+                <span class="text-sm font-extrabold text-[#b26d27] font-mono tracking-wide" x-text="createdTicketCode"></span>
+            </div>
+
+            <div class="mt-6">
+                <button type="button" 
+                        @click="showSuccessModal = false" 
+                        class="w-full bg-[#b26d27] hover:bg-[#9b5a1b] text-white py-2.5 px-4 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -382,6 +418,8 @@
             loadingSubmit: false,
             successMessage: '',
             showForm: false,
+            showSuccessModal: false,
+            createdTicketCode: '',
             attachedImage: null,
             isDragging: false,
             lightboxOpen: false,
@@ -628,10 +666,16 @@
                     const data = await response.json();
                     if (response.ok && data.success) {
                         this.successMessage = data.id;
+                        this.createdTicketCode = data.id;
+                        this.showForm = false;
+                        this.showSuccessModal = true;
                         this.kategori = '';
                         this.subLayanan = '';
                         this.detailLayanan = '';
                         this.detailMasalah = '';
+                        this.$nextTick(() => {
+                            if (window.lucide) lucide.createIcons();
+                        });
                     } else {
                         alert(data.error || 'Gagal mengirim tiket.');
                     }
