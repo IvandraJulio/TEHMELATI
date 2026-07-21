@@ -122,7 +122,7 @@
                             <div class="text-gray-800 font-bold mt-1">
                                 <span x-text="getSelectedTicket().solverName ? getSelectedTicket().solverName : 'Belum Ditugaskan'"></span>
                                 <template x-if="getSelectedTicket().solver2Name">
-                                    <span x-text="' & ' + getSelectedTicket().solver2Name" class="text-blue-600"></span>
+                                    <span x-text="' & ' + getSelectedTicket().solver2Name"></span>
                                 </template>
                             </div>
                         </div>
