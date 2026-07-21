@@ -266,31 +266,99 @@ class DashboardController extends Controller
     }
 
     /**
-     * Memperbarui status tiket dan memproses aksi (terima, tugaskan, selesaikan, eskalasi, tolak)
+     * Memperbarui status tiket dan memproses aksi (terima, tugaskan, selesaikan, eskalasi, tolak, reopen)
      */
     public function updateTicketActionApi(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
+        $now = date('Y-m-d H:i');
+
+        // Handle Reopen Ticket Action
+        if ($request->action === 'reopen' || $request->status === 'reopen') {
+            if ($ticket->status !== 'Selesai') {
+                return response()->json(['error' => 'Hanya tiket berstatus Selesai yang dapat dibuka kembali.'], 400);
+            }
+
+            $completedAt = null;
+            if (!empty($ticket->tanggalSelesai)) {
+                $completedAt = strtotime($ticket->tanggalSelesai);
+            }
+            if (!$completedAt) {
+                $completedAt = strtotime($ticket->tanggalUpdate);
+            }
+
+            if ($completedAt && (time() - $completedAt > 86400)) {
+                return response()->json(['error' => 'Batas waktu 24 jam untuk membuka kembali tiket ini telah berakhir.'], 400);
+            }
+
+            $newStatus = !empty($ticket->solverId) ? 'Dikerjakan' : 'Pending';
+
+            $ticket->update([
+                'status' => $newStatus,
+                'tanggalSelesai' => null,
+                'tanggalUpdate' => $now,
+            ]);
+
+            Comment::create([
+                'id' => 'cmt-' . microtime(true),
+                'ticketId' => $ticket->id,
+                'authorId' => Auth::id(),
+                'authorName' => Auth::user()->name,
+                'authorRole' => Auth::user()->role,
+                'text' => 'Tiket dibuka kembali (reopened) oleh pelapor.',
+                'timestamp' => $now,
+                'type' => 'tindaklanjuti',
+            ]);
+
+            if (!empty($ticket->solverId)) {
+                Notification::create([
+                    'user_id' => $ticket->solverId,
+                    'ticket_id' => $ticket->id,
+                    'title' => 'Tiket Dibuka Kembali',
+                    'message' => "Pelapor telah membuka kembali tiket {$ticket->id} ({$ticket->layanan}).",
+                ]);
+            } elseif (!empty($ticket->kasubbagId)) {
+                $kasubbagUsers = User::where('role', 'kasubbag')->where('subbagId', $ticket->kasubbagId)->get();
+                foreach ($kasubbagUsers as $kb) {
+                    Notification::create([
+                        'user_id' => $kb->id,
+                        'ticket_id' => $ticket->id,
+                        'title' => 'Tiket Dibuka Kembali',
+                        'message' => "Pelapor telah membuka kembali tiket {$ticket->id} ({$ticket->layanan}).",
+                    ]);
+                }
+            }
+
+            return response()->json(['success' => true, 'status' => $newStatus]);
+        }
 
         if ($ticket->status === 'Selesai') {
             return response()->json(['error' => 'Tiket yang sudah selesai tidak dapat diubah.'], 400);
         }
 
-        $now = date('Y-m-d H:i');
-
         $oldStatus = $ticket->status;
         $oldSolverId = $ticket->solverId;
         $oldKasubbagId = $ticket->kasubbagId;
 
+        $targetStatus = $request->status ?? $ticket->status;
+        $tanggalSelesai = $request->tanggalSelesai ?? $ticket->tanggalSelesai;
+        if ($targetStatus === 'Selesai') {
+            if (empty($tanggalSelesai)) {
+                $tanggalSelesai = date('Y-m-d H:i:s');
+            } elseif (strlen($tanggalSelesai) <= 10) {
+                $tanggalSelesai = $tanggalSelesai . ' ' . date('H:i:s');
+            }
+        }
+
         $ticket->update([
-            'status' => $request->status ?? $ticket->status,
+            'status' => $targetStatus,
             'kasubbagId' => $request->kasubbagId ?? $ticket->kasubbagId,
             'kasubbagName' => $request->kasubbagName ?? $ticket->kasubbagName,
             'solverId' => $request->solverId ?? $ticket->solverId,
             'solverName' => $request->solverName ?? $ticket->solverName,
             'alasanTolak' => $request->alasanTolak ?? $ticket->alasanTolak,
             'catatanKasubbag' => $request->catatanKasubbag ?? $ticket->catatanKasubbag,
-            'tanggalSelesai' => $request->tanggalSelesai ?? $ticket->tanggalSelesai,
+            'tanggalSelesai' => $tanggalSelesai,
             'tanggalUpdate' => $now,
         ]);
 
@@ -352,16 +420,40 @@ class DashboardController extends Controller
 
         if ($request->has('comment')) {
             $commentData = $request->comment;
+            $commentType = $commentData['type'] ?? 'komentar';
+            $authorId = $commentData['authorId'] ?? Auth::id();
+            $authorName = $commentData['authorName'] ?? Auth::user()->name;
+
             Comment::create([
                 'id' => $commentData['id'] ?? ('cmt-' . microtime(true)),
                 'ticketId' => $id,
-                'authorId' => $commentData['authorId'] ?? Auth::id(),
-                'authorName' => $commentData['authorName'] ?? Auth::user()->name,
+                'authorId' => $authorId,
+                'authorName' => $authorName,
                 'authorRole' => $commentData['authorRole'] ?? Auth::user()->role,
                 'text' => $commentData['text'],
                 'timestamp' => $now,
-                'type' => $commentData['type'] ?? 'komentar',
+                'type' => $commentType,
             ]);
+
+            if ($commentType === 'komentar') {
+                $shortText = \Illuminate\Support\Str::limit($commentData['text'], 50);
+                if ($authorId !== $ticket->pengirimId) {
+                    Notification::create([
+                        'user_id' => $ticket->pengirimId,
+                        'ticket_id' => $ticket->id,
+                        'title' => 'Pesan Chat Baru',
+                        'message' => "Pesan baru dari {$authorName} pada tiket {$ticket->id}: \"{$shortText}\"",
+                    ]);
+                }
+                if ($authorId === $ticket->pengirimId && !empty($ticket->solverId) && $ticket->solverId !== $authorId) {
+                    Notification::create([
+                        'user_id' => $ticket->solverId,
+                        'ticket_id' => $ticket->id,
+                        'title' => 'Pesan Chat Baru',
+                        'message' => "Pesan baru dari Pelapor ({$authorName}) pada tiket {$ticket->id}: \"{$shortText}\"",
+                    ]);
+                }
+            }
         }
 
         return response()->json(['success' => true]);
@@ -377,21 +469,49 @@ class DashboardController extends Controller
             'comment.text' => 'required|string',
         ]);
 
+        $ticket = Ticket::findOrFail($id);
+
+        if ($ticket->status === 'Selesai') {
+            return response()->json(['error' => 'Fitur chat telah dinonaktifkan karena tiket sudah selesai.'], 400);
+        }
+
         $commentData = $request->comment;
         $now = date('Y-m-d H:i');
+        $user = Auth::user();
+        $commentType = $commentData['type'] ?? 'komentar';
 
         Comment::create([
             'id' => $commentData['id'] ?? ('cmt-' . microtime(true)),
             'ticketId' => $id,
-            'authorId' => Auth::id(),
-            'authorName' => Auth::user()->name,
-            'authorRole' => Auth::user()->role,
+            'authorId' => $user->id,
+            'authorName' => $user->name,
+            'authorRole' => $user->role,
             'text' => $commentData['text'],
             'timestamp' => $now,
-            'type' => $commentData['type'] ?? 'komentar',
+            'type' => $commentType,
         ]);
 
-        Ticket::where('id', $id)->update(['tanggalUpdate' => $now]);
+        $ticket->update(['tanggalUpdate' => $now]);
+
+        if ($commentType === 'komentar') {
+            $shortText = \Illuminate\Support\Str::limit($commentData['text'], 50);
+            if ($user->id !== $ticket->pengirimId) {
+                Notification::create([
+                    'user_id' => $ticket->pengirimId,
+                    'ticket_id' => $ticket->id,
+                    'title' => 'Pesan Chat Baru',
+                    'message' => "Pesan baru dari {$user->name} pada tiket {$ticket->id}: \"{$shortText}\"",
+                ]);
+            }
+            if ($user->id === $ticket->pengirimId && !empty($ticket->solverId) && $ticket->solverId !== $user->id) {
+                Notification::create([
+                    'user_id' => $ticket->solverId,
+                    'ticket_id' => $ticket->id,
+                    'title' => 'Pesan Chat Baru',
+                    'message' => "Pesan baru dari Pelapor ({$user->name}) pada tiket {$ticket->id}: \"{$shortText}\"",
+                ]);
+            }
+        }
 
         return response()->json(['success' => true]);
     }

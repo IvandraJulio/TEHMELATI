@@ -139,8 +139,8 @@
                     },
                     init() {
                         this.fetchNotifications();
-                        // Poll every 30 seconds
-                        setInterval(() => this.fetchNotifications(), 30000);
+                        // Poll every 10 seconds
+                        setInterval(() => this.fetchNotifications(), 10000);
                     }
                 }" @click.away="open = false">
                     <button @click="open = !open; if(open) markAsRead()" class="text-gray-500 hover:text-gray-800 p-1.5 rounded-full hover:bg-slate-50 transition-all cursor-pointer relative flex items-center justify-center">

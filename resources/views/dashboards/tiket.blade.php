@@ -60,9 +60,17 @@
                                 <span class="status-badge" :class="getStatusBadgeClass(t.status)" x-text="t.status === 'Kembalikan tiket ke operator' ? 'Pending' : t.status"></span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <a :href="'/dashboard/detail?id=' + t.id" class="inline-block bg-slate-100 hover:bg-[#fcf4ec] hover:text-[#b26d27] text-gray-700 font-bold px-4 py-2 rounded-xl transition-all cursor-pointer">
-                                    Lihat Detail
-                                </a>
+                                <div class="flex items-center justify-end gap-2">
+                                    <template x-if="canReopen(t)">
+                                        <button @click="reopenTicket(t.id)" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition-all flex items-center gap-1 cursor-pointer">
+                                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                            <span>Reopen</span>
+                                        </button>
+                                    </template>
+                                    <a :href="'/dashboard/detail?id=' + t.id" class="inline-block bg-slate-100 hover:bg-[#fcf4ec] hover:text-[#b26d27] text-gray-700 font-bold px-4 py-2 rounded-xl transition-all cursor-pointer">
+                                        Lihat Detail
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     </template>
@@ -100,6 +108,54 @@
                     this.tickets = await res.json();
                 } catch (e) {
                     console.error('Failed to load tickets', e);
+                }
+            },
+
+            canReopen(t) {
+                if (!t || t.status !== 'Selesai') return false;
+                
+                let completedTime = null;
+                if (t.tanggalSelesai) {
+                    completedTime = new Date(t.tanggalSelesai.replace(' ', 'T')).getTime();
+                }
+                if (!completedTime || isNaN(completedTime)) {
+                    if (t.tanggalUpdate) {
+                        completedTime = new Date(t.tanggalUpdate.replace(' ', 'T')).getTime();
+                    }
+                }
+                if (!completedTime || isNaN(completedTime)) return false;
+
+                const now = Date.now();
+                const elapsedMs = now - completedTime;
+                const hours24Ms = 24 * 60 * 60 * 1000;
+
+                return elapsedMs >= 0 && elapsedMs <= hours24Ms;
+            },
+
+            async reopenTicket(id) {
+                if (!confirm('Apakah Anda yakin ingin membuka kembali tiket ini?')) return;
+                
+                try {
+                    const response = await fetch(`/api/tickets/${id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            action: 'reopen'
+                        })
+                    });
+
+                    const res = await response.json();
+                    if (response.ok && res.success) {
+                        alert('Tiket berhasil dibuka kembali!');
+                        await this.fetchTickets();
+                    } else {
+                        alert(res.error || 'Gagal membuka kembali tiket.');
+                    }
+                } catch (e) {
+                    alert('Terjadi kesalahan jaringan.');
                 }
             },
 
