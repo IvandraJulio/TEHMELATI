@@ -136,14 +136,6 @@
 
 
 
-                            <!-- Complete Ticket -->
-                            <button @click="openCompleteModal()" 
-                                    x-show="activeTab === 'aktif' && getSelectedTicket().status === 'Dikerjakan'"
-                                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-1.5">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                Selesaikan Tiket
-                            </button>
-
                             <!-- Tindaklanjuti Ticket -->
                             <button @click="openTindaklanjutiModal()" 
                                     x-show="activeTab === 'aktif'"
@@ -255,54 +247,75 @@
 
     <!-- MODAL: Complete Ticket -->
     <div x-show="completeModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
-            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
-                <i data-lucide="check-circle" class="text-emerald-600 w-5 h-5"></i>
-                Selesaikan Tiket
-            </h3>
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4 relative">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+                <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                    <i data-lucide="check-circle" class="text-emerald-600 w-5 h-5"></i>
+                    Selesaikan Tiket
+                </h3>
+                <button @click="completeModalOpen = false" type="button" class="text-gray-400 hover:text-gray-600 hover:bg-slate-100 p-1.5 rounded-lg transition-all cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
             <div>
                 <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Catatan Penyelesaian</label>
                 <textarea x-model="completeNotes" rows="3" placeholder="Bagaimana masalah diselesaikan?..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-medium"></textarea>
             </div>
-            <div class="flex justify-end gap-2.5 pt-2">
-                <button @click="completeModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
-                <button @click="confirmComplete()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Selesai</button>
+            <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button @click="completeModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold cursor-pointer">Batal</button>
+                <button @click="confirmComplete()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer">Selesai</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: Escalate Ticket -->
     <div x-show="escalateModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
-            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
-                <i data-lucide="alert-octagon" class="text-rose-600 w-5 h-5"></i>
-                Eskalasi ke Kasubbag
-            </h3>
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4 relative">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+                <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                    <i data-lucide="alert-octagon" class="text-rose-600 w-5 h-5"></i>
+                    Eskalasi ke Kasubbag
+                </h3>
+                <button @click="escalateModalOpen = false" type="button" class="text-gray-400 hover:text-gray-600 hover:bg-slate-100 p-1.5 rounded-lg transition-all cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
             <div>
                 <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Alasan Eskalasi</label>
                 <textarea x-model="escalateReason" rows="3" placeholder="Mengapa tiket ini perlu dieskalasi kembali ke Kasubbag?..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-medium"></textarea>
             </div>
-            <div class="flex justify-end gap-2.5 pt-2">
-                <button @click="escalateModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
-                <button @click="confirmEscalate()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold">Kirim</button>
+            <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button @click="escalateModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold cursor-pointer">Batal</button>
+                <button @click="confirmEscalate()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold cursor-pointer">Kirim</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: Tindaklanjuti Ticket -->
     <div x-show="tindaklanjutiModalOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" style="display: none;">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4">
-            <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
-                <i data-lucide="wrench" class="text-sky-600 w-5 h-5"></i>
-                Tindaklanjuti Tiket
-            </h3>
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 border border-slate-100 shadow-2xl text-gray-800 space-y-4 relative">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+                <h3 class="text-sm font-bold font-display text-gray-900 flex items-center gap-2">
+                    <i data-lucide="wrench" class="text-sky-600 w-5 h-5"></i>
+                    Tindaklanjuti Tiket
+                </h3>
+                <button @click="tindaklanjutiModalOpen = false" type="button" class="text-gray-400 hover:text-gray-600 hover:bg-slate-100 p-1.5 rounded-lg transition-all cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
             <div>
-                <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Log Tindaklanjuti</label>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Log / Catatan Tindak Lanjut <span class="text-rose-500">*</span></label>
                 <textarea x-model="tindaklanjutiNotes" rows="3" placeholder="Detail tindak lanjut yang dilakukan..." class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-medium"></textarea>
             </div>
-            <div class="flex justify-end gap-2.5 pt-2">
-                <button @click="tindaklanjutiModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold">Batal</button>
-                <button @click="confirmTindaklanjuti()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold">Kirim</button>
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                <button @click="confirmCompleteFromTL()" type="button" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-sm flex items-center gap-1.5">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    Selesaikan Tiket
+                </button>
+                <button @click="confirmTindaklanjuti()" type="button" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-sm flex items-center gap-1.5">
+                    <i data-lucide="wrench" class="w-4 h-4"></i>
+                    Kirim Tindak Lanjut
+                </button>
             </div>
         </div>
     </div>
@@ -572,7 +585,12 @@
 
             async confirmTindaklanjuti() {
                 const ticket = this.getSelectedTicket();
-                if (!ticket || !this.tindaklanjutiNotes.trim()) return;
+                if (!ticket) return;
+
+                if (!this.tindaklanjutiNotes.trim()) {
+                    alert('Harap isi Catatan Tindak Lanjut terlebih dahulu!');
+                    return;
+                }
 
                 const meName = '{{ Auth::user()->name }}';
 
@@ -598,6 +616,44 @@
                     }
                 } catch (e) {
                     alert('Gagal mengirim tindak lanjut.');
+                }
+            },
+
+            async confirmCompleteFromTL() {
+                const ticket = this.getSelectedTicket();
+                if (!ticket) return;
+
+                if (!this.tindaklanjutiNotes.trim()) {
+                    alert('Wajib mengisi Catatan Tindak Lanjut terlebih dahulu untuk menyelesaikan tiket!');
+                    return;
+                }
+
+                const meName = '{{ Auth::user()->name }}';
+
+                try {
+                    const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: 'Selesai',
+                            catatanKasubbag: this.tindaklanjutiNotes.trim(),
+                            tanggalSelesai: new Date().toISOString().slice(0, 10),
+                            comment: {
+                                text: `Tindak Lanjut & Penyelesaian Solver: ${this.tindaklanjutiNotes.trim()}`,
+                                type: 'penyelesaian'
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.tindaklanjutiModalOpen = false;
+                        this.fetchTickets();
+                    }
+                } catch (e) {
+                    alert('Gagal menyelesaikan tiket.');
                 }
             },
 
