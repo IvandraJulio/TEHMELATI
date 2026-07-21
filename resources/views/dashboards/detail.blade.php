@@ -94,7 +94,12 @@
                         </div>
                         <div class="border border-slate-100 p-3 rounded-xl space-y-1" x-show="getSelectedTicket().solverName">
                             <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Solver Ditugaskan</div>
-                            <div class="text-gray-800 font-bold" x-text="getSelectedTicket().solverName"></div>
+                            <div class="text-gray-800 font-bold">
+                                <span x-text="getSelectedTicket().solverName"></span>
+                                <template x-if="getSelectedTicket().solver2Name">
+                                    <span x-text="' & ' + getSelectedTicket().solver2Name" class="text-blue-600"></span>
+                                </template>
+                            </div>
                         </div>
                     </div>
 

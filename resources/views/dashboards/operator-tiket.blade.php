@@ -107,7 +107,12 @@
                         </div>
                         <div class="border border-slate-100 p-3 rounded-xl space-y-1" x-show="getSelectedTicket().solverName">
                             <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Solver Ditugaskan</div>
-                            <div class="text-gray-800 font-bold" x-text="getSelectedTicket().solverName"></div>
+                            <div class="text-gray-800 font-bold">
+                                <span x-text="getSelectedTicket().solverName"></span>
+                                <template x-if="getSelectedTicket().solver2Name">
+                                    <span x-text="' & ' + getSelectedTicket().solver2Name" class="text-blue-600"></span>
+                                </template>
+                            </div>
                         </div>
                     </div>
 
@@ -153,9 +158,16 @@
                         <div class="space-y-2" x-show="getSelectedTicket().status !== 'Selesai'">
                             <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Tugaskan Langsung ke Solver</h4>
                             <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-3.5 justify-between min-h-[120px]">
-                                <div class="w-full" x-data="{ dropdownOpen: false }">
-                                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider font-mono">Pilih Personel Solver</label>
-                                    <div class="relative">
+                                <!-- Solver 1 -->
+                                <div class="w-full space-y-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono">Pilih Personel Solver 1</label>
+                                        <button x-show="!showSolver2" @click="showSolver2 = true" type="button" class="text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-lg transition-all text-[10px] font-bold flex items-center gap-1 cursor-pointer" title="Tambah Solver Kedua">
+                                            <i data-lucide="plus" class="w-3 h-3"></i>
+                                            <span>Tambah Solver</span>
+                                        </button>
+                                    </div>
+                                    <div class="relative" x-data="{ dropdownOpen: false }">
                                         <!-- Dropdown Trigger button -->
                                         <button @click="dropdownOpen = !dropdownOpen" type="button" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-semibold flex items-center justify-between cursor-pointer">
                                             <span class="flex items-center gap-2 min-w-0">
@@ -168,7 +180,7 @@
                                                     </span>
                                                 </template>
                                                 <template x-if="!solvers.find(s => s.id === selectedSolverId)">
-                                                    <span class="text-gray-400">Pilih Solver...</span>
+                                                    <span class="text-gray-400">Pilih Solver 1...</span>
                                                 </template>
                                             </span>
                                             <svg class="w-4 h-4 text-gray-400 pointer-events-none transition-transform shrink-0" :class="dropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +191,54 @@
                                         <!-- Dropdown Menu items -->
                                         <div x-show="dropdownOpen" @click.away="dropdownOpen = false" x-transition.origin.top.left class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
                                             <template x-for="s in solvers.filter(solver => !selectedSubbagId || solver.subbagId === selectedSubbagId)" :key="s.id">
-                                                <button @click="if (s.busy_level !== 'Hi') { selectedSolverId = s.id; dropdownOpen = false; }" type="button" class="w-full text-left p-3 flex items-center justify-between text-xs transition-colors bg-white hover:bg-slate-50 cursor-pointer"
+                                                <button @click="if (s.busy_level !== 'Hi' && s.id !== selectedSolver2Id) { selectedSolverId = s.id; dropdownOpen = false; }" type="button" class="w-full text-left p-3 flex items-center justify-between text-xs transition-colors bg-white hover:bg-slate-50 cursor-pointer"
+                                                        :class="(s.busy_level === 'Hi' || s.id === selectedSolver2Id) ? 'opacity-45 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 cursor-pointer bg-white'">
+                                                    <div class="flex flex-col gap-0.5">
+                                                        <span class="font-bold text-gray-900" x-text="s.name"></span>
+                                                        <span class="text-[10px] text-gray-400" x-text="(subbags[s.subbagId] ? subbags[s.subbagId].replace('Subbagian ', '') : '') + ' | Tugas aktif: ' + s.assigned_today + '/6'"></span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider shrink-0"
+                                                          :class="s.busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (s.busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                                                          x-text="s.busy_level === 'Hi' ? 'Hi (Penuh)' : s.busy_level"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Solver 2 (Optional) -->
+                                <div x-show="showSolver2" x-transition class="w-full space-y-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono">Pilih Personel Solver 2</label>
+                                        <button @click="showSolver2 = false; selectedSolver2Id = '';" type="button" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-lg transition-all text-[10px] font-bold flex items-center gap-1 cursor-pointer" title="Hapus Solver 2">
+                                            <i data-lucide="minus" class="w-3 h-3"></i>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </div>
+                                    <div class="relative" x-data="{ dropdownOpen2: false }">
+                                        <button @click="dropdownOpen2 = !dropdownOpen2" type="button" class="w-full bg-white border border-slate-200 focus:border-[#b26d27] focus:ring-1 focus:ring-[#b26d27]/30 text-gray-800 rounded-xl px-4 py-3 text-xs outline-none transition-all font-semibold flex items-center justify-between cursor-pointer">
+                                            <span class="flex items-center gap-2 min-w-0">
+                                                <template x-if="solvers.find(s => s.id === selectedSolver2Id)">
+                                                    <span class="flex items-center gap-2 text-left min-w-0">
+                                                        <span class="text-gray-900 truncate max-w-[150px] sm:max-w-[200px]" x-text="solvers.find(s => s.id === selectedSolver2Id).name"></span>
+                                                        <span class="px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-wider animate-in fade-in shrink-0"
+                                                              :class="solvers.find(s => s.id === selectedSolver2Id).busy_level === 'Hi' ? 'bg-rose-100 text-rose-800 border-rose-200' : (solvers.find(s => s.id === selectedSolver2Id).busy_level === 'Med' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')"
+                                                              x-text="solvers.find(s => s.id === selectedSolver2Id).busy_level + ' (' + solvers.find(s => s.id === selectedSolver2Id).assigned_today + '/6)'"></span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="!solvers.find(s => s.id === selectedSolver2Id)">
+                                                    <span class="text-gray-400">Pilih Solver 2...</span>
+                                                </template>
+                                            </span>
+                                            <svg class="w-4 h-4 text-gray-400 pointer-events-none transition-transform shrink-0" :class="dropdownOpen2 ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown Menu items Solver 2 -->
+                                        <div x-show="dropdownOpen2" @click.away="dropdownOpen2 = false" x-transition.origin.top.left class="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
+                                            <template x-for="s in solvers.filter(solver => (!selectedSubbagId || solver.subbagId === selectedSubbagId) && solver.id !== selectedSolverId)" :key="s.id">
+                                                <button @click="if (s.busy_level !== 'Hi') { selectedSolver2Id = s.id; dropdownOpen2 = false; }" type="button" class="w-full text-left p-3 flex items-center justify-between text-xs transition-colors bg-white hover:bg-slate-50 cursor-pointer"
                                                         :class="s.busy_level === 'Hi' ? 'opacity-45 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 cursor-pointer bg-white'">
                                                     <div class="flex flex-col gap-0.5">
                                                         <span class="font-bold text-gray-900" x-text="s.name"></span>
@@ -193,6 +252,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <button @click="assignTicketToSolver()" 
                                         :disabled="!selectedSolverId"
                                         :class="!selectedSolverId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'"
@@ -291,6 +351,8 @@
             statusFilter: 'All',
             selectedSubbagId: '',
             selectedSolverId: '',
+            selectedSolver2Id: '',
+            showSolver2: false,
 
             subbags: {
                 'k1': 'Subbagian Pengelolaan Infrastruktur dan Jaringan',
@@ -494,11 +556,21 @@
                 const ticket = this.getSelectedTicket();
                 if (!ticket || !this.selectedSolverId) return;
 
-                const solver = this.solvers.find(s => s.id === this.selectedSolverId);
-                if (!solver) return;
+                const solver1 = this.solvers.find(s => s.id === this.selectedSolverId);
+                if (!solver1) return;
 
-                const subbagName = this.subbags[solver.subbagId] || '';
+                let solver2 = null;
+                if (this.showSolver2 && this.selectedSolver2Id) {
+                    solver2 = this.solvers.find(s => s.id === this.selectedSolver2Id);
+                }
+
+                const subbagName = this.subbags[solver1.subbagId] || '';
                 const operatorName = '{{ Auth::user()->name }}';
+
+                let commentText = `Operator ${operatorName} menugaskan tiket langsung kepada solver: ${solver1.name}.`;
+                if (solver2) {
+                    commentText = `Operator ${operatorName} menugaskan tiket langsung kepada 2 solver: ${solver1.name} dan ${solver2.name}.`;
+                }
 
                 try {
                     const response = await fetch(`/api/tickets/${ticket.id}/actions`, {
@@ -509,19 +581,20 @@
                         },
                         body: JSON.stringify({
                             status: 'Ditugaskan',
-                            kasubbagId: solver.subbagId,
+                            kasubbagId: solver1.subbagId,
                             kasubbagName: `Kasubbag ${subbagName}`,
-                            solverId: solver.id,
-                            solverName: solver.name,
+                            solverId: solver1.id,
+                            solverName: solver1.name,
+                            solver2Id: solver2 ? solver2.id : null,
+                            solver2Name: solver2 ? solver2.name : null,
                             comment: {
-                                text: `Operator ${operatorName} menugaskan tiket langsung kepada solver: ${solver.name}.`,
+                                text: commentText,
                                 type: 'penugasan'
                             }
                         })
                     });
 
                     if (response.ok) {
-                        this.assignModalOpen = false;
                         this.fetchTickets();
                     } else {
                         alert('Gagal menugaskan solver.');

@@ -79,7 +79,11 @@ class DashboardController extends Controller
      */
     public function solver()
     {
-        $tickets = Ticket::with('comments')->where('solverId', Auth::id())
+        $tickets = Ticket::with('comments')
+            ->where(function($q) {
+                $q->where('solverId', Auth::id())
+                  ->orWhere('solver2Id', Auth::id());
+            })
             ->orderBy('tanggalUpdate', 'desc')
             ->get();
 
@@ -338,6 +342,7 @@ class DashboardController extends Controller
 
         $oldStatus = $ticket->status;
         $oldSolverId = $ticket->solverId;
+        $oldSolver2Id = $ticket->solver2Id;
         $oldKasubbagId = $ticket->kasubbagId;
 
         $targetStatus = $request->status ?? $ticket->status;
@@ -350,20 +355,34 @@ class DashboardController extends Controller
             }
         }
 
-        $ticket->update([
+        $updateData = [
             'status' => $targetStatus,
             'kasubbagId' => $request->kasubbagId ?? $ticket->kasubbagId,
             'kasubbagName' => $request->kasubbagName ?? $ticket->kasubbagName,
-            'solverId' => $request->solverId ?? $ticket->solverId,
-            'solverName' => $request->solverName ?? $ticket->solverName,
             'alasanTolak' => $request->alasanTolak ?? $ticket->alasanTolak,
             'catatanKasubbag' => $request->catatanKasubbag ?? $ticket->catatanKasubbag,
             'tanggalSelesai' => $tanggalSelesai,
             'tanggalUpdate' => $now,
-        ]);
+        ];
+
+        if ($request->has('solverId')) {
+            $updateData['solverId'] = $request->solverId;
+        }
+        if ($request->has('solverName')) {
+            $updateData['solverName'] = $request->solverName;
+        }
+        if ($request->has('solver2Id')) {
+            $updateData['solver2Id'] = $request->solver2Id;
+        }
+        if ($request->has('solver2Name')) {
+            $updateData['solver2Name'] = $request->solver2Name;
+        }
+
+        $ticket->update($updateData);
 
         $newStatus = $ticket->status;
         $newSolverId = $ticket->solverId;
+        $newSolver2Id = $ticket->solver2Id;
         $newKasubbagId = $ticket->kasubbagId;
 
         // Hapus notifikasi 'Tiket Belum Diambil' jika sudah ditugaskan, dialihkan, selesai, atau dikembalikan ke operator
@@ -402,6 +421,14 @@ class DashboardController extends Controller
                 'ticket_id' => $ticket->id,
                 'title' => 'Tugas Baru Ditugaskan',
                 'message' => "Anda telah ditugaskan untuk menangani tiket {$ticket->id} ({$ticket->layanan}).",
+            ]);
+        }
+        if (!empty($newSolver2Id) && ($oldSolver2Id !== $newSolver2Id || ($oldStatus !== $newStatus && in_array($newStatus, ['Ditugaskan', 'Dikerjakan'])))) {
+            Notification::create([
+                'user_id' => $newSolver2Id,
+                'ticket_id' => $ticket->id,
+                'title' => 'Tugas Baru Ditugaskan',
+                'message' => "Anda telah ditugaskan sebagai Solver 2 untuk menangani tiket {$ticket->id} ({$ticket->layanan}).",
             ]);
         }
 
@@ -872,7 +899,10 @@ Atau jika tidak menyarankan tiket:
         $result = [];
 
         foreach ($solvers as $solver) {
-            $count = Ticket::where('solverId', $solver->id)
+            $count = Ticket::where(function($q) use ($solver) {
+                    $q->where('solverId', $solver->id)
+                      ->orWhere('solver2Id', $solver->id);
+                })
                 ->whereIn('status', ['Ditugaskan', 'Dikerjakan'])
                 ->count();
 

@@ -153,6 +153,8 @@ class DatabaseSeeder extends Seeder
             $sqlContent = File::get($seedSqlPath);
             // Remove 'USE db_layanan_ti;'
             $sqlContent = preg_replace('/USE\s+db_layanan_ti\s*;/i', '', $sqlContent);
+            // Replace double quotes with backticks for MySQL compatibility
+            $sqlContent = str_replace('"', '`', $sqlContent);
             // Execute the raw query
             DB::unprepared($sqlContent);
         }

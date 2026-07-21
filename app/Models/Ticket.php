@@ -27,6 +27,8 @@ class Ticket extends Model
         'kasubbagName',
         'solverId',
         'solverName',
+        'solver2Id',
+        'solver2Name',
         'status',
         'alasanTolak',
         'catatanKasubbag'
