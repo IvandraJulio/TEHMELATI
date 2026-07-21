@@ -382,6 +382,8 @@
                 if (selected) {
                     this.selectedSubbagId = selected.kasubbagId;
                     this.selectedSolverId = selected.solverId || '';
+                    this.selectedSolver2Id = selected.solver2Id || '';
+                    this.showSolver2 = !!selected.solver2Id;
                 }
 
                 // Listen to selectedSubbagId changes to reset selectedSolverId if it doesn't match
@@ -422,6 +424,8 @@
                     if (selected) {
                         this.selectedSubbagId = selected.kasubbagId;
                         this.selectedSolverId = selected.solverId || '';
+                        this.selectedSolver2Id = selected.solver2Id || '';
+                        this.showSolver2 = !!selected.solver2Id;
                     }
                     
                     this.$nextTick(() => {
@@ -463,6 +467,8 @@
                 if (t) {
                     this.selectedSubbagId = t.kasubbagId;
                     this.selectedSolverId = t.solverId || '';
+                    this.selectedSolver2Id = t.solver2Id || '';
+                    this.showSolver2 = !!t.solver2Id;
                 }
                 this.$nextTick(() => {
                     lucide.createIcons();
@@ -525,6 +531,8 @@
                             kasubbagName: `Kasubbag ${subbagName}`,
                             solverId: '',
                             solverName: '',
+                            solver2Id: '',
+                            solver2Name: '',
                             comment: {
                                 text: `Operator ${operatorName} mengalihkan rute tiket ke ${subbagName}.`,
                                 type: 'penugasan'

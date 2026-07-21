@@ -140,6 +140,7 @@ class DashboardController extends Controller
         } elseif ($user->role === 'solver') {
             $query->where(function ($q) use ($user) {
                 $q->where('solverId', $user->id)
+                  ->orWhere('solver2Id', $user->id)
                   ->orWhere(function ($q2) use ($user) {
                       $q2->where('kasubbagId', $user->subbagId)
                          ->where(function ($q3) {
