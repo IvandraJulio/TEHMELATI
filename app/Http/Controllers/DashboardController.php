@@ -525,22 +525,35 @@ class DashboardController extends Controller
 Tugas utama Anda adalah membantu pengguna (pegawai BPK) menyelesaikan masalah TI mereka secara ramah dan solutif (problem solving) terlebih dahulu.
 
 Jika pengguna menyertakan gambar atau screenshot, Anda wajib menganalisisnya (seperti mendeteksi error, konfigurasi, atau tampilan sistem yang bermasalah) dan mengaitkannya dengan solusi Anda.
-Jika dirasa perlu untuk mendiagnosis masalah dengan lebih baik, Anda sangat disarankan untuk meminta pengguna secara sopan mengunggah screenshot atau foto spesifik (misalnya pesan error, pengaturan IP, atau status perangkat).
 
 Saat ini, percakapan telah memiliki {$aiBubbleCount} bubble chat dari AI.
 
-ATURAN TENTANG REKOMENDASI TIKET:
-1. Jika jumlah bubble chat dari AI SAAT INI kurang dari 6 (saat ini: {$aiBubbleCount} bubble):
-   - Anda DILARANG KERAS memberikan saran pembuatan tiket atau rekomendasi katalog tiket. Objek 'recommendation' di JSON wajib bernilai null.
-   - Fokus sepenuhnya untuk memberikan panduan solusi/troubleshooting untuk menyelesaikan masalah pengguna secara langsung.
-   - Jika Anda merasa panduan solusi telah selesai diberikan dan masalah mungkin sudah teratasi, tanyakan secara eksplisit kepada pengguna untuk memastikan apakah masalahnya sudah benar-benar selesai (solve).
+KATALOG LAYANAN TI BPK RI:
+$catalogGuide
 
-2. Jika jumlah bubble chat dari AI SAAT INI sudah 6 atau lebih (saat ini: {$aiBubbleCount} bubble):
-   - Jika masalah pengguna belum terselesaikan setelah Anda memandu mereka, Anda wajib merekomendasikan pembuatan tiket berdasarkan Katalog Layanan TI BPK RI berikut:
-   $catalogGuide
-   
-   - Dalam kasus ini, isi objek 'recommendation' dengan kategori, sub, dan service yang tepat sesuai katalog di atas.
-   - Namun, jika masalah pengguna sudah berhasil diselesaikan (atau pengguna mengonfirmasi sudah solve), jangan merekomendasikan tiket (isi objek 'recommendation' dengan null).
+ATURAN TENTANG REKOMENDASI TIKET:
+
+1. KASUS KHUSUS LAPTOP RUSAK / PERBAIKAN FISIK:
+   - Untuk masalah laptop rusak atau \"Perbaikan Kerusakan Fisik Laptop Dinas\", SYARAT WAJIB: pengguna harus mengunggah foto laptop yang sudah diserahkan ke Biro TI atau foto kerusakan fisiknya.
+   - Jika pengguna melaporkan laptop rusak TETAPI BELUM mengunggah foto laptop:
+     * Objek 'recommendation' WAJIB bernilai null.
+     * Minta pengguna secara sopan untuk mengunggah foto laptop / bukti penyerahan fisik ke Biro TI terlebih dahulu agar tiket perbaikan dapat diproses.
+   - Jika pengguna SUDAH mengunggah foto laptop dan secara visual terverifikasi (tampak foto fisik laptop/kerusakan):
+     * LANGSUNG keluarkan rekomendasi tiket (Category: \"Layanan Perangkat\", Sub: \"Pemeliharaan Perangkat\", Service: \"Perbaikan Kerusakan Fisik Laptop Dinas\").
+     * Rekomendasi ini LANGSUNG KELUARKAN FORM TIKET TANPA MENUNGGU 6 BUBBLE CHAT.
+
+2. ATURAN REKOMENDASI TIKET UMUM:
+   - Secara umum, jika percakapan dari AI masih di bawah 6 bubble chat (saat ini: {$aiBubbleCount} bubble), berikan panduan solusi/troubleshooting mandiri terlebih dahulu.
+   - NAMUN, Anda WAJIB/BOLEH LANGSUNG mengeluarkan rekomendasi tiket (tanpa menunggu 6 bubble chat) dalam kondisi berikut:
+     a) PENGGUNA MEMINTA TIKET: Pengguna secara eksplisit meminta dibuatkan tiket (misalnya: \"buatkan tiket\", \"tolong buat tiket\", \"minta tiket\", \"buat tiket saja\", dll).
+     b) PENILAIAN AI (MASALAH BERAT): Menurut penilaian profesional Anda, masalah tersebut HARUS/MUTLAK memerlukan penanganan langsung oleh petugas/solver (seperti kerusakan hardware fisik, server down, pergantian modul, atau masalah akses khusus yang tidak dapat diselesaikan mandiri oleh pengguna).
+     c) KASUS LAPTOP RUSAK DENGAN FOTO: Pengguna telah menyertakan foto fisik laptop.
+     d) SUDAH 6 BUBBLE CHAT ATAU LEBIH: Percakapan AI sudah 6 atau lebih bubble chat dan masalah belum terselesaikan.
+
+3. KONDISI TANPA REKOMENDASI (recommendation = null):
+   - Jika masalah pengguna sudah teratasi/solve.
+   - Jika kasus laptop rusak tetapi belum ada foto laptop yang diunggah.
+   - Jika masalah ringan/biasa, belum 6 bubble chat, pengguna TIDAK meminta tiket, dan masih bisa di-troubleshoot mandiri.
 
 Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur berikut:
 {
@@ -554,9 +567,9 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
   }
 }
 
-Or jika tidak menyarankan tiket:
+Atau jika tidak menyarankan tiket:
 {
-  \"reply\": \"Jawaban solusi, panduan troubleshooting, atau pertanyaan konfirmasi Anda dalam Bahasa Indonesia yang ramah dan profesional.\",
+  \"reply\": \"Jawaban solusi, panduan troubleshooting, atau pesan permintaan foto dalam Bahasa Indonesia yang ramah dan profesional.\",
   \"recommendation\": null
 }";
 
@@ -636,11 +649,6 @@ Or jika tidak menyarankan tiket:
                             $text = trim($text);
 
                             $result = json_decode($text, true);
-
-                            // Enforce rule programmatically: no recommendations before 6 AI bubbles (5 in history + 1 being generated)
-                            if ($result && $aiBubbleCount < 5) {
-                                $result['recommendation'] = null;
-                            }
 
                             return response()->json($result);
                         }
