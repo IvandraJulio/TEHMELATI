@@ -58,6 +58,14 @@ class DashboardController extends Controller
     }
 
     /**
+     * Pengguna FAQ Page
+     */
+    public function faq()
+    {
+        return view('dashboards.faq');
+    }
+
+    /**
      * Kasubbag Dashboard
      */
     public function kasubbag()

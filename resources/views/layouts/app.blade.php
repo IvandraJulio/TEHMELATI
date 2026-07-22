@@ -73,6 +73,7 @@
                     ['label' => 'Beranda', 'route' => 'dashboard', 'icon' => 'home'],
                     ['label' => 'Status Tiket', 'route' => 'dashboard.tiket', 'icon' => 'layers'],
                     ['label' => 'Detail Tiket', 'route' => 'dashboard.detail', 'icon' => 'file-text'],
+                    ['label' => 'FAQ', 'route' => 'dashboard.faq', 'icon' => 'help-circle'],
                 ];
             } elseif ($currentUser->role === 'kasubbag') {
                 $navItems = [

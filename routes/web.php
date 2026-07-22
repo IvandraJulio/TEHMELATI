@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'pengguna'])->name('dashboard');
         Route::get('/dashboard/tiket', [DashboardController::class, 'tiketSaya'])->name('dashboard.tiket');
         Route::get('/dashboard/detail', [DashboardController::class, 'tiketDetail'])->name('dashboard.detail');
+        Route::get('/dashboard/faq', [DashboardController::class, 'faq'])->name('dashboard.faq');
     });
 
     // Rute khusus untuk peran Kasubbag
