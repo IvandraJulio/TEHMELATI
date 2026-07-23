@@ -224,7 +224,7 @@
 
                     <!-- Sidebar Footer / Logout -->
                     <div class="px-3">
-                        <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-100 pt-3">
+                        <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-100 pt-3" onsubmit="localStorage.removeItem('melati_chat_history_' + '{{ Auth::user()->username }}'); localStorage.removeItem('melati_chat_history_time_' + '{{ Auth::user()->username }}');">
                             @csrf
                             <button type="submit" class="flex items-center gap-3 w-full px-4 py-2.5 text-xs font-bold text-gray-400 hover:text-red-600 rounded-xl transition-all cursor-pointer text-left">
                                 <i data-lucide="log-out" class="w-4.5 h-4.5"></i>
@@ -264,7 +264,7 @@
                     </div>
 
                     <div>
-                        <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-100 pt-3">
+                        <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-100 pt-3" onsubmit="localStorage.removeItem('melati_chat_history_' + '{{ Auth::user()->username }}'); localStorage.removeItem('melati_chat_history_time_' + '{{ Auth::user()->username }}');">
                             @csrf
                             <button type="submit" class="flex items-center gap-3 w-full px-4 py-2.5 text-xs font-bold text-gray-400 hover:text-red-600 rounded-xl transition-all cursor-pointer text-left">
                                 <i data-lucide="log-out" class="w-4.5 h-4.5"></i>

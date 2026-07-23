@@ -790,6 +790,19 @@
             searchOpen: false,
             searchQuery: '',
             modalQuery: '',
+            init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const topic = urlParams.get('topic');
+                const search = urlParams.get('search');
+                
+                if (topic) {
+                    this.activeTopic = topic;
+                }
+                if (search) {
+                    this.searchQuery = search;
+                    this.modalQuery = search;
+                }
+            },
             openSearch() {
                 this.searchOpen = true;
                 this.$nextTick(() => {

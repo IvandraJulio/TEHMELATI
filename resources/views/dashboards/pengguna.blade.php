@@ -69,6 +69,16 @@
                                   :class="msg.sender === 'bot' ? 'bg-[#F3EDE2] text-gray-700 rounded-tl-none border-gray-200/60' : 'bg-[#F0DCC0] text-gray-800 border-orange-200/50 rounded-tr-none'"
                                   x-html="formatMarkdown(msg.text)"></div>
 
+                             <!-- Related FAQ Recommendation Button for Bot Response -->
+                             <template x-if="msg.sender === 'bot' && msg.recommendation">
+                                 <div class="mt-1 pb-1">
+                                     <a :href="getFaqLink(msg.recommendation)" class="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#b26d27] hover:bg-[#9b5a1b] text-white text-[11px] font-bold rounded-xl transition-all shadow-xs cursor-pointer">
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                                         <span x-text="'Lihat Panduan ' + (msg.recommendation.sub || 'FAQ')"></span>
+                                     </a>
+                                 </div>
+                             </template>
+
                              <!-- Image Sent by User -->
                              <template x-if="msg.image">
                                  <div class="rounded-xl overflow-hidden border border-slate-200 max-w-xs shadow-xs mt-1 cursor-pointer" @click="openImageLightbox(msg.image.dataUrl)">
@@ -425,6 +435,55 @@
             lightboxOpen: false,
             lightboxImageUrl: '',
             
+            userId: '{{ Auth::user()->username }}',
+            chatHistoryKey: '',
+            chatHistoryTimeKey: '',
+            getFaqLink(rec) {
+                if (!rec) return 'http://127.0.0.1:8000/dashboard/faq';
+                
+                let topic = 'identitas';
+                if (rec.category) {
+                    const cat = rec.category.toLowerCase();
+                    if (cat.includes('identitas')) topic = 'identitas';
+                    else if (cat.includes('data')) topic = 'data';
+                    else if (cat.includes('aplikasi')) topic = 'aplikasi';
+                    else if (cat.includes('teknologi')) topic = 'teknologi';
+                    else if (cat.includes('perangkat')) topic = 'perangkat';
+                    else if (cat.includes('dukungan')) topic = 'dukungan';
+                    else if (cat.includes('informasi')) topic = 'informasi';
+                }
+                
+                let search = '';
+                if (rec.sub) {
+                    const sub = rec.sub.toLowerCase();
+                    if (sub.includes('akun')) search = 'akun';
+                    else if (sub.includes('tte')) search = 'tte';
+                    else if (sub.includes('segel')) search = 'segel';
+                    else if (sub.includes('email')) search = 'email';
+                    else if (sub.includes('mfa')) search = 'mfa';
+                    else if (sub.includes('lan') || sub.includes('intranet') || sub.includes('wifi')) search = 'wifi';
+                    else if (sub.includes('internet')) search = 'internet';
+                    else if (sub.includes('vpn')) search = 'vpn';
+                    else if (sub.includes('hosting')) search = 'hosting';
+                    else if (sub.includes('komputer') || sub.includes('perangkat') || sub.includes('laptop')) search = 'perangkat';
+                }
+                
+                if (!search && rec.service) {
+                    const srv = rec.service.toLowerCase();
+                    if (srv.includes('akun')) search = 'akun';
+                    else if (srv.includes('tte')) search = 'tte';
+                    else if (srv.includes('segel')) search = 'segel';
+                    else if (srv.includes('email')) search = 'email';
+                    else if (srv.includes('mfa')) search = 'mfa';
+                    else if (srv.includes('vpn')) search = 'vpn';
+                    else if (srv.includes('lan')) search = 'lan';
+                    else if (srv.includes('wifi')) search = 'wifi';
+                    else if (srv.includes('laptop') || srv.includes('komputer')) search = 'perangkat';
+                }
+                
+                return `http://127.0.0.1:8000/dashboard/faq?topic=${topic}&search=${search}`;
+            },
+
             // Chatbot State
             chatInput: '',
             chatLoading: false,
@@ -598,14 +657,48 @@
             },
 
             init() {
+                this.chatHistoryKey = 'melati_chat_history_' + this.userId;
+                this.chatHistoryTimeKey = 'melati_chat_history_time_' + this.userId;
+
+                const savedTime = localStorage.getItem(this.chatHistoryTimeKey);
+                const savedMessages = localStorage.getItem(this.chatHistoryKey);
+
+                if (savedTime && savedMessages) {
+                    const timeDiff = Date.now() - parseInt(savedTime);
+                    const tenMinutes = 10 * 60 * 1000;
+                    if (timeDiff < tenMinutes) {
+                        this.chatMessages = JSON.parse(savedMessages);
+                    } else {
+                        this.clearChatHistory();
+                    }
+                }
+                localStorage.setItem(this.chatHistoryTimeKey, Date.now().toString());
+
+                this.$watch('chatMessages', value => {
+                    localStorage.setItem(this.chatHistoryKey, JSON.stringify(value));
+                    localStorage.setItem(this.chatHistoryTimeKey, Date.now().toString());
+                });
+
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('showForm') === 'true') {
                     this.showForm = true;
                 }
                 this.$nextTick(() => {
                     this.scrollChat();
-                    lucide.createIcons();
+                    if (window.lucide) lucide.createIcons();
                 });
+            },
+
+            clearChatHistory() {
+                localStorage.removeItem(this.chatHistoryKey);
+                localStorage.removeItem(this.chatHistoryTimeKey);
+                this.chatMessages = [
+                    {
+                        id: 'welcome',
+                        sender: 'bot',
+                        text: 'Halo! Saya adalah Asisten Virtual Layanan TI BPK berbasis Google Gemini AI. Deskripsikan kendala atau permintaan layanan Anda dalam bahasa sehari-hari (contoh: "kabel LAN saya rusak" atau "lupa password email dinas"), dan saya akan merekomendasikan kategori layanan yang tepat secara cerdas.'
+                    }
+                ];
             },
 
             onCategoryChange() {
@@ -838,7 +931,7 @@
                             sender: 'bot',
                             text: data.reply,
                             recommendation: data.recommendation,
-                            showConfirmation: !!data.recommendation,
+                            showConfirmation: data.recommendation ? !!data.suggest_ticket : false,
                             confirmed: false
                         });
                     } else {
@@ -906,7 +999,15 @@
                         this.chatMessages.push({
                             id: 'bot-' + Date.now(),
                             sender: 'bot',
-                            text: `[Offline Fallback] Masalah Anda terdeteksi berkaitan dengan ${bestRule.service}. Tips Solusi: ${bestRule.hint} Apakah kendala Anda sudah teratasi?`
+                            text: `[Offline Fallback] Masalah Anda terdeteksi berkaitan dengan ${bestRule.service}. Tips Solusi: ${bestRule.hint} Apakah kendala Anda sudah teratasi?`,
+                            recommendation: {
+                                category: bestRule.category,
+                                sub: bestRule.sub,
+                                service: bestRule.service,
+                                confidence: confidence
+                            },
+                            showConfirmation: false,
+                            confirmed: false
                         });
                     } else {
                         // 5th bot bubble or later: Suggest ticket creation

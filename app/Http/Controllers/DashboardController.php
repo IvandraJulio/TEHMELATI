@@ -698,28 +698,29 @@ ATURAN TENTANG REKOMENDASI TIKET:
      * Layar Interaktif / Smartboard (Layar sentuh smartboard rapat, display interaktif)
    - SYARAT WAJIB BUKTI FOTO: Pengguna HARUS mengunggah foto fisik perangkat yang mengalami kendala/kerusakan atau foto bukti penyerahan fisik perangkat ke Biro TI.
    - Jika pengguna melaporkan masalah pada salah satu perangkat hardware di atas TETAPI BELUM mengunggah foto:
-     * Objek 'recommendation' WAJIB bernilai null.
+     * Set suggest_ticket = false.
+     * Tetap berikan objek recommendation yang relevan dari katalog agar pengguna dapat melihat panduan FAQ terkait.
      * Minta pengguna secara sopan untuk mengunggah foto perangkat / foto kerusakan fisik / bukti penyerahan ke Biro TI terlebih dahulu agar tiket perbaikan dapat diproses.
    - Jika pengguna SUDAH mengunggah foto perangkat dan secara visual terverifikasi (tampak foto fisik perangkat/kerusakan):
      * LANGSUNG keluarkan rekomendasi tiket yang sesuai dengan kategori dan layanan hardware tersebut.
-     * Rekomendasi ini LANGSUNG KELUARKAN FORM TIKET TANPA MENUNGGU 6 BUBBLE CHAT.
+     * Set suggest_ticket = true.
 
-2. ATURAN REKOMENDASI TIKET UMUM:
-   - Secara umum, jika percakapan dari AI masih di bawah 6 bubble chat (saat ini: {$aiBubbleCount} bubble), berikan panduan solusi/troubleshooting mandiri terlebih dahulu.
-   - NAMUN, Anda WAJIB/BOLEH LANGSUNG mengeluarkan rekomendasi tiket (tanpa menunggu 6 bubble chat) dalam kondisi berikut:
+2. ATURAN REKOMENDASI TIKET UMUM (suggest_ticket):
+   - Secara umum, jika percakapan dari AI masih di bawah 6 bubble chat (saat ini: {$aiBubbleCount} bubble), berikan panduan solusi/troubleshooting mandiri terlebih dahulu dan set suggest_ticket = false.
+   - Tetap berikan objek recommendation yang sesuai (category, sub, service) agar sistem dapat merekomendasikan FAQ terkait.
+   - Namun, Anda wajib mengatur suggest_ticket = true dalam kondisi berikut:
      a) PENGGUNA MEMINTA TIKET: Pengguna secara eksplisit meminta dibuatkan tiket (misalnya: \"buatkan tiket\", \"tolong buat tiket\", \"minta tiket\", \"buat tiket saja\", dll).
-     b) PENILAIAN AI (MASALAH BERAT): Menurut penilaian profesional Anda, masalah tersebut HARUS/MUTLAK memerlukan penanganan langsung oleh petugas/solver (seperti kerusakan hardware fisik [Laptop/Notebook, Router, Proyektor, Mikrofon Konferensi, Layar Interaktif/Smartboard], server down, pergantian modul, atau masalah akses khusus yang tidak dapat diselesaikan mandiri oleh pengguna).
-     c) KASUS HARDWARE DENGAN FOTO: Pengguna telah menyertakan foto fisik perangkat hardware (Laptop/Notebook, Router, Proyektor, Mikrofon Konferensi, atau Layar Interaktif / Smartboard).
+     b) PENILAIAN AI (MASALAH BERAT): Menurut penilaian profesional Anda, masalah tersebut HARUS/MUTLAK memerlukan penanganan langsung oleh petugas/solver (seperti server down, pergantian modul, atau masalah akses khusus yang tidak dapat diselesaikan mandiri oleh pengguna).
+     c) KASUS HARDWARE DENGAN FOTO: Pengguna telah menyertakan foto fisik perangkat hardware.
      d) SUDAH 6 BUBBLE CHAT ATAU LEBIH: Percakapan AI sudah 6 atau lebih bubble chat dan masalah belum terselesaikan.
 
-3. KONDISI TANPA REKOMENDASI (recommendation = null):
-   - Jika masalah pengguna sudah teratasi/solve.
-   - Jika kasus kerusakan perangkat hardware (Laptop/Notebook, Router, Proyektor, Mikrofon Konferensi, Layar Interaktif/Smartboard) tetapi belum ada foto perangkat yang diunggah.
-   - Jika masalah ringan/biasa, belum 6 bubble chat, pengguna TIDAK meminta tiket, dan masih bisa di-troubleshoot mandiri.
+3. KONDISI KOSONG (recommendation = null):
+   - Hanya jika topik sama sekali tidak relevan dengan TI BPK (misalnya: menanyakan resep masakan, obrolan santai di luar konteks TI). Set suggest_ticket = false.
 
 Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur berikut:
 {
   \"reply\": \"Jawaban solusi, sapaan, panduan troubleshooting, atau pertanyaan konfirmasi Anda dalam Bahasa Indonesia yang ramah dan profesional.\",
+  \"suggest_ticket\": true | false,
   \"recommendation\": {
     \"category\": \"Nama Kategori Level 1\",
     \"sub\": \"Nama Sub-Layanan Level 2\",
@@ -727,12 +728,6 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
     \"confidence\": \"Tinggi\" | \"Sedang\" | \"Rendah\",
     \"score\": 5
   }
-}
-
-Atau jika tidak menyarankan tiket:
-{
-  \"reply\": \"Jawaban solusi, panduan troubleshooting, atau pesan permintaan foto dalam Bahasa Indonesia yang ramah dan profesional.\",
-  \"recommendation\": null
 }";
 
         $models = [
@@ -763,6 +758,10 @@ Atau jika tidak menyarankan tiket:
                                     'type' => 'STRING',
                                     'description' => 'Jawaban solusi, sapaan, panduan troubleshooting, atau pertanyaan konfirmasi Anda dalam Bahasa Indonesia yang ramah dan profesional.'
                                 ],
+                                'suggest_ticket' => [
+                                    'type' => 'BOOLEAN',
+                                    'description' => 'Set to true if we should prompt the user to create a ticket now. Set to false if we are still troubleshooting.'
+                                ],
                                 'recommendation' => [
                                     'type' => 'OBJECT',
                                     'nullable' => true,
@@ -790,7 +789,7 @@ Atau jika tidak menyarankan tiket:
                                     'required' => ['category', 'sub', 'service', 'confidence']
                                 ]
                             ],
-                            'required' => ['reply']
+                            'required' => ['reply', 'suggest_ticket']
                         ]
                     ]
                 ];
