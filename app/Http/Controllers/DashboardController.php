@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\Comment;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -62,7 +63,19 @@ class DashboardController extends Controller
      */
     public function faq()
     {
-        return view('dashboards.faq');
+        $articles = Article::orderBy('created_at', 'desc')->get()->map(function($article) {
+            return [
+                'id' => $article->id,
+                'title' => $article->title,
+                'category' => $article->category,
+                'subcategory' => $article->subcategory,
+                'likes' => number_format($article->likes),
+                'updated_at' => 'Diperbarui ' . $article->updated_at->diffForHumans(),
+                'content' => $article->content
+            ];
+        });
+
+        return view('dashboards.faq', compact('articles'));
     }
 
     /**
@@ -938,5 +951,83 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
         }
 
         return response()->json($result);
+    }
+
+    /**
+     * Operator FAQ Management View
+     */
+    public function operatorFaq()
+    {
+        $articles = Article::orderBy('created_at', 'desc')->get();
+        return view('dashboards.operator-faq', compact('articles'));
+    }
+
+    /**
+     * Store new FAQ article
+     */
+    public function storeFaqApi(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'subcategory' => 'nullable|string|max:100',
+            'content' => 'required|string',
+        ]);
+
+        $article = Article::create([
+            'title' => $request->title,
+            'category' => $request->category,
+            'subcategory' => $request->subcategory ?: null,
+            'content' => $request->content,
+            'likes' => 0,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artikel berhasil dibuat.',
+            'article' => $article
+        ]);
+    }
+
+    /**
+     * Update existing FAQ article
+     */
+    public function updateFaqApi(Request $request, $id)
+    {
+        $article = Article::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'subcategory' => 'nullable|string|max:100',
+            'content' => 'required|string',
+        ]);
+
+        $article->update([
+            'title' => $request->title,
+            'category' => $request->category,
+            'subcategory' => $request->subcategory ?: null,
+            'content' => $request->content,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artikel berhasil diperbarui.',
+            'article' => $article
+        ]);
+    }
+
+    /**
+     * Delete FAQ article
+     */
+    public function deleteFaqApi($id)
+    {
+        $article = Article::findOrFail($id);
+        $article->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artikel berhasil dihapus.'
+        ]);
     }
 }

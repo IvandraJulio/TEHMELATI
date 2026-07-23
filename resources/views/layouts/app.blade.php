@@ -88,6 +88,7 @@
                     ['label' => 'Overview', 'route' => 'operator', 'icon' => 'layout-dashboard'],
                     ['label' => 'Semua Tiket', 'route' => 'operator.tiket', 'icon' => 'file-spreadsheet'],
                     ['label' => 'Analitik', 'route' => 'operator.analitik', 'icon' => 'bar-chart-3'],
+                    ['label' => 'Kelola FAQ', 'route' => 'operator.faq', 'icon' => 'help-circle'],
                 ];
             }
         }

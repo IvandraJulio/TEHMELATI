@@ -37,6 +37,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/operator', [DashboardController::class, 'operator'])->name('operator');
         Route::get('/operator/tiket', [DashboardController::class, 'operatorTiket'])->name('operator.tiket');
         Route::get('/operator/analitik', [DashboardController::class, 'operatorAnalitik'])->name('operator.analitik');
+        Route::get('/operator/faq', [DashboardController::class, 'operatorFaq'])->name('operator.faq');
+        Route::post('/api/operator/faq', [DashboardController::class, 'storeFaqApi']);
+        Route::post('/api/operator/faq/{id}', [DashboardController::class, 'updateFaqApi']);
+        Route::delete('/api/operator/faq/{id}', [DashboardController::class, 'deleteFaqApi']);
     });
 
     // Rute API AJAX umum (pengguna yang sudah terotentikasi)
