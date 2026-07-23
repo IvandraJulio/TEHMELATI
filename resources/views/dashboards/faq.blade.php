@@ -13,11 +13,17 @@
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .quick-link-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.3s ease, 
+                    background-color 0.3s ease;
+        will-change: transform, box-shadow;
     }
     .quick-link-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 24px -10px rgba(178, 109, 39, 0.12);
+        transform: translateY(-6px) scale(1.015) !important;
+        border-color: rgba(178, 109, 39, 0.45) !important;
+        background-color: #fdf8f3 !important;
+        box-shadow: 0 22px 35px -12px rgba(178, 109, 39, 0.16) !important;
     }
     .article-card {
         background-color: transparent !important;
@@ -101,75 +107,75 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <!-- Card 1 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'akun'; modalQuery = 'akun';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Set up Singpass app
+                        Aktivasi Akun Baru
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
                     </div>
                 </div>
 
                 <!-- Card 2 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'password'; modalQuery = 'password';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Create passkey
+                        Reset Password
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                     </div>
                 </div>
 
                 <!-- Card 3 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'vpn'; modalQuery = 'vpn';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Reset password
+                        Pemasangan VPN BPK
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                 </div>
 
                 <!-- Card 4 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'mfa'; modalQuery = 'mfa';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Register an account
+                        Registrasi Token MFA
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Row 2: 3 Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl">
+            <!-- Row 2: 3 Cards (Centered) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:w-3/4 mx-auto">
                 <!-- Card 5 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'ktp'; modalQuery = 'ktp';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Update mobile number
+                        Panduan e-KTP Digital
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 21v-4a4 4 0 0 1 8 0v4"/><circle cx="11" cy="9" r="3"/></svg>
                     </div>
                 </div>
 
                 <!-- Card 6 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'tte'; modalQuery = 'tte';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Update address
+                        Sertifikat TTE Dinas
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
                     </div>
                 </div>
 
                 <!-- Card 7 -->
-                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group">
+                <div class="quick-link-card bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-28 cursor-pointer group" @click="searchQuery = 'perangkat'; modalQuery = 'perangkat';">
                     <span class="text-[13px] font-bold text-slate-800 group-hover:text-[#b26d27] transition-colors leading-snug">
-                        Suspend account
+                        Peminjaman Perangkat
                     </span>
                     <div class="self-end text-[#b26d27]/90 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.343 3.051A6 6 0 0 1 18 8v4l2 2v1H4v-1l2-2V8a6 6 0 0 1 4.343-5.949"/><path d="M9 17a3 3 0 0 0 6 0"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/><line x1="5" x2="19" y1="16" y2="16"/></svg>
                     </div>
                 </div>
             </div>
