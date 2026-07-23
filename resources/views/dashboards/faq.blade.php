@@ -424,14 +424,7 @@
             <!-- RIGHT COLUMN: ARTICLES LIST -->
             <div class="lg:col-span-8 space-y-4">
                 
-                <!-- Filter Badge Header -->
-                <div class="flex items-center gap-2 mb-2 text-xs flex-wrap" x-show="!searchQuery">
-                    <span class="text-slate-500 font-semibold">10 articles in</span>
-                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#FFF4E5] border border-[#FCDDB5] text-[#b26d27] font-semibold text-[11px] rounded-full shadow-3xs">
-                        <span>Account Activation / Registering for Singpass</span>
-                        <span class="text-[10px] font-bold leading-none cursor-pointer">✕</span>
-                    </span>
-                </div>
+
 
                 <!-- Search Filter Badge Header -->
                 <div class="flex items-center gap-2 mb-2 text-xs flex-wrap" x-show="searchQuery" style="display: none;">
