@@ -65,7 +65,10 @@
     <!-- MAIN CONTAINER -->
     <div class="max-w-5xl mx-auto space-y-12 relative z-10">
 
-        <!-- HEADER SECTION -->
+        <!-- MAIN SEARCH / LIST VIEW -->
+        <div x-show="!selectedArticle" x-transition class="space-y-12">
+
+            <!-- HEADER SECTION -->
         <div class="text-center space-y-6 pt-4">
             <h1 class="text-4xl sm:text-5xl font-extrabold text-[#111827] tracking-tight font-display">
                 Halo! Melati di sini
@@ -437,7 +440,7 @@
                 <div class="space-y-1">
                     
                     <!-- Article 1 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Bagaimana cara mendaftarkan identitas digital saya?')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Bagaimana cara mendaftarkan identitas digital saya?')" @click="selectArticle(1)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -455,7 +458,7 @@
                     </div>
 
                     <!-- Article 2 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Siapa saja yang berhak menggunakan layanan identitas ini?')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Siapa saja yang berhak menggunakan layanan identitas ini?')" @click="selectArticle(2)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -473,7 +476,7 @@
                     </div>
 
                     <!-- Article 3 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Bagaimana cara memeriksa status pendaftaran akun saya?')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Bagaimana cara memeriksa status pendaftaran akun saya?')" @click="selectArticle(3)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -491,7 +494,7 @@
                     </div>
 
                     <!-- Article 4 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Apa yang harus dilakukan jika verifikasi identitas gagal?')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Apa yang harus dilakukan jika verifikasi identitas gagal?')" @click="selectArticle(4)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -509,7 +512,7 @@
                     </div>
 
                     <!-- Article 5 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara mengubah data profil dan informasi pribadi')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara mengubah data profil dan informasi pribadi')" @click="selectArticle(5)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -527,7 +530,7 @@
                     </div>
 
                     <!-- Article 6 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Panduan lengkap penggunaan KTP digital')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Panduan lengkap penggunaan KTP digital')" @click="selectArticle(6)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -545,7 +548,7 @@
                     </div>
 
                     <!-- Article 7 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara mendaftarkan perangkat baru ke akun saya')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara mendaftarkan perangkat baru ke akun saya')" @click="selectArticle(7)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -563,7 +566,7 @@
                     </div>
 
                     <!-- Article 8 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Mengapa saya diminta verifikasi ulang setiap login?')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Mengapa saya diminta verifikasi ulang setiap login?')" @click="selectArticle(8)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -581,7 +584,7 @@
                     </div>
 
                     <!-- Article 9 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara menghapus perangkat yang tidak dikenal dari akun')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara menghapus perangkat yang tidak dikenal dari akun')" @click="selectArticle(9)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -599,7 +602,7 @@
                     </div>
 
                     <!-- Article 10 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Apa perbedaan antara passkey dan password biasa?')">
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Apa perbedaan antara passkey dan password biasa?')" @click="selectArticle(10)">
                         <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
@@ -633,7 +636,54 @@
 
         </div>
 
+    </div> <!-- Close x-show="!selectedArticle" -->
+
+    <!-- ARTICLE DETAIL VIEW -->
+    <div x-show="selectedArticle" x-transition class="max-w-3xl mx-auto py-8 space-y-8 text-left" style="display: none;">
+        <!-- Back button -->
+        <button @click="selectedArticle = null" class="flex items-center gap-2 text-slate-500 hover:text-[#b26d27] font-semibold text-sm transition-colors cursor-pointer focus:outline-none mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <span>Kembali</span>
+        </button>
+
+        <!-- Category -->
+        <div class="inline-flex items-center px-3.5 py-1 bg-[#FFF4E5] border border-[#FCDDB5] text-[#b26d27] font-bold text-[11px] rounded-full shadow-3xs" x-text="selectedArticle?.category">
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-[#111827] tracking-tight leading-tight" x-text="selectedArticle?.title">
+        </h1>
+
+        <!-- Meta Data (Avatar + Time + Likes) -->
+        <div class="flex items-center gap-4 py-2">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-slate-400 font-semibold">
+                <span class="flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span x-text="selectedArticle?.updated_at"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-slate-200/80 my-4" />
+
+        <!-- Content Area -->
+        <div class="prose max-w-none text-slate-800 text-[14.5px] sm:text-base leading-relaxed font-medium mt-6 space-y-4" x-html="selectedArticle?.content">
+        </div>
+
+        <!-- CALLOUT BOX ("Need more help?") -->
+        <div class="bg-[#f2e6d6] border border-[#e5d4be] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-12">
+            <div>
+                <h4 class="text-[15px] font-bold text-slate-900">Need more help?</h4>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">Describe your issues to us.</p>
+            </div>
+            <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-800 text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all border border-slate-200/80 cursor-pointer shrink-0">
+                Contact us
+            </a>
+        </div>
     </div>
+
+</div>
 
     <!-- Quick search modal overlay -->
     <div x-show="searchOpen" 
@@ -731,6 +781,10 @@
 <script>
     function faqPage() {
         return {
+            selectedArticle: null,
+            selectArticle(id) {
+                this.selectedArticle = this.articles.find(a => a.id === id);
+            },
             activeTopic: 'identitas', // default open topic
             activeSub: '', // default open sub
             searchOpen: false,
@@ -770,7 +824,167 @@
             },
             isOpenSub(id) {
                 return this.activeSub === id;
-            }
+            },
+            articles: [
+                {
+                    id: 1,
+                    title: 'Bagaimana cara mendaftarkan identitas digital saya?',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 10mo ago',
+                    likes: '22,224',
+                    content: `
+                        <p>Untuk mendaftarkan identitas digital Anda pada sistem Melati, ikuti petunjuk berikut:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Persiapan Dokumen:</strong> Pastikan Anda telah memiliki e-KTP dan email resmi BPK RI aktif.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Akses Portal:</strong> Kunjungi halaman registrasi mandiri melalui menu utama.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Verifikasi Wajah:</strong> Lakukan verifikasi e-KTP dan foto wajah secara langsung menggunakan kamera.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Aktivasi:</strong> Klik tautan aktivasi yang dikirimkan ke email Anda untuk menyelesaikan pendaftaran.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 2,
+                    title: 'Siapa saja yang berhak menggunakan layanan identitas ini?',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 4mo ago',
+                    likes: '763',
+                    content: `
+                        <p>Layanan identitas digital Melati ditujukan khusus untuk kalangan internal BPK RI:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Seluruh Pegawai Negeri Sipil (PNS) di lingkungan BPK RI.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) BPK RI.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Tenaga Kontrak / Solver internal yang terdaftar resmi di Biro TIK.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 3,
+                    title: 'Bagaimana cara memeriksa status pendaftaran akun saya?',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 2y ago',
+                    likes: '457',
+                    content: `
+                        <p>Untuk mengetahui status pengajuan akun atau pendaftaran layanan Anda:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Silakan masuk ke halaman utama Portal Melati.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Periksa tab <strong>Notifikasi</strong> pada pojok kanan atas untuk melihat update persetujuan admin.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Hubungi operator helpdesk melalui fitur chat jika status tetap menggantung lebih dari 1x24 jam.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 4,
+                    title: 'Apa yang harus dilakukan jika verifikasi identitas gagal?',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 3mo ago',
+                    likes: '1,284',
+                    content: `
+                        <p>Jika verifikasi identitas Anda gagal, berikut langkah yang perlu dilakukan:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Periksa penyebab kegagalan:</strong></span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Foto dokumen buram atau terpotong</span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Data tidak sesuai dengan dokumen resmi</span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Koneksi internet tidak stabil saat proses verifikasi</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Langkah perbaikan:</strong></span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Ulangi proses verifikasi dengan foto dokumen yang lebih jelas.</span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Pastikan pencahayaan cukup saat melakukan verifikasi biometrik.</span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Gunakan koneksi internet yang stabil.</span></li>
+                            <li class="flex items-start gap-2.5 pl-6"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Jika masih gagal setelah 3 percobaan, hubungi tim dukungan TI.</span></li>
+                        </ul>
+                        <p class="mt-4">Anda dapat menghubungi helpdesk melalui email atau datang langsung ke kantor layanan terdekat.</p>
+                    `
+                },
+                {
+                    id: 5,
+                    title: 'Cara mengubah data profil dan informasi pribadi',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 1mo ago',
+                    likes: '589',
+                    content: `
+                        <p>Untuk mengubah informasi kontak atau profil terdaftar Anda:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Buka menu <strong>Pengaturan Profil</strong> dari ikon avatar Anda di pojok kanan atas.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Ubah nomor telepon atau informasi pelengkap lainnya.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Simpan perubahan dengan memasukkan password atau konfirmasi PIN sekali pakai (OTP).</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 6,
+                    title: 'Panduan lengkap penggunaan KTP digital',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 6mo ago',
+                    likes: '3,102',
+                    content: `
+                        <p>Panduan penggunaan Identitas Kependudukan Digital (IKD/e-KTP) untuk verifikasi akses:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Pastikan aplikasi IKD Kemendagri sudah terinstal dan terverifikasi di ponsel Anda.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Pilih metode login "IKD / KTP Digital" saat melakukan otentikasi portal BPK RI.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Scan kode QR yang tampil di layar desktop menggunakan pemindai aplikasi IKD Anda.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 7,
+                    title: 'Cara mendaftarkan perangkat baru ke akun saya',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 2mo ago',
+                    likes: '876',
+                    content: `
+                        <p>Untuk otorisasi perangkat (laptop/handphone) baru untuk bekerja:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Login ke Portal Melati di perangkat baru Anda menggunakan kredensial BPK.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Sistem akan mengirimkan permintaan konfirmasi ke perangkat utama yang telah terdaftar.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Setujui permintaan masuk di perangkat utama untuk mengotorisasi perangkat baru tersebut.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 8,
+                    title: 'Mengapa saya diminta verifikasi ulang setiap login?',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 5mo ago',
+                    likes: '2,341',
+                    content: `
+                        <p>MFA (Multi-Factor Authentication) diwajibkan demi menjaga keamanan data pemeriksaan penting:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Kebijakan keamanan TI BPK RI mewajibkan otentikasi ganda untuk mencegah kebocoran password.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Jika Anda menggunakan browser privat atau menghapus cookies, sistem akan mendeteksi sebagai login baru.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Anda dapat mencentang "Ingat perangkat ini selama 30 hari" untuk mengurangi frekuensi verifikasi.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 9,
+                    title: 'Cara menghapus perangkat yang tidak dikenal dari akun',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 1y ago',
+                    likes: '198',
+                    content: `
+                        <p>Jika Anda melihat perangkat yang tidak Anda kenali terhubung ke akun Anda:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Segera buka menu <strong>Keamanan Akun > Manajemen Perangkat</strong>.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Klik ikon tempat sampah atau tombol "Logout/Hapus" di sebelah nama perangkat asing tersebut.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Lakukan perubahan password akun Anda secepatnya untuk keamanan ekstra.</span></li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 10,
+                    title: 'Apa perbedaan antara passkey dan password biasa?',
+                    category: 'Layanan Identitas',
+                    updated_at: 'Diperbarui 3mo ago',
+                    likes: '4,510',
+                    content: `
+                        <p>Perbedaan keamanan antara metode passkey dan password tradisional:</p>
+                        <ul class="space-y-2.5 text-[13.5px] text-slate-600 leading-relaxed font-medium mt-4">
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Password:</strong> String teks yang rentan ditebak, dicuri via phishing, atau dibobol saat server bocor.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span><strong>Passkey:</strong> Kunci kriptografi unik yang terikat pada perangkat fisik Anda (biometrik sidik jari/wajah).</span></li>
+                            <li class="flex items-start gap-2.5"><span class="text-[#b26d27] mt-1 shrink-0">•</span><span>Passkey jauh lebih aman karena tidak bisa dicuri dengan phishing biasa dan tidak memerlukan hafalan password.</span></li>
+                        </ul>
+                    `
+                }
+            ]
         }
     }
 </script>
