@@ -20,26 +20,47 @@
         box-shadow: 0 12px 24px -10px rgba(178, 109, 39, 0.12);
     }
     .article-card {
-        transition: all 0.25s ease;
+        background-color: transparent !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(178, 109, 39, 0.15) !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        padding-top: 1.125rem !important;
+        padding-bottom: 1.125rem !important;
+        transition: all 0.2s ease;
+    }
+    .article-card:last-child {
+        border-bottom: none !important;
     }
     .article-card:hover {
-        border-color: rgba(178, 109, 39, 0.3);
-        transform: translateY(-1px);
-        box-shadow: 0 8px 16px -6px rgba(0, 0, 0, 0.04);
+        background-color: rgba(255, 255, 255, 0.4) !important;
+        border-bottom-color: transparent !important;
+        border-radius: 0.75rem !important;
+        transform: none !important;
+        box-shadow: none !important;
     }
 </style>
 
-<div class="faq-container relative min-h-full pb-16 overflow-hidden rounded-3xl bg-[#faf6f0] p-6 sm:p-10" x-data="faqPage()">
+<div class="faq-container relative min-h-full pb-16 rounded-3xl bg-[#faf6f0] p-6 sm:p-10" x-data="faqPage()">
 
-    <!-- Decorative Background Glows (1:1 with reference design) -->
-    <!-- Top Center Soft Radial Light Glow -->
-    <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-[#f7e3ce]/50 via-[#faf6f0]/40 to-transparent rounded-full blur-[110px] -z-10 pointer-events-none"></div>
+    <!-- Decorative Background Flower Patterns (Cream Flowers with 50% blur) -->
+    <!-- Top-Left Flower -->
+    <img src="/bunga-cream.png" alt="Decorative Flower" class="absolute -top-32 left-[10%] w-[420px] opacity-[0.45] blur-[24px] pointer-events-none z-0 select-none">
 
-    <!-- Bottom Left Large Organic Star/Flower Soft Warm Glow -->
-    <div class="absolute -bottom-36 -left-36 w-[650px] h-[650px] bg-[#f5dfc8]/60 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+    <!-- Bottom-Right Flower -->
+    <img src="/bunga-cream.png" alt="Decorative Flower" class="absolute -bottom-40 right-[10%] w-[500px] opacity-[0.45] blur-[24px] pointer-events-none z-0 select-none">
 
-    <!-- Right Side Warm Glow -->
-    <div class="absolute top-1/3 -right-28 w-[600px] h-[600px] bg-[#f7e6d7]/40 rounded-full blur-[110px] -z-10 pointer-events-none"></div>
+    <!-- Middle-Left Flower -->
+    <img src="/bunga-cream.png" alt="Decorative Flower" class="absolute top-[30%] -left-44 w-[460px] opacity-[0.45] blur-[24px] pointer-events-none z-0 select-none">
+
+    <!-- Middle-Right Flower -->
+    <img src="/bunga-cream.png" alt="Decorative Flower" class="absolute top-[60%] -right-44 w-[460px] opacity-[0.45] blur-[24px] pointer-events-none z-0 select-none">
+
+
 
     <!-- MAIN CONTAINER -->
     <div class="max-w-5xl mx-auto space-y-12 relative z-10">
@@ -51,17 +72,19 @@
             </h1>
 
             <!-- Search Input Bar -->
-            <div class="max-w-lg mx-auto relative">
-                <div class="relative flex items-center">
+            <div class="max-w-lg mx-auto relative" @keydown.window.cmd.k.prevent="openSearch()" @keydown.window.ctrl.k.prevent="openSearch()">
+                <div class="relative flex items-center cursor-pointer" @click="openSearch()">
                     <div class="absolute left-4.5 text-slate-400 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </div>
                     <input type="text" 
                            placeholder="Apa yang mau dicari?"
-                           class="w-full pl-12 pr-16 py-4 bg-white border border-slate-200/90 rounded-2xl shadow-sm text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-2 focus:ring-[#b26d27]/20 focus:border-[#b26d27] transition-all">
-                    <div class="absolute right-4 flex items-center gap-0.5 pointer-events-none text-[11px] font-semibold text-slate-400 border border-slate-200/80 bg-slate-50/80 px-2 py-0.5 rounded-lg shadow-3xs">
-                        <span>⌘</span>
-                        <span>K</span>
+                           :value="searchQuery"
+                           readonly
+                           class="w-full pl-12 pr-24 py-4 bg-white border border-slate-200/90 rounded-full shadow-sm text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-2 focus:ring-[#b26d27]/20 focus:border-[#b26d27] transition-all cursor-pointer">
+                    <div class="absolute right-4.5 flex items-center gap-1.5 pointer-events-none text-slate-400 font-medium">
+                        <kbd class="flex items-center justify-center min-w-[28px] h-7 px-1.5 text-[11px] bg-slate-50 border border-slate-200/80 rounded-md font-sans">⌘</kbd>
+                        <kbd class="flex items-center justify-center min-w-[28px] h-7 px-1.5 text-[11px] bg-slate-50 border border-slate-200/80 rounded-md font-sans">K</kbd>
                     </div>
                 </div>
             </div>
@@ -202,7 +225,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-transform" :class="isOpenSub('data-pengelolaan') ? 'rotate-180 text-[#b26d27]' : ''"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
                                     <div x-show="isOpenSub('data-pengelolaan')" x-collapse>
-                                        <div class="pl-4 mt-1 space-y-1 text-left">
+                                        <div class="pl-4 border-l border-slate-200 mt-1 space-y-1 text-left">
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Perencanaan Data</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pengumpulan Data</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pengolahan Data</button>
@@ -223,7 +246,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-transform" :class="isOpenSub('data-sistem') ? 'rotate-180 text-[#b26d27]' : ''"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
                                     <div x-show="isOpenSub('data-sistem')" x-collapse>
-                                        <div class="pl-4 mt-1 space-y-1 text-left">
+                                        <div class="pl-4 border-l border-slate-200 mt-1 space-y-1 text-left">
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">BIDICS Dashboard</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">BIDICS-SSA</button>
                                         </div>
@@ -273,7 +296,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-transform" :class="isOpenSub('teknologi-intranet') ? 'rotate-180 text-[#b26d27]' : ''"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
                                     <div x-show="isOpenSub('teknologi-intranet')" x-collapse>
-                                        <div class="pl-4 mt-1 space-y-1 text-left">
+                                        <div class="pl-4 border-l border-slate-200 mt-1 space-y-1 text-left">
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pembuatan LAN</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pengaturan Konfigurasi LAN</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Penonaktifan LAN</button>
@@ -292,7 +315,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-transform" :class="isOpenSub('teknologi-internet') ? 'rotate-180 text-[#b26d27]' : ''"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
                                     <div x-show="isOpenSub('teknologi-internet')" x-collapse>
-                                        <div class="pl-4 mt-1 space-y-1 text-left">
+                                        <div class="pl-4 border-l border-slate-200 mt-1 space-y-1 text-left">
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pemasangan Internet</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pengaturan Konfigurasi Internet</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Penonaktifan Internet</button>
@@ -307,7 +330,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-transform" :class="isOpenSub('teknologi-vpn') ? 'rotate-180 text-[#b26d27]' : ''"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
                                     <div x-show="isOpenSub('teknologi-vpn')" x-collapse>
-                                        <div class="pl-4 mt-1 space-y-1 text-left">
+                                        <div class="pl-4 border-l border-slate-200 mt-1 space-y-1 text-left">
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pemasangan VPN</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pengaturan Konfigurasi VPN</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Penonaktifan VPN</button>
@@ -322,7 +345,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 transition-transform" :class="isOpenSub('teknologi-hosting') ? 'rotate-180 text-[#b26d27]' : ''"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
                                     <div x-show="isOpenSub('teknologi-hosting')" x-collapse>
-                                        <div class="pl-4 mt-1 space-y-1 text-left">
+                                        <div class="pl-4 border-l border-slate-200 mt-1 space-y-1 text-left">
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pendaftaran Hosting Subdomain</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Pengaturan Konfigurasi Hosting</button>
                                             <button class="w-full text-left py-1 text-[12.5px] font-medium text-slate-500 hover:text-slate-950 leading-relaxed">Penonaktifan Hosting</button>
@@ -393,7 +416,7 @@
             <div class="lg:col-span-8 space-y-4">
                 
                 <!-- Filter Badge Header -->
-                <div class="flex items-center gap-2 mb-2 text-xs flex-wrap">
+                <div class="flex items-center gap-2 mb-2 text-xs flex-wrap" x-show="!searchQuery">
                     <span class="text-slate-500 font-semibold">10 articles in</span>
                     <span class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#FFF4E5] border border-[#FCDDB5] text-[#b26d27] font-semibold text-[11px] rounded-full shadow-3xs">
                         <span>Account Activation / Registering for Singpass</span>
@@ -401,29 +424,28 @@
                     </span>
                 </div>
 
+                <!-- Search Filter Badge Header -->
+                <div class="flex items-center gap-2 mb-2 text-xs flex-wrap" x-show="searchQuery" style="display: none;">
+                    <span class="text-slate-500 font-semibold">Hasil pencarian untuk:</span>
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#FFF4E5] border border-[#FCDDB5] text-[#b26d27] font-semibold text-[11px] rounded-full shadow-3xs">
+                        <span x-text="'&ldquo;' + searchQuery + '&rdquo;'"></span>
+                        <span class="text-[10px] font-bold leading-none cursor-pointer" @click="searchQuery = ''; modalQuery = '';">✕</span>
+                    </span>
+                </div>
+
                 <!-- Articles Stack -->
-                <div class="space-y-3">
+                <div class="space-y-1">
                     
                     <!-- Article 1 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#0e9488] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M8 15C8.5 17 15.5 17 16 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Bagaimana cara mendaftarkan identitas digital saya?')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Bagaimana cara mendaftarkan identitas digital saya?
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 10mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>22,224</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -433,25 +455,15 @@
                     </div>
 
                     <!-- Article 2 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#1e4a58] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M9 15.5C10 16 14 16 15 15.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Siapa saja yang berhak menggunakan layanan identitas ini?')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Siapa saja yang berhak menggunakan layanan identitas ini?
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 4mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>763</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -461,25 +473,15 @@
                     </div>
 
                     <!-- Article 3 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#e2f3e8] border border-[#c1e2cd] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#1e5235"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#1e5235"/>
-                                    <path d="M10 15H14" stroke="#1e5235" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Bagaimana cara memeriksa status pendaftaran akun saya?')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Bagaimana cara memeriksa status pendaftaran akun saya?
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 2y ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>457</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -489,25 +491,15 @@
                     </div>
 
                     <!-- Article 4 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#1f2d3a] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M9 15.5C10.5 14.5 13.5 14.5 15 15.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Apa yang harus dilakukan jika verifikasi identitas gagal?')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Apa yang harus dilakukan jika verifikasi identitas gagal?
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 3mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>1,284</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -517,25 +509,15 @@
                     </div>
 
                     <!-- Article 5 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#1b4e5a] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M9 15C10 16.5 14 16.5 15 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara mengubah data profil dan informasi pribadi')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Cara mengubah data profil dan informasi pribadi
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 1mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>588</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -545,25 +527,15 @@
                     </div>
 
                     <!-- Article 6 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#0d9488] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M8 15.5C9 17 15 17 16 15.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Panduan lengkap penggunaan KTP digital')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Panduan lengkap penggunaan KTP digital
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 6mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>3,102</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -573,25 +545,15 @@
                     </div>
 
                     <!-- Article 7 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#e5f5e0] border border-[#c2e5b7] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#2b5f25"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#2b5f25"/>
-                                    <path d="M9 15C10 16 14 16 15 15" stroke="#2b5f25" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara mendaftarkan perangkat baru ke akun saya')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Cara mendaftarkan perangkat baru ke akun saya
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 2mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>876</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -601,25 +563,15 @@
                     </div>
 
                     <!-- Article 8 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#1d4ed8] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M8 15C9 17 15 17 16 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Mengapa saya diminta verifikasi ulang setiap login?')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Mengapa saya diminta verifikasi ulang setiap login?
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 5mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>2,341</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -629,25 +581,15 @@
                     </div>
 
                     <!-- Article 9 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#f97316] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#ffffff"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#ffffff"/>
-                                    <path d="M9 15.5C10.5 16.5 13.5 16.5 15 15.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Cara menghapus perangkat yang tidak dikenal dari akun')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Cara menghapus perangkat yang tidak dikenal dari akun
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 1y ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>198</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -657,25 +599,15 @@
                     </div>
 
                     <!-- Article 10 -->
-                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs">
-                        <div class="flex items-center gap-4 min-w-0">
-                            <div class="w-11 h-11 rounded-full shrink-0 flex items-center justify-center bg-[#dcfce7] border border-[#bbf7d0] transition-transform group-hover:scale-105">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="opacity-95">
-                                    <circle cx="8" cy="10" r="1.5" fill="#14532d"/>
-                                    <circle cx="16" cy="10" r="1.5" fill="#14532d"/>
-                                    <path d="M10 15.5H14" stroke="#14532d" stroke-width="2" stroke-linecap="round" fill="none"/>
-                                </svg>
-                            </div>
+                    <div class="article-card bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between gap-4 cursor-pointer group shadow-3xs" x-show="matchesSearch('Apa perbedaan antara passkey dan password biasa?')">
+                        <div class="flex items-center min-w-0">
                             <div class="min-w-0">
                                 <h4 class="text-[13px] sm:text-sm font-bold text-slate-900 group-hover:text-[#b26d27] transition-colors leading-snug">
                                     Apa perbedaan antara passkey dan password biasa?
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span>Updated 3mo ago</span>
-                                    <span class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                        <span>4,510</span>
-                                    </span>
+
                                 </div>
                             </div>
                         </div>
@@ -702,6 +634,97 @@
         </div>
 
     </div>
+
+    <!-- Quick search modal overlay -->
+    <div x-show="searchOpen" 
+         class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-start justify-center pt-28 px-4" 
+         style="display: none;" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @keydown.window.escape="searchOpen = false">
+         
+        <!-- Backdrop Click to close -->
+        <div class="absolute inset-0 bg-transparent" @click="searchOpen = false"></div>
+        
+        <!-- Modal Card Content -->
+        <div class="relative bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden p-6 space-y-6 flex flex-col z-10"
+             @click.stop
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+             
+            <!-- Modal Header / Search Bar -->
+            <form @submit.prevent="runSearch()" class="relative flex items-center bg-white border border-slate-200/90 rounded-2xl p-1 px-1.5 focus-within:ring-2 focus-within:ring-[#b26d27]/20 focus-within:border-[#b26d27] transition-all">
+                <div class="pl-3 text-[#b26d27]/80">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+                <input type="text" 
+                       x-model="modalQuery"
+                       placeholder="Search a question" 
+                       class="flex-1 pl-3 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent font-medium"
+                       x-ref="modalSearchInput">
+                <button type="submit" class="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-500 font-semibold text-[11px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <span>Search</span>
+                    <span class="text-[10px] text-slate-400 leading-none">↵</span>
+                </button>
+            </form>
+            
+            <!-- Trending Searches -->
+            <div class="space-y-3">
+                <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Trending searches</h5>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" @click="modalQuery = 'lupa password'; runSearch();" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-full text-xs font-semibold text-slate-600 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <span>lupa password</span>
+                    </button>
+                    <button type="button" @click="modalQuery = 'cara daftar akun'; runSearch();" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-full text-xs font-semibold text-slate-600 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <span>cara daftar akun</span>
+                    </button>
+                    <button type="button" @click="modalQuery = 'verifikasi identitas'; runSearch();" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-full text-xs font-semibold text-slate-600 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <span>verifikasi identitas</span>
+                    </button>
+                    <button type="button" @click="modalQuery = 'layanan TTE'; runSearch();" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-full text-xs font-semibold text-slate-600 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <span>layanan TTE</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Popular Questions Asked -->
+            <div class="space-y-3">
+                <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Popular questions asked</h5>
+                <div class="divide-y divide-slate-100">
+                    <button type="button" @click="modalQuery = 'Bagaimana cara mereset password akun saya?'; runSearch();" class="w-full text-left py-3 flex items-center gap-3.5 group hover:bg-slate-50/50 rounded-xl px-2 -mx-2 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 group-hover:text-[#b26d27] transition-colors shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        <span class="text-xs font-semibold text-slate-700 group-hover:text-[#b26d27] transition-colors leading-relaxed font-sans">Bagaimana cara mereset password akun saya?</span>
+                    </button>
+                    <button type="button" @click="modalQuery = 'Bagaimana cara mengunduh dan mengatur aplikasi layanan?'; runSearch();" class="w-full text-left py-3 flex items-center gap-3.5 group hover:bg-slate-50/50 rounded-xl px-2 -mx-2 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 group-hover:text-[#b26d27] transition-colors shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        <span class="text-xs font-semibold text-slate-700 group-hover:text-[#b26d27] transition-colors leading-relaxed font-sans">Bagaimana cara mengunduh dan mengatur aplikasi layanan?</span>
+                    </button>
+                    <button type="button" @click="modalQuery = 'Cara mengatur ulang aplikasi di perangkat baru?'; runSearch();" class="w-full text-left py-3 flex items-center gap-3.5 group hover:bg-slate-50/50 rounded-xl px-2 -mx-2 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 group-hover:text-[#b26d27] transition-colors shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        <span class="text-xs font-semibold text-slate-700 group-hover:text-[#b26d27] transition-colors leading-relaxed font-sans">Cara mengatur ulang aplikasi di perangkat baru?</span>
+                    </button>
+                    <button type="button" @click="modalQuery = 'Apa itu layanan MFA dan bagaimana cara menggunakannya?'; runSearch();" class="w-full text-left py-3 flex items-center gap-3.5 group hover:bg-slate-50/50 rounded-xl px-2 -mx-2 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 group-hover:text-[#b26d27] transition-colors shrink-0"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        <span class="text-xs font-semibold text-slate-700 group-hover:text-[#b26d27] transition-colors leading-relaxed font-sans">Apa itu layanan MFA dan bagaimana cara menggunakannya?</span>
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
 </div>
 
 @push('scripts')
@@ -710,6 +733,23 @@
         return {
             activeTopic: 'identitas', // default open topic
             activeSub: '', // default open sub
+            searchOpen: false,
+            searchQuery: '',
+            modalQuery: '',
+            openSearch() {
+                this.searchOpen = true;
+                this.$nextTick(() => {
+                    this.$refs.modalSearchInput.focus();
+                });
+            },
+            runSearch() {
+                this.searchQuery = this.modalQuery;
+                this.searchOpen = false;
+            },
+            matchesSearch(title) {
+                if (!this.searchQuery) return true;
+                return title.toLowerCase().includes(this.searchQuery.toLowerCase());
+            },
             toggleTopic(id) {
                 if (this.isOpenTopic(id)) {
                     this.activeTopic = '';
