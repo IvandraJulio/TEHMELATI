@@ -10,6 +10,7 @@ class Article extends Model
         'title',
         'category',
         'subcategory',
+        'service',
         'content',
         'likes',
     ];

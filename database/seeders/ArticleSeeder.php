@@ -390,11 +390,12 @@ class ArticleSeeder extends Seeder
                 'updated_at' => now()->subMonths(4),
             ],
 
-            // LAYANAN TEKNOLOGI
+            // LAYANAN TEKNOLOGI (3 Levels)
             [
                 'title' => 'Cara Mengajukan Pemasangan Jaringan LAN Baru',
                 'category' => 'Layanan Teknologi',
-                'subcategory' => 'Pembuatan LAN',
+                'subcategory' => 'Layanan Intranet',
+                'service' => 'Pembuatan Local Area Network (LAN)',
                 'likes' => 304,
                 'content' => '
                     <p>Untuk menambah titik port LAN baru pada ruang kerja Anda:</p>
@@ -409,7 +410,8 @@ class ArticleSeeder extends Seeder
             [
                 'title' => 'Panduan Menghubungkan Perangkat ke Wi-Fi BPK-Secure',
                 'category' => 'Layanan Teknologi',
-                'subcategory' => 'Pemasangan Wi-Fi',
+                'subcategory' => 'Layanan Intranet',
+                'service' => 'Pemasangan perangkat Wireless Fidelity (Wifi)',
                 'likes' => 5210,
                 'content' => '
                     <p>Wi-Fi BPK-Secure ditujukan untuk laptop dinas pegawai dengan enkripsi WPA2-Enterprise:</p>
@@ -425,7 +427,8 @@ class ArticleSeeder extends Seeder
             [
                 'title' => 'Mengatasi Masalah Wi-Fi Terputus (Disconnected)',
                 'category' => 'Layanan Teknologi',
-                'subcategory' => 'Pengaturan Konfigurasi Wi-Fi',
+                'subcategory' => 'Layanan Intranet',
+                'service' => 'Pengaturan konfigurasi Wifi',
                 'likes' => 1320,
                 'content' => '
                     <p>Jika koneksi Wi-Fi Anda sering terputus atau mendapat status "No Internet Access":</p>
@@ -440,7 +443,8 @@ class ArticleSeeder extends Seeder
             [
                 'title' => 'Panduan Pemasangan dan Koneksi VPN BPK',
                 'category' => 'Layanan Teknologi',
-                'subcategory' => 'Pemasangan VPN',
+                'subcategory' => 'Layanan Virtual Private Network',
+                'service' => 'Pemasangan VPN',
                 'likes' => 11450,
                 'content' => '
                     <p>VPN (Virtual Private Network) digunakan untuk mengakses portal internal BPK dari luar jaringan kantor:</p>
@@ -456,7 +460,8 @@ class ArticleSeeder extends Seeder
             [
                 'title' => 'Mengakses Control Panel Web Hosting BPK',
                 'category' => 'Layanan Teknologi',
-                'subcategory' => 'Pengaturan Konfigurasi Hosting',
+                'subcategory' => 'Layanan Hosting',
+                'service' => 'Pengaturan konfigurasi hosting subdomain',
                 'likes' => 229,
                 'content' => '
                     <p>Admin satker yang memiliki hosting subdomain bpk.go.id dapat mengelola website melalui control panel:</p>

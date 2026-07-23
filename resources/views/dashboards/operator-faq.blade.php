@@ -62,7 +62,12 @@
                         </div>
                         <h4 class="text-xs font-bold text-gray-900 truncate" x-text="art.title"></h4>
                         <template x-if="art.subcategory">
-                            <p class="text-[10px] text-emerald-700 font-semibold mt-1" x-text="art.subcategory"></p>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded" x-text="art.subcategory"></span>
+                                <template x-if="art.service">
+                                    <span class="text-[10px] text-blue-750 font-semibold bg-blue-50 px-1.5 py-0.5 rounded" x-text="art.service"></span>
+                                </template>
+                            </div>
                         </template>
                     </div>
                 </template>
@@ -81,7 +86,10 @@
                         <div>
                             <span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold" x-text="getSelectedArticle().category"></span>
                             <template x-if="getSelectedArticle().subcategory">
-                                <span class="ml-1.5 px-2 py-0.5 bg-orange-50 text-[#b26d27] rounded-md text-[10px] font-bold" x-text="getSelectedArticle().subcategory"></span>
+                                <span class="ml-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-bold" x-text="getSelectedArticle().subcategory"></span>
+                            </template>
+                            <template x-if="getSelectedArticle().service">
+                                <span class="ml-1.5 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[10px] font-bold" x-text="getSelectedArticle().service"></span>
                             </template>
                             <h2 class="text-base font-bold text-gray-800 font-display mt-2" x-text="getSelectedArticle().title"></h2>
                             <p class="text-[10px] text-gray-400 mt-1" x-text="'Likes: ' + getSelectedArticle().likes"></p>
@@ -156,10 +164,21 @@
                 <!-- Subcategory -->
                 <div x-show="form.category && getSubcategoriesForForm().length > 0">
                     <label class="block text-[10px] font-bold text-gray-700 mb-1">Subkategori (Level 2)</label>
-                    <select x-model="form.subcategory" class="w-full bg-slate-50 border border-slate-200 focus:border-[#b26d27] text-gray-800 rounded-xl px-4 py-2.5 text-xs outline-none transition-all font-semibold">
-                        <option value="">- Pilih Subkategori (Opsional) -</option>
+                    <select x-model="form.subcategory" @change="form.service = ''" class="w-full bg-slate-50 border border-slate-200 focus:border-[#b26d27] text-gray-800 rounded-xl px-4 py-2.5 text-xs outline-none transition-all font-semibold">
+                        <option value="">- Pilih Subkategori -</option>
                         <template x-for="sub in getSubcategoriesForForm()" :key="sub">
                             <option :value="sub" x-text="sub"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Service (Level 3) -->
+                <div x-show="form.category && categoriesData[form.category]?.type === '3-level' && form.subcategory && getServicesForForm().length > 0">
+                    <label class="block text-[10px] font-bold text-gray-700 mb-1">Detail Layanan (Level 3)</label>
+                    <select x-model="form.service" class="w-full bg-slate-50 border border-slate-200 focus:border-[#b26d27] text-gray-800 rounded-xl px-4 py-2.5 text-xs outline-none transition-all font-semibold">
+                        <option value="">- Pilih Layanan -</option>
+                        <template x-for="svc in getServicesForForm()" :key="svc">
+                            <option :value="svc" x-text="svc"></option>
                         </template>
                     </select>
                 </div>
@@ -228,26 +247,67 @@
                 title: '',
                 category: '',
                 subcategory: '',
+                service: '',
                 content: '',
             },
             categoriesData: {
-                'Layanan Identitas': ['Layanan Akun', 'Layanan TTE (Tanda Tangan Elektronik)', 'Layanan Segel Elektronik', 'Layanan Email', 'Layanan MFA (Multi-Factor Authentication)'],
-                'Layanan Data': [
-                    'Perencanaan Data', 'Pengumpulan Data', 'Pengolahan Data', 'Penyimpanan Data', 
-                    'Penyebarluasan Data', 'Analisis Data', 'Pengamanan Data', 'Pemusnahan Data',
-                    'BIDICS Dashboard', 'BIDICS-SSA'
-                ],
-                'Layanan Aplikasi': ['Pengembangan Aplikasi', 'Aplikasi Pemeriksaan', 'Aplikasi Kelembagaan', 'Aplikasi Pendukung', 'Aplikasi Kolaborasi', 'Layanan Survei'],
-                'Layanan Teknologi': [
-                    'Pembuatan LAN', 'Pengaturan Konfigurasi LAN', 'Penonaktifan LAN', 'Penyediaan Kabel LAN', 
-                    'Pemasangan Wi-Fi', 'Pengaturan Konfigurasi Wi-Fi', 'Penonaktifan Wi-Fi',
-                    'Pemasangan Internet', 'Pengaturan Konfigurasi Internet', 'Penonaktifan Internet',
-                    'Pemasangan VPN', 'Pengaturan Konfigurasi VPN', 'Penonaktifan VPN',
-                    'Pendaftaran Hosting Subdomain', 'Pengaturan Konfigurasi Hosting', 'Penonaktifan Hosting'
-                ],
-                'Layanan Perangkat': ['Standarisasi Perangkat Komputer', 'Pemeliharaan Perangkat', 'Peminjaman Perangkat', 'Penyediaan Barang Persediaan'],
-                'Layanan Dukungan TI': ['Pendampingan Personel TI'],
-                'Layanan Informasi': ['Knowledge Base Produk TI', 'Informasi Produk TI', 'Tugas dan Fungsi Biro TI']
+                'Layanan Identitas': {
+                    type: '2-level',
+                    subs: ['Layanan Akun', 'Layanan TTE (Tanda Tangan Elektronik)', 'Layanan Segel Elektronik', 'Layanan Email', 'Layanan MFA (Multi-Factor Authentication)']
+                },
+                'Layanan Data': {
+                    type: '2-level',
+                    subs: [
+                        'Perencanaan Data', 'Pengumpulan Data', 'Pengolahan Data', 'Penyimpanan Data', 
+                        'Penyebarluasan Data', 'Analisis Data', 'Pengamanan Data', 'Pemusnahan Data',
+                        'BIDICS Dashboard', 'BIDICS-SSA'
+                    ]
+                },
+                'Layanan Aplikasi': {
+                    type: '2-level',
+                    subs: ['Pengembangan Aplikasi', 'Aplikasi Pemeriksaan', 'Aplikasi Kelembagaan', 'Aplikasi Pendukung', 'Aplikasi Kolaborasi', 'Layanan Survei']
+                },
+                'Layanan Teknologi': {
+                    type: '3-level',
+                    subs: {
+                        'Layanan Intranet': [
+                            'Pembuatan Local Area Network (LAN)', 
+                            'Pengaturan konfigurasi LAN', 
+                            'Penonaktifan LAN', 
+                            'Penyediaan kabel LAN', 
+                            'Pemasangan perangkat Wireless Fidelity (Wifi)', 
+                            'Pengaturan konfigurasi Wifi', 
+                            'Penonaktifan Wifi'
+                        ],
+                        'Layanan Internet': [
+                            'Pemasangan perangkat koneksi internet', 
+                            'Pengaturan konfigurasi perangkat koneksi internet', 
+                            'Penonaktifan perangkat koneksi internet'
+                        ],
+                        'Layanan Virtual Private Network': [
+                            'Pemasangan VPN', 
+                            'Pengaturan konfigurasi VPN', 
+                            'Penonaktifan VPN'
+                        ],
+                        'Layanan Hosting': [
+                            'Pendaftaran hosting subdomain', 
+                            'Pengaturan konfigurasi hosting subdomain', 
+                            'Penonaktifan hosting subdomain'
+                        ]
+                    }
+                },
+                'Layanan Perangkat': {
+                    type: '2-level',
+                    subs: ['Standarisasi Perangkat Komputer', 'Pemeliharaan Perangkat', 'Peminjaman Perangkat', 'Penyediaan Barang Persediaan']
+                },
+                'Layanan Dukungan TI': {
+                    type: '2-level',
+                    subs: ['Pendampingan Personel TI']
+                },
+                'Layanan Informasi': {
+                    type: '2-level',
+                    subs: ['Knowledge Base Produk TI', 'Informasi Produk TI', 'Tugas dan Fungsi Biro TI']
+                }
             },
             selectArticle(id) {
                 this.selectedId = id;
@@ -267,7 +327,8 @@
                         const matchTitle = a.title.toLowerCase().includes(query);
                         const matchContent = a.content.toLowerCase().includes(query);
                         const matchSub = a.subcategory ? a.subcategory.toLowerCase().includes(query) : false;
-                        if (!matchTitle && !matchContent && !matchSub) {
+                        const matchSvc = a.service ? a.service.toLowerCase().includes(query) : false;
+                        if (!matchTitle && !matchContent && !matchSub && !matchSvc) {
                             return false;
                         }
                     }
@@ -276,13 +337,26 @@
             },
             getSubcategoriesForForm() {
                 if (!this.form.category) return [];
-                return this.categoriesData[this.form.category] || [];
+                const cat = this.categoriesData[this.form.category];
+                if (!cat) return [];
+                if (cat.type === '2-level') {
+                    return cat.subs;
+                } else {
+                    return Object.keys(cat.subs);
+                }
+            },
+            getServicesForForm() {
+                if (!this.form.category || !this.form.subcategory) return [];
+                const cat = this.categoriesData[this.form.category];
+                if (!cat || cat.type !== '3-level') return [];
+                return cat.subs[this.form.subcategory] || [];
             },
             openCreateModal() {
                 this.editingId = null;
                 this.form.title = '';
                 this.form.category = '';
                 this.form.subcategory = '';
+                this.form.service = '';
                 this.form.content = '';
                 this.formOpen = true;
             },
@@ -291,6 +365,7 @@
                 this.form.title = article.title;
                 this.form.category = article.category;
                 this.form.subcategory = article.subcategory || '';
+                this.form.service = article.service || '';
                 this.form.content = article.content;
                 this.formOpen = true;
             },

@@ -69,6 +69,7 @@ class DashboardController extends Controller
                 'title' => $article->title,
                 'category' => $article->category,
                 'subcategory' => $article->subcategory,
+                'service' => $article->service,
                 'likes' => number_format($article->likes),
                 'updated_at' => 'Diperbarui ' . $article->updated_at->diffForHumans(),
                 'content' => $article->content
@@ -971,6 +972,7 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
             'title' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'subcategory' => 'nullable|string|max:100',
+            'service' => 'nullable|string|max:100',
             'content' => 'required|string',
         ]);
 
@@ -978,6 +980,7 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
             'title' => $request->title,
             'category' => $request->category,
             'subcategory' => $request->subcategory ?: null,
+            'service' => $request->service ?: null,
             'content' => $request->content,
             'likes' => 0,
         ]);
@@ -1000,6 +1003,7 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
             'title' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'subcategory' => 'nullable|string|max:100',
+            'service' => 'nullable|string|max:100',
             'content' => 'required|string',
         ]);
 
@@ -1007,6 +1011,7 @@ Format respons Anda harus SELALU berupa objek JSON yang valid dengan struktur be
             'title' => $request->title,
             'category' => $request->category,
             'subcategory' => $request->subcategory ?: null,
+            'service' => $request->service ?: null,
             'content' => $request->content,
         ]);
 

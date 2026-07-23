@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('category');
             $table->string('subcategory')->nullable();
+            $table->string('service')->nullable();
             $table->text('content');
             $table->integer('likes')->default(0);
             $table->timestamps();
